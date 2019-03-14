@@ -6,95 +6,174 @@ from sbol import *
 from flashtext import KeywordProcessor
 
 class SequenceAnnotater():
-    def __init__(self, sbol_files=[], sbh_URL=None, user=None, password=None, sbol_URLs=[]):
+    def __init__(self, feature_files=[], sbh_URL=None, user=None, password=None, feature_URLs=[]):
         self.feature_matcher = KeywordProcessor()
+        self.seq_anno_dict = {}
 
         # Config.setOption('sbol_typed_uris', False)
 
-        self.load_file_features(sbol_files)
+        self.load_file_features(feature_files)
 
-        if sbh_URL is not None and user is not None and password is not None and len(sbol_URLs) > 0:
-            self.load_remote_features(sbh_URL, user, password, sbol_URLs, part_shop)
+        if sbh_URL is not None and user is not None and password is not None and len(feature_URLs) > 0:
+            self.load_remote_features(sbh_URL, user, password, feature_URLs, part_shop)
 
-    def load_file_features(self, sbol_files):
+    def load_file_features(self, feature_files):
         for feature_file in feature_files:
             doc = Document()
 
             doc.read(feature_file)
 
-            self.__load_document_features(doc)
+            self.__load_document_components(doc)
+            self.__load_document_annotations(doc)
         
-    def load_remote_features(self, sbh_URL, user, password, sbol_URLs, part_shop):
+    def load_remote_features(self, sbh_URL, user, password, feature_URLs, part_shop):
         part_shop = PartShop(sbh_URL + '/')
         part_shop.login(user, password)
 
         doc = Document()
 
-        part_shop.pull(sbol_URLs, doc)
+        part_shop.pull(feature_URLs, doc)
 
-        self.__load_document_features(doc)
+        self.__load_document_components(doc)
+        self.__load_document_annotations(doc)
 
-    def __load_document_features(self, doc):
-        for root_feature in doc.componentDefinitions:
-            for leaf_feature in self.__get_leaf_features(root_feature, doc)
-                if leaf_feature.sequence is not None:
-                    seq = leaf_feature.sequence.elements
-                    self.feature_matcher.add_keyword(seq, leaf_feature.identity)
-
+    def __load_document_components(self, doc):
+        for root_comp in doc.componentDefinitions:
+            for leaf_comp in self.__get_leaf_components(root_comp, doc):
+                if leaf_comp.sequence is not None:
+                    seq = leaf_comp.sequence.elements
                     rcomplement_seq = str(Seq(seq).reverse_complement())
-                    self.feature_matcher.add_keyword(rcomplement_seq, leaf_feature.identity)
 
-    def __get_leaf_features(self, root_feature, doc):
-        leaf_features = []
+                    self.feature_matcher.add_keyword(' '.join(seq), (leaf_comp.identity, SBOL_ORIENTATION_INLINE))
+                    self.feature_matcher.add_keyword(' '.join(rcomplement_seq), (leaf_comp.identity,
+                                                     SBOL_ORIENTATION_REVERSE_COMPLEMENT))
 
-        if len(root_feature.components) == 0:
-            leaf_features.append(root_feature)
+    def __get_leaf_components(self, root_comp, doc):
+        leaf_comps = []
+
+        if len(root_comp.components) == 0:
+            leaf_comps.append(root_comp)
         else:
-            for component in root_feature.components:
+            for sub_comp in root_comp.components:
                 try:
-                    sub_feature = doc.getComponentDefinition(componet.definition)
+                    leaf_comp = doc.getComponentDefinition(sub_comp.definition)
 
-                    leaf_features.extend(get_leaf_features(sub_feature))
+                    leaf_comps.extend(self.__get_leaf_components(leaf_comp, doc))
                 except RuntimeError:
                     pass
 
-        return leaf_features
+        return leaf_comps
 
-    def annotate_sequence(self, comp_def):
-        if comp_def.sequence is not None:
-            feature_matches = self.feature_matcher.extract_keywords(comp_def.sequence.elements, span_info=True)
+    def __load_document_annotations(self, doc):
+        for comp in doc.componentDefinitions:
+            for seq_anno in comp.sequenceAnnotations:
+                if (seq_anno.component is None and len(seq_anno.locations) == 1
+                    and seq_anno.locations[0].getTypeURI() == 'http://sbols.org/v2#Range'
+                    and comp.sequence is not None):
+                    seq_range = seq_anno.locations.getRange()
 
-            for feature_match in feature_matches:
-                annotated = False
-                i = 0
+                    if seq_range.orientation == SBOL_ORIENTATION_INLINE:
+                        seq = comp.sequence.elements[seq_range.start - 1:seq_range.end]
+                        rcomplement_seq = str(Seq(seq).reverse_complement())
+                    else:
+                        rcomplement_seq = comp.sequence.elements[seq_range.start - 1:seq_range.end]
+                        seq = str(Seq(seq).reverse_complement())
+                        
+                    self.feature_matcher.add_keyword(' '.join(seq), (comp.identity, SBOL_ORIENTATION_INLINE,
+                                                     seq_anno.identity, seq_anno.name, seq_anno.description,
+                                                     seq_anno.roles))
+                    self.feature_matcher.add_keyword(' '.join(rcomplement_seq), (comp.identity,
+                                                     SBOL_ORIENTATION_REVERSE_COMPLEMENT, seq_anno.identity,
+                                                     seq_anno.name, seq_anno.description, seq_anno.roles))
 
-                while not annotated:
-                    try:
-                        sub_comp = comp_def.components.create('comp' + str(i))
+                    self.seq_anno_dict[seq_anno.identity] = seq_anno
 
-                        sub_comp.definition = feature_match[0]
+    def annotate_sequences(self, sequence_files=[], sbh_URL=None, user=None, password=None, sequence_URLs=[], 
+                           sbh_output=None, validate=False):
+        Config.setOption('validate', validate)
 
-                        annotated = True
-                    except RuntimeError:
-                        i = i + 1
+        docs = []
 
-                annotated = False
-                i = 0
+        for sequence_file in sequence_files:
+            docs.append(Document())
 
-                while not annotated:
-                    try:
-                        seq_anno = comp_def.sequenceAnnotations.create('anno' + str(i))
+            docs[-1].read(sequence_file)
 
-                        seq_anno.component = seq_anno.identity
+        if sbh_URL is not None and user is not None and password is not None and len(sequence_URLs) > 0:
+            part_shop = PartShop(sbh_URL + '/')
+            part_shop.login(user, password)
 
-                        location = seq_anno.locations.createRange('loc1')
+            docs.append(Document())
 
-                        location.start = feature_match[1] + 1
-                        location.end = feature_match[2]
+            part_shop.pull(sequence_URLs, docs[-1])
 
-                        annotated = True
-                    except RuntimeError:
-                        i = i + 1
+        for doc in docs:
+            for comp in doc.componentDefinitions:
+                if comp.sequence is not None:
+                    unannotated_seq = ' '.join(comp.sequence.elements)
+
+                    feature_matches = self.feature_matcher.extract_keywords(unannotated_seq, span_info=True)
+
+                    for i in range(0, len(feature_matches)):
+                        annotated = False
+                        j = i
+
+                        if len(feature_matches[i][0]) == 2:
+                            while not annotated:
+                                try:
+                                    sub_comp = comp.components.create('comp' + str(j))
+
+                                    sub_comp.definition = feature_matches[i][0][0]
+
+                                    annotated = True
+                                except RuntimeError:
+                                    j = j + 1
+
+                            annotated = False
+                            j = i
+
+                            while not annotated:
+                                try:
+                                    seq_anno = comp.sequenceAnnotations.create('anno' + str(j))
+
+                                    seq_anno.component = sub_comp.identity
+                                    
+                                    location = seq_anno.locations.createRange('loc1')
+
+                                    location.orientation = feature_matches[i][0][1]
+                                    location.start = feature_matches[i][1]//2 + 1
+                                    location.end = (feature_matches[i][2] + 1)//2
+
+                                    annotated = True
+                                except RuntimeError:
+                                    j = j + 1
+                        elif len(feature_matches[i][0]) == 6:
+                            while not annotated:
+                                try:
+                                    seq_anno = comp.sequenceAnnotations.create('anno' + str(j))
+
+                                    seq_anno.name = feature_matches[i][0][3]
+                                    seq_anno.description = feature_matches[i][0][4]
+                                    seq_anno.roles = seq_anno.roles + feature_matches[i][0][5]
+                                    seq_anno.wasDerivedFrom = seq_anno.wasDerivedFrom + [feature_matches[i][0][2]]
+                                    
+                                    location = seq_anno.locations.createRange('loc1')
+
+                                    location.orientation = feature_matches[i][0][1]
+                                    location.start = feature_matches[i][1]//2 + 1
+                                    location.end = (feature_matches[i][2] + 1)//2
+
+                                    annotated = True
+                                except RuntimeError:
+                                    j = j + 1
+
+        for i in range(0, len(sequence_files)):
+            sequence_filename = sequence_files[i][:sequence_files[i].index('.xml')]
+
+            docs[i].write(sequence_filename + '_annotated.xml')
+
+        if len(docs) == len(sequence_files) + 1 and sbh_output is not None:
+            docs[-1].write(sbh_output + '.xml')
 
 
 def main(args=None):
@@ -102,15 +181,22 @@ def main(args=None):
         args = sys.argv[1:]
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-f', '--sbol_files', nargs='*', default=[])
-    parser.add_argument('-l', '--sbh_URL', nargs='?', default=None)
-    parser.add_argument('-u', '--user', nargs='?', default=None)
+    parser.add_argument('-s', '--sequence_files', nargs='*', default=[])
+    parser.add_argument('-S', '--sequence_URLs', nargs='*', default=[])
+    parser.add_argument('-f', '--feature_files', nargs='*', default=[])
+    parser.add_argument('-F', '--feature_URLs', nargs='*', default=[])
+    parser.add_argument('-u', '--sbh_URL', nargs='?', default=None)
+    parser.add_argument('-n', '--username', nargs='?', default=None)
     parser.add_argument('-p', '--password', nargs='?', default=None)
-    parser.add_argument('-s', '--sbol_URLs', nargs='*', default=[])
-
+    parser.add_argument('-o', '--sbh_output', nargs='?', default='sbh_annotated')
+    
     args = parser.parse_args(args)
 
-    sequence_annotater = SequenceAnnotater(args.feature_files, args.sbh_URL, args.user, args.password, args.sbol_URLs)
+    sequence_annotater = SequenceAnnotater(args.feature_files, args.sbh_URL, args.username, args.password,
+                                           args.feature_URLs)
+
+    sequence_annotater.annotate_sequences(args.sequence_files, args.sbh_URL, args.username, args.password,
+                                          args.sequence_URLs, args.sbh_output)
 
     # def extract_sequence(sub_def, seq_anno, comp_def, doc):
     #     if len(comp_def.sequences) == 1 and len(seq_anno.locations) == 1:
