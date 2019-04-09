@@ -61,6 +61,7 @@ class SequenceAnnotater():
             for sub_comp in root_comp.components:
                 try:
                     leaf_comp = doc.getComponentDefinition(sub_comp.definition)
+
                 except RuntimeError:
                     leaf_comp = None
 
