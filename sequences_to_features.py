@@ -200,31 +200,35 @@ class FeaturePruner():
                 if abs(seq_annos[i + 1][0] - seq_annos[i][0]) <= cover_offset and abs(seq_annos[i + 1][1] - seq_annos[i][1]) <= cover_offset:
                     selected_index = cls.__select_feature(parent_definition, seq_annos[i], seq_annos[i + 1])
 
+                    if seq_annos[i + 1][3] is None:
+                        feature_identity2 = seq_annos[i + 1][2]
+                    else:
+                        feature_identity2 = parent_definition.components.remove(seq_annos[i + 1][3]).definition
+
                     if selected_index == 0 or selected_index == 3:
                         parent_definition.sequenceAnnotations.remove(seq_annos[i + 1][2])
 
-                        if seq_annos[i + 1][3] is None:
-                            feature_identity = seq_annos[i + 1][2]
-                        else:
-                            feature_identity = parent_definition.components.remove(seq_annos[i + 1][3]).definition
-
-                        logging.info('Removed %s at [%s, %s] in %s.', feature_identity, seq_annos[i + 1][0], seq_annos[i + 1][1], parent_definition.identity)
+                        logging.info('Removed %s at [%s, %s] in %s.', feature_identity2, seq_annos[i + 1][0], seq_annos[i + 1][1], parent_definition.identity)
 
                         del seq_annos[i + 1]
+                    else:
+                        logging.info('Kept %s at [%s, %s] in %s.', feature_identity2, seq_annos[i + 1][0], seq_annos[i + 1][1], parent_definition.identity)
+
+                    if seq_annos[i][3] is None:
+                        feature_identity1 = seq_annos[i + 1][2]
+                    else:
+                        feature_identity1 = parent_definition.components.remove(seq_annos[i][3]).definition
 
                     if selected_index == 1 or selected_index == 3:
                         parent_definition.sequenceAnnotations.remove(seq_annos[i][2])
-                        
-                        if seq_annos[i][3] is None:
-                            feature_identity = seq_annos[i + 1][2]
-                        else:
-                            feature_identity = parent_definition.components.remove(seq_annos[i][3]).definition
 
-                        logging.info('Removed %s at [%s, %s] in %s.', feature_identity, seq_annos[i][0], seq_annos[i][1], parent_definition.identity)
+                        logging.info('Removed %s at [%s, %s] in %s.', feature_identity1, seq_annos[i][0], seq_annos[i][1], parent_definition.identity)
 
                         del seq_annos[i]
 
                         i = i - 1
+                    else:
+                        logging.info('Kept %s at [%s, %s] in %s.', feature_identity1, seq_annos[i][0], seq_annos[i][1], parent_definition.identity)
                     
                 i = i + 1
 
