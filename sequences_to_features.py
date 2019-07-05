@@ -68,33 +68,33 @@ class FeatureAnnotater():
         return len(feature.nucleotides) >= min_feature_length
 
     @classmethod
-    def __create_sub_component(cls, parent_definition, comp_definition):
+    def __create_sub_component(cls, parent_definition, child_definition):
         i = 1
 
         while i > 0:
             try:
-                sub_comp = parent_definition.components.create('_'.join([comp_definition.displayId, str(i)]))
+                sub_comp = parent_definition.components.create('_'.join([child_definition.displayId, str(i)]))
             except RuntimeError:
                 sub_comp = None
 
             if sub_comp is None:
                 i = i + 1
             else:
-                sub_comp.name = comp_definition.name
-                sub_comp.definition = comp_definition.identity
+                sub_comp.name = child_definition.name
+                sub_comp.definition = child_definition.identity
 
                 i = -1
 
         return sub_comp
 
     @classmethod
-    def __create_sequence_annotation(cls, parent_definition, comp_definition, orientation, start, end,
+    def __create_sequence_annotation(cls, parent_definition, child_definition, orientation, start, end,
                                      sub_comp_URI=None, parent_URI=None):
         i = 1
 
         while i > 0:
             try:
-                seq_anno = parent_definition.sequenceAnnotations.create('_'.join([comp_definition.displayId,
+                seq_anno = parent_definition.sequenceAnnotations.create('_'.join([child_definition.displayId,
                                                                                   'anno',
                                                                                   str(i)]))
             except RuntimeError:
@@ -103,12 +103,12 @@ class FeatureAnnotater():
             if seq_anno is None:
                 i = i + 1
             else:
-                seq_anno.name = comp_definition.name
-                seq_anno.description = comp_definition.description
+                seq_anno.name = child_definition.name
+                seq_anno.description = child_definition.description
                 if sub_comp_URI is not None:
                     seq_anno.component = sub_comp_URI
                 if parent_URI is not None:
-                    seq_anno.roles = seq_anno.roles + comp_definition.roles
+                    seq_anno.roles = seq_anno.roles + child_definition.roles
                     seq_anno.wasDerivedFrom = seq_anno.wasDerivedFrom + [parent_URI]
                 
                 location = seq_anno.locations.createRange('loc_1')
@@ -121,7 +121,22 @@ class FeatureAnnotater():
 
         return seq_anno
 
-    def __annotate_helper(self, parent_definition, feature_matches, orientation, rc_factor=0):
+    @classmethod
+    def __move_component_definition(cls, source_doc, sink_doc, component_definition):
+        try:
+            sink_doc.addComponentDefinition(component_definition)
+        except:
+            pass
+
+        for sub_comp in component_definition.components:
+            try:
+                sub_definition = source_doc.getComponentDefinition(sub_comp.definition)
+
+                cls.__move_component_definition(source_doc, sink_doc, sub_definition)
+            except RuntimeError:
+                pass
+
+    def __annotate_helper(self, target_doc, target_definition, feature_matches, orientation, rc_factor=0):
         for feature_match in feature_matches:
             temp_start = feature_match[1]//2 + 1
             temp_end = (feature_match[2] + 1)//2
@@ -133,16 +148,20 @@ class FeatureAnnotater():
                 start = temp_start
                 end = temp_end
                 
-            comp_definition = self.feature_library.get_definition(feature_match[0][0].identity)
+            feature_definition = self.feature_library.get_definition(feature_match[0][0].identity)
 
-            print(parent_definition.identity)
-            print(comp_definition.identity)
+            print(target_definition.identity)
+            print(feature_definition.identity)
 
-            sub_comp = self.__create_sub_component(parent_definition, comp_definition)
-            self.__create_sequence_annotation(parent_definition, comp_definition, orientation, start, end,
+            sub_comp = self.__create_sub_component(target_definition, feature_definition)
+            self.__create_sequence_annotation(target_definition, feature_definition, orientation, start, end,
                                              sub_comp.identity)
 
-            logging.info('Annotated %s at [%s, %s] in %s.', comp_definition.identity, start, end, parent_definition.identity)
+            feature_doc = self.feature_library.get_document(feature_match[0][0].identity)
+
+            self.__move_component_definition(feature_doc, target_doc, feature_definition)
+
+            logging.info('Annotated %s at [%s, %s] in %s.', feature_definition.identity, start, end, target_definition.identity)
 
     def annotate(self, target_library, min_target_length=100):
         for target in target_library.features:
@@ -153,10 +172,11 @@ class FeatureAnnotater():
                 inline_matches = self.feature_matcher.extract_keywords(inline_elements, span_info=True)
                 rc_matches = self.feature_matcher.extract_keywords(rc_elements, span_info=True)
 
-                parent_definition = target_library.get_definition(target.identity)
-
-                self.__annotate_helper(parent_definition, inline_matches, SBOL_ORIENTATION_INLINE)
-                self.__annotate_helper(parent_definition, rc_matches, SBOL_ORIENTATION_REVERSE_COMPLEMENT,
+                target_doc = target_library.get_document(target.identity)
+                target_definition = target_library.get_definition(target.identity)
+                
+                self.__annotate_helper(target_doc, target_definition, inline_matches, SBOL_ORIENTATION_INLINE)
+                self.__annotate_helper(target_doc, target_definition, rc_matches, SBOL_ORIENTATION_REVERSE_COMPLEMENT,
                                        len(target.nucleotides) + 1)
 
                 logging.info('Finished annotating %s.\n', target.identity)
