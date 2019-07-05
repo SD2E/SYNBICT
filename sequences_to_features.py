@@ -11,6 +11,10 @@ def load_sbol(sbol_file):
     doc = Document()
     doc.read(sbol_file)
 
+    doc.addNamespace('http://purl.org/dc/elements/1.1/', 'dc')
+    doc.addNamespace('http://wiki.synbiohub.org/wiki/Terms/igem#', 'igem')
+    doc.addNamespace('http://wiki.synbiohub.org/wiki/Terms/synbiohub#', 'sbh')
+
     return doc
 
 class Feature():
@@ -32,24 +36,23 @@ class FeatureAnnotater():
         SO_SEQUENCE_FEATURE
     }
 
-    def __init__(self, feature_library, min_feature_length=10):
+    def __init__(self, feature_library, min_feature_length=40):
         self.feature_library = feature_library
         self.feature_matcher = KeywordProcessor()
 
         for feature in feature_library.features:
             inline_elements = ' '.join(feature.nucleotides)
-            
-            if inline_elements in self.feature_matcher:
-                canonical_features = self.feature_matcher.get_keyword(inline_elements)
 
-                if self.has__non_generic_role(feature) and self.__has_min_length(feature, min_feature_length):
-                    canonical_features = [cf for cf in canonical_features if self.__has_non_generic_role(cf)]
+            if self.__has_min_length(feature, min_feature_length):
+                if inline_elements in self.feature_matcher:
+                    if self.__has_non_generic_role(feature):
+                        canonical_features = [cf for cf in self.feature_matcher.get_keyword(inline_elements) if self.__has_non_generic_role(cf)]
 
-                    canonical_features.append(feature)
-            elif self.__has_min_length(feature, min_feature_length):
-                canonical_features = [feature]
+                        canonical_features.append(feature)
+                else:
+                    canonical_features = [feature]
 
-            self.feature_matcher.add_keyword(inline_elements, canonical_features)
+                self.feature_matcher.add_keyword(inline_elements, canonical_features)
 
     @classmethod
     def __has_non_generic_role(cls, feature):
@@ -136,7 +139,7 @@ class FeatureAnnotater():
             except RuntimeError:
                 pass
 
-    def __annotate_helper(self, target_doc, target_definition, feature_matches, orientation, rc_factor=0):
+    def __process_feature_matches(self, target_doc, target_definition, feature_matches, orientation, rc_factor=0):
         for feature_match in feature_matches:
             temp_start = feature_match[1]//2 + 1
             temp_end = (feature_match[2] + 1)//2
@@ -147,24 +150,24 @@ class FeatureAnnotater():
             else:
                 start = temp_start
                 end = temp_end
-                
-            feature_definition = self.feature_library.get_definition(feature_match[0][0].identity)
 
-            print(target_definition.identity)
-            print(feature_definition.identity)
+            for feature in feature_match[0]:
+                feature_definition = self.feature_library.get_definition(feature.identity)
 
-            sub_comp = self.__create_sub_component(target_definition, feature_definition)
-            self.__create_sequence_annotation(target_definition, feature_definition, orientation, start, end,
-                                             sub_comp.identity)
+                sub_comp = self.__create_sub_component(target_definition, feature_definition)
+                self.__create_sequence_annotation(target_definition, feature_definition, orientation, start, end,
+                                                 sub_comp.identity)
 
-            feature_doc = self.feature_library.get_document(feature_match[0][0].identity)
+                feature_doc = self.feature_library.get_document(feature.identity)
 
-            self.__move_component_definition(feature_doc, target_doc, feature_definition)
+                self.__move_component_definition(feature_doc, target_doc, feature_definition)
 
-            logging.info('Annotated %s at [%s, %s] in %s.', feature_definition.identity, start, end, target_definition.identity)
+                logging.info('Annotated %s at [%s, %s] in %s.', feature_definition.identity, start, end, target_definition.identity)
 
-    def annotate(self, target_library, min_target_length=100):
+    def annotate(self, target_library, min_target_length=1000):
         for target in target_library.features:
+            print('Annotating ' + target.identity)
+
             if self.__has_min_length(target, min_target_length):
                 inline_elements = ' '.join(target.nucleotides)
                 rc_elements = ' '.join(target.reverse_complement_nucleotides())
@@ -175,8 +178,8 @@ class FeatureAnnotater():
                 target_doc = target_library.get_document(target.identity)
                 target_definition = target_library.get_definition(target.identity)
                 
-                self.__annotate_helper(target_doc, target_definition, inline_matches, SBOL_ORIENTATION_INLINE)
-                self.__annotate_helper(target_doc, target_definition, rc_matches, SBOL_ORIENTATION_REVERSE_COMPLEMENT,
+                self.__process_feature_matches(target_doc, target_definition, inline_matches, SBOL_ORIENTATION_INLINE)
+                self.__process_feature_matches(target_doc, target_definition, rc_matches, SBOL_ORIENTATION_REVERSE_COMPLEMENT,
                                        len(target.nucleotides) + 1)
 
                 logging.info('Finished annotating %s.\n', target.identity)
@@ -187,7 +190,7 @@ class FeaturePruner():
         pass
 
     @classmethod
-    def prune(cls, target_library, cover_offset):
+    def prune(cls, target_library, cover_offset=10):
         for target in target_library.features:
             parent_definition = target_library.get_definition(target.identity)
 
@@ -203,10 +206,13 @@ class FeaturePruner():
                     if seq_annos[i + 1][3] is None:
                         feature_identity2 = seq_annos[i + 1][2]
                     else:
-                        feature_identity2 = parent_definition.components.remove(seq_annos[i + 1][3]).definition
+                        feature_identity2 = parent_definition.components.get(seq_annos[i + 1][3]).definition
 
                     if selected_index == 0 or selected_index == 3:
                         parent_definition.sequenceAnnotations.remove(seq_annos[i + 1][2])
+
+                        if seq_annos[i + 1][3] is not None:
+                            parent_definition.components.remove(seq_annos[i + 1][3])
 
                         logging.info('Removed %s at [%s, %s] in %s.', feature_identity2, seq_annos[i + 1][0], seq_annos[i + 1][1], parent_definition.identity)
 
@@ -215,12 +221,15 @@ class FeaturePruner():
                         logging.info('Kept %s at [%s, %s] in %s.', feature_identity2, seq_annos[i + 1][0], seq_annos[i + 1][1], parent_definition.identity)
 
                     if seq_annos[i][3] is None:
-                        feature_identity1 = seq_annos[i + 1][2]
+                        feature_identity1 = seq_annos[i][2]
                     else:
-                        feature_identity1 = parent_definition.components.remove(seq_annos[i][3]).definition
+                        feature_identity1 = parent_definition.components.get(seq_annos[i][3]).definition
 
                     if selected_index == 1 or selected_index == 3:
                         parent_definition.sequenceAnnotations.remove(seq_annos[i][2])
+
+                        if seq_annos[i][3] is not None:
+                            parent_definition.components.remove(seq_annos[i][3])
 
                         logging.info('Removed %s at [%s, %s] in %s.', feature_identity1, seq_annos[i][0], seq_annos[i][1], parent_definition.identity)
 
@@ -321,8 +330,8 @@ def main(args=None):
     parser.add_argument('-t', '--target_files', nargs='+')
     parser.add_argument('-f', '--feature_files', nargs='*', default=[])
     parser.add_argument('-l', '--curation_log', nargs='?', default='')
-    parser.add_argument('-m', '--min_target_length', nargs='?', default=100)
-    parser.add_argument('-M', '--min_feature_length', nargs='?', default=10)
+    parser.add_argument('-m', '--min_target_length', nargs='?', default=1000)
+    parser.add_argument('-M', '--min_feature_length', nargs='?', default=40)
     parser.add_argument('-c', '--cover_offset', nargs='?', default=10)
     parser.add_argument('-v', '--validate', action='store_true')
     # parser.add_argument('-s', '--sbh_URL', nargs='?', default=None)
@@ -364,7 +373,7 @@ def main(args=None):
         (target_file, file_extension) = os.path.splitext(args.target_files[i])
         target_documents[i].write('_'.join([target_file, 'annotated', str(i)]) + file_extension)
 
-    print('booyah!')
+    print('Finished curating.')
 
 if __name__ == '__main__':
     main()
