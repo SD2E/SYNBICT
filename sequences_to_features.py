@@ -142,6 +142,8 @@ class FeatureAnnotater():
             self.__create_sequence_annotation(parent_definition, comp_definition, orientation, start, end,
                                              sub_comp.identity)
 
+            logging.info('Annotated %s at [%s, %s] in %s.', comp_definition.identity, start, end, parent_definition.identity)
+
     def annotate(self, target_library, min_target_length=100):
         for target in target_library.features:
             if self.__has_min_length(target, min_target_length):
@@ -156,6 +158,8 @@ class FeatureAnnotater():
                 self.__annotate_helper(parent_definition, inline_matches, SBOL_ORIENTATION_INLINE)
                 self.__annotate_helper(parent_definition, rc_matches, SBOL_ORIENTATION_REVERSE_COMPLEMENT,
                                        len(target.nucleotides) + 1)
+
+                logging.info('Finished annotating %s.\n', target.identity)
 
 class FeaturePruner():
 
@@ -173,28 +177,38 @@ class FeaturePruner():
             i = 0
 
             while i < len(seq_annos) - 1:
-                if seq_annos[i + 1][0] - seq_annos[i][0] <= cover_offset and seq_annos[i + 1][1] - seq_annos[i][1] <= cover_offset:
+                if abs(seq_annos[i + 1][0] - seq_annos[i][0]) <= cover_offset and abs(seq_annos[i + 1][1] - seq_annos[i][1]) <= cover_offset:
                     selected_index = cls.__select_feature(parent_definition, seq_annos[i], seq_annos[i + 1])
 
                     if selected_index == 0 or selected_index == 3:
                         parent_definition.sequenceAnnotations.remove(seq_annos[i + 1][2])
 
-                        if seq_annos[i + 1][3] is not None:
-                            parent_definition.components.remove(seq_annos[i + 1][3])
+                        if seq_annos[i + 1][3] is None:
+                            feature_identity = seq_annos[i + 1][2]
+                        else:
+                            feature_identity = parent_definition.components.remove(seq_annos[i + 1][3]).definition
+
+                        logging.info('Removed %s at [%s, %s] in %s.', feature_identity, seq_annos[i + 1][0], seq_annos[i + 1][1], parent_definition.identity)
 
                         del seq_annos[i + 1]
 
                     if selected_index == 1 or selected_index == 3:
                         parent_definition.sequenceAnnotations.remove(seq_annos[i][2])
                         
-                        if seq_annos[i][3] is not None:
-                            parent_definition.components.remove(seq_annos[i][3])
+                        if seq_annos[i][3] is None:
+                            feature_identity = seq_annos[i + 1][2]
+                        else:
+                            feature_identity = parent_definition.components.remove(seq_annos[i][3]).definition
+
+                        logging.info('Removed %s at [%s, %s] in %s.', feature_identity, seq_annos[i][0], seq_annos[i][1], parent_definition.identity)
 
                         del seq_annos[i]
 
                         i = i - 1
                     
                 i = i + 1
+
+            logging.info('Finished pruning %s.\n', target.identity)
 
     @classmethod
     def __select_feature(cls, parent_definition, seq_anno1, seq_anno2):
@@ -208,7 +222,7 @@ class FeaturePruner():
         else:
             feature2 = parent_definition.components.get(seq_anno2[3]).definition
             
-        select_message = 'There appear to be redundant features {f1} at [{s1}, {e1}] and {f2} at [{s2}, {e2}].\nPlease select which ones to keep: 0 = {f1}, 1 = {f2}, 2 = both, 3 = neither\n'.format(f1=feature1, s1=seq_anno1[0], e1=seq_anno1[1], f2=feature2, s2=seq_anno2[0], e2=seq_anno2[1])
+        select_message = 'There appear to be redundant features {f1} at [{s1}, {e1}] and {f2} at [{s2}, {e2}] in {pd}.\nPlease select which ones to keep: 0 = {f1}, 1 = {f2}, 2 = both, 3 = neither\n'.format(f1=feature1, s1=seq_anno1[0], e1=seq_anno1[1], f2=feature2, s2=seq_anno2[0], e2=seq_anno2[1], pd=parent_definition.identity)
 
         selected_index = input(select_message)
 
@@ -280,25 +294,25 @@ def main(args=None):
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-n', '--namespace')
-    parser.add_argument('-t', '--target_files', nargs='*', default=[])
-    parser.add_argument('-T', '--target_URLs', nargs='*', default=[])
+    parser.add_argument('-t', '--target_files', nargs='+')
     parser.add_argument('-f', '--feature_files', nargs='*', default=[])
-    parser.add_argument('-F', '--feature_URLs', nargs='*', default=[])
-    parser.add_argument('-s', '--sbh_URL', nargs='?', default=None)
-    parser.add_argument('-u', '--username', nargs='?', default=None)
-    parser.add_argument('-p', '--password', nargs='?', default=None)
-    parser.add_argument('-o', '--sbh_output_file', nargs='?', default=None)
-    parser.add_argument('-v', '--validate', action='store_true')
-    parser.add_argument('-w', '--overwrite_files', action='store_true')
-    parser.add_argument('-m', '--min_feature_length', nargs='?', default=10)
-    parser.add_argument('-M', '--min_target_length', nargs='?', default=100)
+    parser.add_argument('-l', '--curation_log', nargs='?', default='')
+    parser.add_argument('-m', '--min_target_length', nargs='?', default=100)
+    parser.add_argument('-M', '--min_feature_length', nargs='?', default=10)
     parser.add_argument('-c', '--cover_offset', nargs='?', default=10)
-    parser.add_argument('-l', '--curation_log', nargs='?', default='curation.log')
+    parser.add_argument('-v', '--validate', action='store_true')
+    # parser.add_argument('-s', '--sbh_URL', nargs='?', default=None)
+    # parser.add_argument('-u', '--username', nargs='?', default=None)
+    # parser.add_argument('-p', '--password', nargs='?', default=None)
+    # parser.add_argument('-F', '--feature_URLs', nargs='*', default=[])
+    # parser.add_argument('-T', '--target_URLs', nargs='*', default=[])
+    # parser.add_argument('-o', '--sbh_output_file', nargs='?', default=None)
     
     args = parser.parse_args(args)
 
-    for handler in logging.root.handlers[:]:
-        logging.root.removeHandler(handler)
+    if len(args.curation_log) > 0:
+        for handler in logging.root.handlers[:]:
+            logging.root.removeHandler(handler)
 
         logging.basicConfig(level=logging.INFO, filename=args.curation_log, filemode='w',
                             format='%(levelname)s : %(message)s')
