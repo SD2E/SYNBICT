@@ -8,6 +8,8 @@ from sbol import *
 from flashtext import KeywordProcessor
 
 def load_sbol(sbol_file):
+    print('Loading ' + sbol_file + '.')
+
     doc = Document()
     doc.read(sbol_file)
 
@@ -234,14 +236,50 @@ class FeaturePruner():
                         logging.info('Removed %s at [%s, %s] in %s.', feature_identity1, seq_annos[i][0], seq_annos[i][1], parent_definition.identity)
 
                         del seq_annos[i]
-
-                        i = i - 1
                     else:
                         logging.info('Kept %s at [%s, %s] in %s.', feature_identity1, seq_annos[i][0], seq_annos[i][1], parent_definition.identity)
-                    
+
+                    if selected_index == 0 or selected_index == 1 or selected_index == 3:
+                        i = i - 1
+
                 i = i + 1
 
             logging.info('Finished pruning %s.\n', target.identity)
+
+        kept_identities = set()
+
+        for target in target_library.features:
+            target_doc = target_library.get_document(target.identity)
+
+            kept_identities = kept_identities.union(cls.__get_kept_identities(target_doc, target.identity))
+
+        for doc in target_library.docs:
+            identities = set()
+
+            for component_definition in doc.componentDefinitions:
+                identities.add(component_definition.identity)
+
+            pruned_identities = identities.difference(kept_identities)
+
+            for pruned_identity in pruned_identities:
+                doc.componentDefinitions.remove(pruned_identity)
+
+    @classmethod
+    def __get_kept_identities(cls, doc, identity):
+        kept_identities = {identity}
+
+        try:
+            component_definition = doc.getComponentDefinition(identity)
+        except RuntimeError:
+            pass
+
+        for parent_identity in component_definition.wasDerivedFrom:
+            kept_identities.add(parent_identity)
+
+        for sub_comp in component_definition.components:
+            kept_identities = kept_identities.union(cls.__get_kept_identities(doc, sub_comp.definition))
+
+        return kept_identities
 
     @classmethod
     def __select_feature(cls, parent_definition, seq_anno1, seq_anno2):
@@ -255,7 +293,7 @@ class FeaturePruner():
         else:
             feature2 = parent_definition.components.get(seq_anno2[3]).definition
             
-        select_message = 'There appear to be redundant features {f1} at [{s1}, {e1}] and {f2} at [{s2}, {e2}] in {pd}.\nPlease select which ones to keep: 0 = {f1}, 1 = {f2}, 2 = both, 3 = neither\n'.format(f1=feature1, s1=seq_anno1[0], e1=seq_anno1[1], f2=feature2, s2=seq_anno2[0], e2=seq_anno2[1], pd=parent_definition.identity)
+        select_message = 'There appear to be redundant features {f1} at [{s1}, {e1}] and {f2} at [{s2}, {e2}] in {pd}.\nPlease select which ones to keep: 0 = {f1}, 1 = {f2}, 2 = both, 3 = neither.\n'.format(f1=feature1, s1=seq_anno1[0], e1=seq_anno1[1], f2=feature2, s2=seq_anno2[0], e2=seq_anno2[1], pd=parent_definition.identity)
 
         selected_index = input(select_message)
 
@@ -267,6 +305,11 @@ class FeatureLibrary():
         self.features = []
         self.docs = docs
         self.__feature_map = {}
+
+        if is_copy:
+            print('Loading and copying features.')
+        else:
+            print('Loading features.')
 
         for i in range(0, len(self.docs)):
             for comp_definition in self.docs[i].componentDefinitions:
@@ -304,6 +347,14 @@ class FeatureLibrary():
 
     def get_definition(self, identity):
         return self.get_document(identity).getComponentDefinition(identity)
+
+    # def remove_feature(self, identity):
+    #     if identity in self.__feature_map:
+    #         feature_doc = self.get_document(identity)
+
+    #         feature_doc.componentDefinitions.remove(identity)
+
+    #         del self.__feature_map[identity]
 
     @classmethod
     def __copy_component_definition(cls, comp_definition, doc):
