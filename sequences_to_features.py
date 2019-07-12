@@ -8,7 +8,7 @@ from sbol import *
 from flashtext import KeywordProcessor
 
 def load_sbol(sbol_file):
-    print('Loading ' + sbol_file + '.')
+    print('Loading ' + sbol_file + '...')
 
     doc = Document()
     doc.read(sbol_file)
@@ -21,15 +21,6 @@ def load_sbol(sbol_file):
 
 class Feature():
 
-    def __init__(self, nucleotides, identity, roles):
-        self.nucleotides = nucleotides
-        self.identity = identity
-        self.roles = roles
-
-    def reverse_complement_nucleotides(self):
-        return str(Seq(self.nucleotides).reverse_complement())
-
-class FeatureAnnotater():
     SO_REGION = 'http://identifiers.org/so/SO:0000001'
     SO_SEQUENCE_FEATURE = 'http://identifiers.org/so/SO:0000110'
 
@@ -38,7 +29,32 @@ class FeatureAnnotater():
         SO_SEQUENCE_FEATURE
     }
 
-    def __init__(self, feature_library, min_feature_length=40):
+    def __init__(self, nucleotides, identity, roles):
+        self.nucleotides = nucleotides
+        self.identity = identity
+        self.roles = roles
+
+    def reverse_complement_nucleotides(self):
+        return str(Seq(self.nucleotides).reverse_complement())
+
+    @classmethod
+    def has_non_generic_role(cls, roles):
+        return len(roles.difference(cls.GENERIC_ROLES)) > 0
+
+    @classmethod
+    def has_same_roles(cls, roles1, roles2):
+        return len(roles1.difference(roles2)) == 0
+
+    def is_non_generic(self):
+        return self.has_non_generic_role(self.roles)
+
+    def is_same_as(self, other_feature):
+        return self.has_same_roles(self.roles, other_feature.roles)
+
+
+class FeatureAnnotater():
+
+    def __init__(self, feature_library, min_feature_length):
         self.feature_library = feature_library
         self.feature_matcher = KeywordProcessor()
 
@@ -47,26 +63,14 @@ class FeatureAnnotater():
 
             if self.__has_min_length(feature, min_feature_length):
                 if inline_elements in self.feature_matcher:
-                    if self.__has_non_generic_role(feature):
-                        canonical_features = [cf for cf in self.feature_matcher.get_keyword(inline_elements) if self.__has_non_generic_role(cf)]
+                    if feature.is_non_generic():
+                        canonical_features = [cf for cf in self.feature_matcher.get_keyword(inline_elements) if cf.is_non_generic()]
 
                         canonical_features.append(feature)
                 else:
                     canonical_features = [feature]
 
                 self.feature_matcher.add_keyword(inline_elements, canonical_features)
-
-    @classmethod
-    def __has_non_generic_role(cls, feature):
-        return len(feature.roles.difference(cls.GENERIC_ROLES)) > 0
-
-    # @classmethod
-    # def __has_canonical_role(cls, feature, canonical_features):
-    #     for canonical_feature in canonical_features:
-    #         if len(feature.roles.difference(canonical_feature.roles)) == 0:
-    #             return False
-
-    #     return True
 
     @classmethod
     def __has_min_length(cls, feature, min_feature_length):
@@ -166,9 +170,9 @@ class FeatureAnnotater():
 
                 logging.info('Annotated %s at [%s, %s] in %s.', feature_definition.identity, start, end, target_definition.identity)
 
-    def annotate(self, target_library, min_target_length=1000):
-        for target in target_library.features:
-            print('Annotating ' + target.identity)
+    def annotate(self, target_doc, targets, min_target_length):
+        for target in targets:
+            print('Annotating ' + target.identity + '...')
 
             if self.__has_min_length(target, min_target_length):
                 inline_elements = ' '.join(target.nucleotides)
@@ -177,8 +181,7 @@ class FeatureAnnotater():
                 inline_matches = self.feature_matcher.extract_keywords(inline_elements, span_info=True)
                 rc_matches = self.feature_matcher.extract_keywords(rc_elements, span_info=True)
 
-                target_doc = target_library.get_document(target.identity)
-                target_definition = target_library.get_definition(target.identity)
+                target_definition = target_doc.getComponentDefinition(target.identity)
                 
                 self.__process_feature_matches(target_doc, target_definition, inline_matches, SBOL_ORIENTATION_INLINE)
                 self.__process_feature_matches(target_doc, target_definition, rc_matches, SBOL_ORIENTATION_REVERSE_COMPLEMENT,
@@ -188,85 +191,76 @@ class FeatureAnnotater():
 
 class FeaturePruner():
 
-    def __init__(self):
-        pass
+    def __init__(self, feature_library, roles=set()):
+        self.feature_library = feature_library
+        self.roles = roles
 
     @classmethod
-    def prune(cls, target_library, cover_offset=10):
-        for target in target_library.features:
-            parent_definition = target_library.get_definition(target.identity)
+    def __is_covered(cls, anno, cover_annos, cover_offset):
+        for cover_anno in cover_annos:
+            if not abs(cover_anno[0] - anno[0]) <= cover_offset or not abs(cover_anno[1] - anno[1]) <= cover_offset:
+                return False
 
-            seq_annos = [(sa.locations.getRange().start, sa.locations.getRange().end, sa.identity, sa.component) for sa in parent_definition.sequenceAnnotations if len(sa.locations) > 0 and sa.locations[0].getTypeURI() == SBOL_RANGE]
-            seq_annos.sort()
-
-            i = 0
-
-            while i < len(seq_annos) - 1:
-                if abs(seq_annos[i + 1][0] - seq_annos[i][0]) <= cover_offset and abs(seq_annos[i + 1][1] - seq_annos[i][1]) <= cover_offset:
-                    selected_index = cls.__select_feature(parent_definition, seq_annos[i], seq_annos[i + 1])
-
-                    if seq_annos[i + 1][3] is None:
-                        feature_identity2 = seq_annos[i + 1][2]
-                    else:
-                        feature_identity2 = parent_definition.components.get(seq_annos[i + 1][3]).definition
-
-                    if selected_index == 0 or selected_index == 3:
-                        parent_definition.sequenceAnnotations.remove(seq_annos[i + 1][2])
-
-                        if seq_annos[i + 1][3] is not None:
-                            parent_definition.components.remove(seq_annos[i + 1][3])
-
-                        logging.info('Removed %s at [%s, %s] in %s.', feature_identity2, seq_annos[i + 1][0], seq_annos[i + 1][1], parent_definition.identity)
-
-                        del seq_annos[i + 1]
-                    else:
-                        logging.info('Kept %s at [%s, %s] in %s.', feature_identity2, seq_annos[i + 1][0], seq_annos[i + 1][1], parent_definition.identity)
-
-                    if seq_annos[i][3] is None:
-                        feature_identity1 = seq_annos[i][2]
-                    else:
-                        feature_identity1 = parent_definition.components.get(seq_annos[i][3]).definition
-
-                    if selected_index == 1 or selected_index == 3:
-                        parent_definition.sequenceAnnotations.remove(seq_annos[i][2])
-
-                        if seq_annos[i][3] is not None:
-                            parent_definition.components.remove(seq_annos[i][3])
-
-                        logging.info('Removed %s at [%s, %s] in %s.', feature_identity1, seq_annos[i][0], seq_annos[i][1], parent_definition.identity)
-
-                        del seq_annos[i]
-                    else:
-                        logging.info('Kept %s at [%s, %s] in %s.', feature_identity1, seq_annos[i][0], seq_annos[i][1], parent_definition.identity)
-
-                    if selected_index == 0 or selected_index == 1 or selected_index == 3:
-                        i = i - 1
-
-                i = i + 1
-
-            logging.info('Finished pruning %s.\n', target.identity)
-
-        kept_identities = set()
-
-        for target in target_library.features:
-            target_doc = target_library.get_document(target.identity)
-
-            kept_identities = kept_identities.union(cls.__get_kept_identities(target_doc, target.identity))
-
-        for doc in target_library.docs:
-            identities = set()
-
-            for component_definition in doc.componentDefinitions:
-                identities.add(component_definition.identity)
-
-            pruned_identities = identities.difference(kept_identities)
-
-            for pruned_identity in pruned_identities:
-                doc.componentDefinitions.remove(pruned_identity)
+        return True
 
     @classmethod
-    def __get_kept_identities(cls, doc, identity):
-        kept_identities = {identity}
+    def __remove_annotations(cls, indices, annos, target_definition):
+        for i in range(len(annos) - 1, -1, -1):
+            if annos[i][5] is None:
+                feature_identity = annos[i][2]
+            else:
+                feature_identity = target_definition.components.get(annos[i][5]).definition
+            
+            if i in indices:
+                target_definition.sequenceAnnotations.remove(annos[i][2])
+
+                if annos[i][5] is not None:
+                    target_definition.components.remove(annos[i][5])
+
+                logging.info('Removed %s at [%s, %s] in %s.', feature_identity, annos[i][0], annos[i][1], target_definition.identity)
+
+                del annos[i]
+
+    @classmethod
+    def __select_annotations(cls, doc, target_definition, annos):
+        feature_messages = []
+
+        for i in range(0, len(annos)):
+            if annos[i][5] is None:
+                if annos[i][4] is None:
+                    feature_ID = annos[i][3]
+                else:
+                    feature_ID = annos[i][4]
+            else:
+                feature_identity = target_definition.components.get(annos[i][5]).definition
+                feature_definition = doc.getComponentDefinition(feature_identity)
+                
+                if feature_definition.name is None:
+                    feature_ID = feature_definition.displayId
+                else:
+                    feature_ID = feature_definition.name
+
+            feature_messages.append('{nx}: {fi} at [{st}, {en}]'.format(nx=str(i), fi=feature_ID, st=annos[i][0], en=annos[i][1]))
+
+        if target_definition.name is None:
+            target_ID = target_definition.displayId
+        else:
+            target_ID = target_definition.name
+
+        select_message = '\nThere appear to be redundant features in {pi}:\n{fm}\nPlease select which ones to remove if any (comma-separated list of indices, for example 0,2,5):\n'.format(fm='\n'.join(feature_messages), pi=target_ID)
+
+        selected_message = input(select_message)
+
+        try:
+            selected_indices = [int(si.strip()) for si in selected_message.split(',')]
+        except ValueError:
+            selected_indices = []
+
+        return set(selected_indices)
+
+    @classmethod
+    def __get_linked_definitions_identities(cls, doc, identity):
+        linked_identities = {identity}
 
         try:
             component_definition = doc.getComponentDefinition(identity)
@@ -274,30 +268,114 @@ class FeaturePruner():
             pass
 
         for parent_identity in component_definition.wasDerivedFrom:
-            kept_identities.add(parent_identity)
+            linked_identities.add(parent_identity)
 
         for sub_comp in component_definition.components:
-            kept_identities = kept_identities.union(cls.__get_kept_identities(doc, sub_comp.definition))
+            linked_identities = linked_identities.union(cls.__get_linked_definitions_identities(doc, sub_comp.definition))
 
-        return kept_identities
+        return linked_identities
 
-    @classmethod
-    def __select_feature(cls, parent_definition, seq_anno1, seq_anno2):
-        if seq_anno1[3] is None:
-            feature1 = seq_anno1[2]
-        else:
-            feature1 = parent_definition.components.get(seq_anno1[3]).definition
+    def __filter_annotations(self, annos, target_definition):
+        for i in range(len(annos) - 1, -1, -1):
+            if annos[i][5] is None:
+                feature_identity = annos[i][2]
+
+                feature_roles = annos[i][6]
+            else:
+                feature_identity = target_definition.components.get(annos[i][5]).definition
+
+                feature_roles = set(self.feature_library.get_definition(feature_identity).roles)
+
+            if len(feature_roles.intersection(self.roles)) == 0:
+                target_definition.sequenceAnnotations.remove(annos[i][2])
+
+                if annos[i][5] is not None:
+                    target_definition.components.remove(annos[i][5])
+
+                logging.info('Removed %s at [%s, %s] in %s.', feature_identity, annos[i][0], annos[i][1], target_definition.identity)
+
+                del annos[i]
+
+    def __merge_annotations(self, anno, sub_anno, target_definition):
+        feature_identity = target_definition.components.get(sub_anno[5]).definition
+
+        feature_definition = self.feature_library.get_definition(feature_identity)
+
+        if not Feature.has_non_generic_role(anno[6]) or Feature.has_same_roles(anno[6], set(feature_definition.roles)):
+            if anno[4] == None:
+                anno_ID = anno[3]
+            else:
+                anno_ID = anno[4]
+
+            if feature_definition.name == None:
+                feature_ID = feature_definition.displayId
+            else:
+                feature_ID = feature_definition.name
+
+            print('\nMerging {ai} and {fi}...'.format(ai=anno_ID, fi=feature_ID))
+
+            seq_anno = target_definition.sequenceAnnotations.get(anno[2])
+
+            seq_anno.roles = []
+            seq_anno.component = sub_anno[5]
+
+            target_definition.sequenceAnnotations.remove(sub_anno[2])
+
+            logging.info('Merged %s at [%s, %s] and %s at [%s, %s] in %s.', anno[2], anno[0], anno[1], feature_identity, sub_anno[0], sub_anno[1], target_definition.identity)
+
+    def prune(self, target_doc, targets, cover_offset):
+        for target in targets:
+            target_definition = target_doc.getComponentDefinition(target.identity)
+
+            cut_annos = [(sa.locations.getCut().at, sa.locations.getCut().at, sa.identity, sa.displayId, sa.name, sa.component, set(sa.roles)) for sa in target_definition.sequenceAnnotations if len(sa.locations) > 0 and sa.locations[0].getTypeURI() == SBOL_CUT]
+            annos = [(sa.locations.getRange().start, sa.locations.getRange().end, sa.identity, sa.displayId, sa.name, sa.component, set(sa.roles)) for sa in target_definition.sequenceAnnotations if len(sa.locations) > 0 and sa.locations[0].getTypeURI() == SBOL_RANGE]
             
-        if seq_anno2[3] is None:
-            feature2 = seq_anno2[2]
-        else:
-            feature2 = parent_definition.components.get(seq_anno2[3]).definition
-            
-        select_message = 'There appear to be redundant features {f1} at [{s1}, {e1}] and {f2} at [{s2}, {e2}] in {pd}.\nPlease select which ones to keep: 0 = {f1}, 1 = {f2}, 2 = both, 3 = neither.\n'.format(f1=feature1, s1=seq_anno1[0], e1=seq_anno1[1], f2=feature2, s2=seq_anno2[0], e2=seq_anno2[1], pd=parent_definition.identity)
+            annos.extend(cut_annos)
 
-        selected_index = input(select_message)
+            if len(self.roles) > 0:
+                self.__filter_annotations(annos, target_definition)
 
-        return int(selected_index)
+            annos.sort()
+
+            grouped_annos = [[]]
+
+            for anno in annos:
+                if len(grouped_annos) > 1 and self.__is_covered(anno, grouped_annos[-2], cover_offset):
+                    grouped_annos[-2].append(anno)
+                elif self.__is_covered(anno, grouped_annos[-1], cover_offset):
+                    grouped_annos[-1].append(anno)
+                else:
+                    grouped_annos.append([anno])
+
+            for anno_group in grouped_annos:
+                if len(anno_group) > 1:
+                    selected_indices = self.__select_annotations(target_doc, target_definition, anno_group)
+
+                    self.__remove_annotations(selected_indices, anno_group, target_definition)
+
+            for anno_group in grouped_annos:
+                if len(anno_group) == 2:
+                    if anno_group[0][5] is None and anno_group[1][5] is not None:
+                        self.__merge_annotations(anno_group[0], anno_group[1], target_definition)
+                    elif anno_group[0][5] is not None and anno_group[1][5] is None:
+                        self.__merge_annotations(anno_group[1], anno_group[0], target_definition)
+             
+            logging.info('Finished pruning %s.\n', target.identity)
+
+        kept_identities = set()
+
+        for target in targets:
+            kept_identities = kept_identities.union(self.__get_linked_definitions_identities(target_doc, target.identity))
+
+        doc_identities = set()
+
+        for component_definition in target_doc.componentDefinitions:
+            doc_identities.add(component_definition.identity)
+
+        pruned_identities = doc_identities.difference(kept_identities)
+
+        for pruned_identity in pruned_identities:
+            target_doc.componentDefinitions.remove(pruned_identity)
 
 class FeatureLibrary():
 
@@ -307,9 +385,9 @@ class FeatureLibrary():
         self.__feature_map = {}
 
         if is_copy:
-            print('Loading and copying features.')
+            print('Loading and copying features...\n')
         else:
-            print('Loading features.')
+            print('Loading features...\n')
 
         for i in range(0, len(self.docs)):
             for comp_definition in self.docs[i].componentDefinitions:
@@ -335,11 +413,13 @@ class FeatureLibrary():
         if is_copy:
             for i in range(0, len(self.features)):
                 comp_definition = self.get_definition(self.features[i].identity)
+
                 feature_doc = self.get_document(self.features[i].identity)
 
                 definition_copy = self.__copy_component_definition(comp_definition, feature_doc)
 
                 self.__feature_map[definition_copy.identity] = self.__feature_map.pop(self.features[i].identity)
+
                 self.features[i].identity = definition_copy.identity
 
     def get_document(self, identity):
@@ -347,14 +427,6 @@ class FeatureLibrary():
 
     def get_definition(self, identity):
         return self.get_document(identity).getComponentDefinition(identity)
-
-    # def remove_feature(self, identity):
-    #     if identity in self.__feature_map:
-    #         feature_doc = self.get_document(identity)
-
-    #         feature_doc.componentDefinitions.remove(identity)
-
-    #         del self.__feature_map[identity]
 
     @classmethod
     def __copy_component_definition(cls, comp_definition, doc):
@@ -367,7 +439,6 @@ class FeatureLibrary():
                 sub_copy = definition_copy.components.get(sub_comp.displayId)
 
                 anno_copy = definition_copy.sequenceAnnotations.get(seq_anno.displayId)
-
                 anno_copy.component = sub_copy.identity
 
         return definition_copy
@@ -383,7 +454,8 @@ def main(args=None):
     parser.add_argument('-l', '--curation_log', nargs='?', default='')
     parser.add_argument('-m', '--min_target_length', nargs='?', default=1000)
     parser.add_argument('-M', '--min_feature_length', nargs='?', default=40)
-    parser.add_argument('-c', '--cover_offset', nargs='?', default=10)
+    parser.add_argument('-c', '--cover_offset', nargs='?', default=14)
+    parser.add_argument('-r', '--roles', nargs='*', default=[])
     parser.add_argument('-v', '--validate', action='store_true')
     # parser.add_argument('-s', '--sbh_URL', nargs='?', default=None)
     # parser.add_argument('-u', '--username', nargs='?', default=None)
@@ -410,19 +482,20 @@ def main(args=None):
         feature_docs.append(load_sbol(feature_file))
     feature_library = FeatureLibrary(feature_docs)
 
-    target_documents = []
-    for target_file in args.target_files:
-        target_documents.append(load_sbol(target_file))
-    target_library = FeatureLibrary(target_documents, True)
-
     feature_annotater = FeatureAnnotater(feature_library, int(args.min_feature_length))
-    feature_annotater.annotate(target_library, int(args.min_target_length))
 
-    FeaturePruner.prune(target_library, int(args.cover_offset))
+    feature_pruner = FeaturePruner(feature_library, set(args.roles))
 
     for i in range (0, len(args.target_files)):
-        (target_file, file_extension) = os.path.splitext(args.target_files[i])
-        target_documents[i].write('_'.join([target_file, 'annotated', str(i)]) + file_extension)
+        target_doc = load_sbol(args.target_files[i])
+        
+        target_library = FeatureLibrary([target_doc], True)
+        feature_annotater.annotate(target_doc, target_library.features, int(args.min_target_length))
+
+        feature_pruner.prune(target_doc, target_library.features, int(args.cover_offset))
+
+        (target_file_base, file_extension) = os.path.splitext(args.target_files[i])
+        target_doc.write('_'.join([target_file_base, 'annotated']) + file_extension)
 
     print('Finished curating.')
 
