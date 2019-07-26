@@ -5,5 +5,5 @@ cache: pip
 install:
   - pip install -r put_requirements_here
 script:
-  - python3 ./tests/test_will_fail_because_it_doesnt_exist.py
+  - python3 ./tests/test_fails_because_it_doesnt_exist.py
 
