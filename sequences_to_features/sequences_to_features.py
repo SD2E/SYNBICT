@@ -29,9 +29,10 @@ class Feature():
         SO_SEQUENCE_FEATURE
     }
 
-    def __init__(self, nucleotides, identity, roles):
+    def __init__(self, nucleotides, identity, roles, parent_identities=[]):
         self.nucleotides = nucleotides
         self.identity = identity
+        self.parent_identities = parent_identities
         self.roles = roles
 
     def reverse_complement_nucleotides(self):
@@ -51,6 +52,90 @@ class Feature():
     def is_same_as(self, other_feature):
         return self.has_same_roles(self.roles, other_feature.roles)
 
+class FeatureLibrary():
+
+    def __init__(self, docs, is_copy=False):
+        self.features = []
+        self.docs = docs
+        self.__feature_map = {}
+
+        if is_copy:
+            print('Loading and copying features...\n')
+        else:
+            print('Loading features...\n')
+
+        for i in range(0, len(self.docs)):
+            for comp_definition in self.docs[i].componentDefinitions:
+                if BIOPAX_DNA in comp_definition.types:
+                    dna_seqs = []
+
+                    for seq_URI in comp_definition.sequences:
+                        try:
+                            seq = self.docs[i].getSequence(seq_URI)
+                        except RuntimeError:
+                            seq = None
+
+                        if seq is not None and seq.encoding == SBOL_ENCODING_IUPAC:
+                            dna_seqs.append(seq)
+
+                    if len(dna_seqs) > 0:
+                        self.features.append(Feature(dna_seqs[0].elements, comp_definition.identity, set(comp_definition.roles),
+                            comp_definition.wasDerivedFrom))
+
+                        self.__feature_map[comp_definition.identity] = i
+                    else:
+                        logging.warning('DNA sequence for %s not found.', comp_definition.identity)
+
+        if is_copy:
+            for i in range(0, len(self.features)):
+                comp_definition = self.get_definition(self.features[i].identity)
+
+                feature_doc = self.get_document(self.features[i].identity)
+
+                definition_copy = self.__copy_component_definition(comp_definition, feature_doc)
+
+                self.__feature_map[definition_copy.identity] = self.__feature_map.pop(self.features[i].identity)
+
+                self.features[i].identity = definition_copy.identity
+
+    def get_features(self, min_feature_length=0):
+        features = []
+
+        parent_identities = set()
+
+        for feature in self.features:
+            for parent_identity in feature.parent_identities:
+                parent_identities.add(parent_identity)
+
+        for feature in self.features:
+            if len(feature.nucleotides) > min_feature_length and feature.identity not in parent_identities:
+                features.append(feature)
+
+        return features
+
+    def get_document(self, identity):
+        return self.docs[self.__feature_map[identity]]
+
+    def get_definition(self, identity):
+        return self.get_document(identity).getComponentDefinition(identity)
+
+    def has_feature(self, identity):
+        return identity in self.__feature_map
+
+    @classmethod
+    def __copy_component_definition(cls, comp_definition, doc):
+        definition_copy = comp_definition.copy(doc)
+
+        for seq_anno in comp_definition.sequenceAnnotations:
+            if seq_anno.component is not None:
+                sub_comp = comp_definition.components.get(seq_anno.component)
+
+                sub_copy = definition_copy.components.get(sub_comp.displayId)
+
+                anno_copy = definition_copy.sequenceAnnotations.get(seq_anno.displayId)
+                anno_copy.component = sub_copy.identity
+
+        return definition_copy
 
 class FeatureAnnotater():
 
@@ -376,72 +461,6 @@ class FeaturePruner():
 
         for pruned_identity in pruned_identities:
             target_doc.componentDefinitions.remove(pruned_identity)
-
-class FeatureLibrary():
-
-    def __init__(self, docs, is_copy=False):
-        self.features = []
-        self.docs = docs
-        self.__feature_map = {}
-
-        if is_copy:
-            print('Loading and copying features...\n')
-        else:
-            print('Loading features...\n')
-
-        for i in range(0, len(self.docs)):
-            for comp_definition in self.docs[i].componentDefinitions:
-                if BIOPAX_DNA in comp_definition.types:
-                    dna_seqs = []
-
-                    for seq_URI in comp_definition.sequences:
-                        try:
-                            seq = self.docs[i].getSequence(seq_URI)
-                        except RuntimeError:
-                            seq = None
-
-                        if seq is not None and seq.encoding == SBOL_ENCODING_IUPAC:
-                            dna_seqs.append(seq)
-
-                    if len(dna_seqs) > 0:
-                        self.features.append(Feature(dna_seqs[0].elements, comp_definition.identity, set(comp_definition.roles)))
-
-                        self.__feature_map[comp_definition.identity] = i
-                    else:
-                        logging.warning('DNA sequence for %s not found.', comp_definition.identity)
-
-        if is_copy:
-            for i in range(0, len(self.features)):
-                comp_definition = self.get_definition(self.features[i].identity)
-
-                feature_doc = self.get_document(self.features[i].identity)
-
-                definition_copy = self.__copy_component_definition(comp_definition, feature_doc)
-
-                self.__feature_map[definition_copy.identity] = self.__feature_map.pop(self.features[i].identity)
-
-                self.features[i].identity = definition_copy.identity
-
-    def get_document(self, identity):
-        return self.docs[self.__feature_map[identity]]
-
-    def get_definition(self, identity):
-        return self.get_document(identity).getComponentDefinition(identity)
-
-    @classmethod
-    def __copy_component_definition(cls, comp_definition, doc):
-        definition_copy = comp_definition.copy(doc)
-
-        for seq_anno in comp_definition.sequenceAnnotations:
-            if seq_anno.component is not None:
-                sub_comp = comp_definition.components.get(seq_anno.component)
-
-                sub_copy = definition_copy.components.get(sub_comp.displayId)
-
-                anno_copy = definition_copy.sequenceAnnotations.get(seq_anno.displayId)
-                anno_copy.component = sub_copy.identity
-
-        return definition_copy
 
 def main(args=None):
     if args is None:
