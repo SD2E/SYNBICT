@@ -8,7 +8,7 @@ from sbol import *
 from flashtext import KeywordProcessor
 
 def load_sbol(sbol_file):
-    print('Loading ' + sbol_file + '...')
+    print('Loading ' + sbol_file)
 
     doc = Document()
     doc.read(sbol_file)
@@ -60,9 +60,9 @@ class FeatureLibrary():
         self.__feature_map = {}
 
         if is_copy:
-            print('Loading and copying features...\n')
+            print('Loading and copying features\n')
         else:
-            print('Loading features...\n')
+            print('Loading features\n')
 
         for i in range(0, len(self.docs)):
             for comp_definition in self.docs[i].componentDefinitions:
@@ -84,7 +84,7 @@ class FeatureLibrary():
 
                         self.__feature_map[comp_definition.identity] = i
                     else:
-                        logging.warning('DNA sequence for %s not found.', comp_definition.identity)
+                        logging.warning('DNA sequence for %s not found', comp_definition.identity)
 
         if is_copy:
             for i in range(0, len(self.features)):
@@ -253,11 +253,11 @@ class FeatureAnnotater():
 
                 self.__move_component_definition(feature_doc, target_doc, feature_definition)
 
-                logging.info('Annotated %s at [%s, %s] in %s.', feature_definition.identity, start, end, target_definition.identity)
+                logging.info('Annotated %s at [%s, %s] in %s', feature_definition.identity, start, end, target_definition.identity)
 
     def annotate(self, target_doc, targets, min_target_length):
         for target in targets:
-            print('Annotating ' + target.identity + '...')
+            print('Annotating ' + target.identity)
 
             if self.__has_min_length(target, min_target_length):
                 inline_elements = ' '.join(target.nucleotides)
@@ -272,9 +272,15 @@ class FeatureAnnotater():
                 self.__process_feature_matches(target_doc, target_definition, rc_matches, SBOL_ORIENTATION_REVERSE_COMPLEMENT,
                                        len(target.nucleotides) + 1)
 
-                logging.info('Finished annotating %s.\n', target.identity)
+                logging.info('Finished annotating %s\n', target.identity)
 
 class FeaturePruner():
+
+    COMMON_ROLE_DICT = {
+        SO_PROMOTER: 'promoter',
+        SO_CDS: 'CDS',
+        SO_TERMINATOR: 'terminator'
+    }
 
     def __init__(self, feature_library, roles=set()):
         self.feature_library = feature_library
@@ -302,9 +308,17 @@ class FeaturePruner():
                 if annos[i][5] is not None:
                     target_definition.components.remove(annos[i][5])
 
-                logging.info('Removed %s at [%s, %s] in %s.', feature_identity, annos[i][0], annos[i][1], target_definition.identity)
+                logging.info('Removed %s at [%s, %s] in %s', feature_identity, annos[i][0], annos[i][1], target_definition.identity)
 
                 del annos[i]
+
+    @classmethod
+    def __get_common_role(cls, roles):
+        for role in roles:
+            if role in cls.COMMON_ROLE_DICT:
+                return cls.COMMON_ROLE_DICT[role]
+
+        return ''
 
     @classmethod
     def __select_annotations(cls, doc, target_definition, annos):
@@ -316,6 +330,8 @@ class FeaturePruner():
                     feature_ID = annos[i][3]
                 else:
                     feature_ID = annos[i][4]
+
+                feature_role = cls.__get_common_role(annos[i][6])
             else:
                 feature_identity = target_definition.components.get(annos[i][5]).definition
                 feature_definition = doc.getComponentDefinition(feature_identity)
@@ -325,7 +341,13 @@ class FeaturePruner():
                 else:
                     feature_ID = feature_definition.name
 
-            feature_messages.append('{nx}: {fi} at [{st}, {en}]'.format(nx=str(i), fi=feature_ID, st=annos[i][0], en=annos[i][1]))
+                feature_role = cls.__get_common_role(feature_definition.roles)
+
+            if len(feature_role) > 0:
+                feature_messages.append('{nx}: {fi} ({ro}) at [{st}, {en}]'.format(nx=str(i), fi=feature_ID, 
+                    ro=feature_role, st=annos[i][0], en=annos[i][1]))
+            else:
+                feature_messages.append('{nx}: {fi} at [{st}, {en}]'.format(nx=str(i), fi=feature_ID, st=annos[i][0], en=annos[i][1]))
 
         if target_definition.name is None:
             target_ID = target_definition.displayId
@@ -377,7 +399,7 @@ class FeaturePruner():
                 if annos[i][5] is not None:
                     target_definition.components.remove(annos[i][5])
 
-                logging.info('Removed %s at [%s, %s] in %s.', feature_identity, annos[i][0], annos[i][1], target_definition.identity)
+                logging.info('Removed %s at [%s, %s] in %s', feature_identity, annos[i][0], annos[i][1], target_definition.identity)
 
                 del annos[i]
 
@@ -397,7 +419,7 @@ class FeaturePruner():
             else:
                 feature_ID = feature_definition.name
 
-            print('\nMerging {ai} and {fi}...'.format(ai=anno_ID, fi=feature_ID))
+            print('\nMerging {ai} and {fi}'.format(ai=anno_ID, fi=feature_ID))
 
             seq_anno = target_definition.sequenceAnnotations.get(anno[2])
 
@@ -406,7 +428,7 @@ class FeaturePruner():
 
             target_definition.sequenceAnnotations.remove(sub_anno[2])
 
-            logging.info('Merged %s at [%s, %s] and %s at [%s, %s] in %s.', anno[2], anno[0], anno[1], feature_identity, sub_anno[0], sub_anno[1], target_definition.identity)
+            logging.info('Merged %s at [%s, %s] and %s at [%s, %s] in %s', anno[2], anno[0], anno[1], feature_identity, sub_anno[0], sub_anno[1], target_definition.identity)
 
     def prune(self, target_doc, targets, cover_offset):
         for target in targets:
@@ -445,7 +467,7 @@ class FeaturePruner():
                     elif anno_group[0][5] is not None and anno_group[1][5] is None:
                         self.__merge_annotations(anno_group[1], anno_group[0], target_definition)
              
-            logging.info('Finished pruning %s.\n', target.identity)
+            logging.info('Finished pruning %s\n', target.identity)
 
         kept_identities = set()
 
@@ -514,9 +536,16 @@ def main(args=None):
         feature_pruner.prune(target_doc, target_library.features, int(args.cover_offset))
 
         (target_file_base, file_extension) = os.path.splitext(args.target_files[i])
-        target_doc.write('_'.join([target_file_base, 'annotated']) + file_extension)
+        output_file = '_'.join([target_file_base, 'annotated']) + file_extension
 
-    print('Finished curating.')
+        if Config.getOption('validate') == True:
+            print('\nValidating and writing ' + output_file)
+        else:
+            print('\nWriting ' + output_file)
+
+        target_doc.write(output_file)
+
+    print('\nFinished curating')
 
 if __name__ == '__main__':
     main()
