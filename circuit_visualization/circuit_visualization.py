@@ -200,10 +200,16 @@ class CircuitVisualizer():
 
                             part['name'] = located[i][4]
 
-                            # if feature_definition.name is None:
-                                # part['opts']['label'] = feature_definition.displayId
-                            # else:
-                                # part['opts']['label'] = feature_definition.name
+                            if part['type'] == 'CDS' or part['type'] == 'promoter':
+                                if feature_definition.name is None:
+                                    part['opts']['label'] = feature_definition.displayId
+                                else:
+                                    part['opts']['label'] = feature_definition.name
+
+                                part['opts']['label_y_offset'] = -30
+                                part['opts']['label_size'] = 4
+                                if part['type'] == 'CDS':
+                                    part['opts']['label_style'] = 'italic'
 
                             part['fwd'] = (located[i][2] == SBOL_ORIENTATION_INLINE)
 
