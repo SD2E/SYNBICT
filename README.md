@@ -3,7 +3,26 @@ Synthetic Biology Curation Tools
 
 ![SYNBICT architecture diagram](synbict_architecture_diagram.png)
 
+## Installation instructions
+
+This project depends on Python 3.
+
+Run this command:
+
+`python ./setup.py install`
+
+If you want to visualize, you need to install dnaplotlib and matplotlib
+
+`pip install dnaplotlib`
+`pip install matplotlib`
+
 ## sequences_to_features.py
+
+sequences_to_features.py annotates an SBOL file.
+
+For input file [NAME].xml, its output is [NAME]_annotated.xml in the same directory as the input file.
+
+### Arguments for sequences_to_features.py
 
 Argument | Short Arg | Type | Description | Example
 --- | --- | --- | --- | ---
@@ -16,3 +35,27 @@ Argument | Short Arg | Type | Description | Example
 `--cover_offset` | `-c` | `Integer` | **Optional**. Maximum distance between the start/end of one sequence feature and the start/end of another sequence feature for pruning to initiate. Default is 14 bp. | 14
 `--roles` | `-r` | `String` | **Optional**. List of Sequence Ontology terms to filter annotations and remove any without at least one such term as a role. Default is an empty list. | http://identifiers.org/so/SO:0000167 http://identifiers.org/so/SO:0000316
 `--validate` | `-v` | `Boolean` | **Optional**. If included, output SBOL file will be validate. Default is no validation. | -v
+
+## features\_to\_circuits.py 
+
+Argument | Short Arg | Type | Description | Example
+--- | --- | --- | --- | ---
+`--namespace` | `-n` | `String` | **Required**. Annotation namespace that you own or that you are reasonably certain is only used by you. | http://mynamespace.org
+`--target_files` | `-t` | `String` | **Required**. List of paths for SBOL files containing sequences to curate. | mytargets_1.xml mytargetfile_2.xml
+-i circuit name (required)
+-c parts collection (required)
+
+-n http://foo.bar -i bob 
+-t ~/tmp/cpc/Cello_Parts_collection/Strain_3_MG1655_Genomic_IcaR_Gate_annotated.xml 
+-c ~/tmp/cpc/Cello_Parts_collection/Cello_Parts_collection.xml 
+
+## circuit_visualization.py
+
+### Arguments
+ -c file to visualize, which must have at least one ModuleDefinition
+   -h, --help            show this help message and exit
+  -c CIRCUIT_FILE, --circuit_file CIRCUIT_FILE
+  -f [FEATURE_FILES [FEATURE_FILES ...]], --feature_files [FEATURE_FILES [FEATURE_FILES ...]]
+  -l [CURATION_LOG], --curation_log [CURATION_LOG]
+  -m [MIN_FEATURES], --min_features [MIN_FEATURES]
+  -v, --validate
