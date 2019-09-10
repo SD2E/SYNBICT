@@ -11,17 +11,18 @@ To install, run this command after changing directories to SYNBICT:
 
 `python setup.py install`
 
-If you want to visualize circuits, you need to install matplotlib and the fork of dnaplotlib at https://github.com/nroehner/dnaplotlib.
+If you want to visualize circuits, you need to install biopython, matplotlib and the fork of dnaplotlib at https://github.com/nroehner/dnaplotlib.
 
 `pip install matplotlib`
 
+
 ## Testing
 
-`python sequences_to_features.py -n http://synbict.org -t ..\test\Strain_4_MG1655_Genomic_NAND_Circuit.xml -f ..\test\Cello_Parts_collection_modified.xml -l ..\test\test_feature_curation.log`
+`python sequences_to_features.py -n http://synbict.org -t ../test/Strain_4_MG1655_Genomic_NAND_Circuit.xml -f ../test/Cello_Parts_collection_modified.xml -l ../test/test_feature_curation.log`
 
-`python features_to_circuits.py -n http://synbict.org -i test_gate -t ..\test\Strain_4_MG1655_Genomic_NAND_Circuit_annotated.xml -c ..\test\Cello_Parts_collection_modified.xml -l ..\test\test_circuit_inference.log`
+`python features_to_circuits.py -n http://synbict.org -i test_gate -t ../test/Strain_4_MG1655_Genomic_NAND_Circuit_annotated.xml -c ../test/Cello_Parts_collection_modified.xml -l ../test/test_circuit_inference.log`
 
-`python circuit_visualization.py -c ..\test\Strain_4_MG1655_Genomic_NAND_Circuit_annotated_circuit.xml -f ..\test\Strain_4_MG1655_Genomic_NAND_Circuit_annotated_circuit.xml -l ..\test\test_circuit_visualization.log`
+`python circuit_visualization.py -c ../test/Strain_4_MG1655_Genomic_NAND_Circuit_annotated_circuit.xml -f ../test/Strain_4_MG1655_Genomic_NAND_Circuit_annotated_circuit.xml -l ../test/test_circuit_visualization.log`
 
 ## sequences_to_features.py
 
