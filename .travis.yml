@@ -4,4 +4,4 @@ python:
 install:
   - python setup.py install
 script:
-  - python -m unittest discover test
+  - python -m unittest test/test_curation.py
