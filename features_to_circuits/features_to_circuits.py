@@ -55,13 +55,9 @@ class CircuitLibrary():
 
         for i in range(0, len(self.docs)):
             for mod_definition in self.docs[i].moduleDefinitions:
-                features = []
-
-                is_complete = True
-
                 features = self.__extract_features(self.docs[i], mod_definition)
 
-                if len(features) > 0 and is_complete:
+                if len(features) > 0:
                     for intxn in mod_definition.interactions:
                         if SBO_STIMULATION in intxn.types:
                             stimulator = None
@@ -120,8 +116,6 @@ class CircuitLibrary():
                     self.circuits.append(Circuit(mod_definition.identity, features))
 
                     self.__circuit_map[mod_definition.identity] = i
-                else:
-                    logging.warning('%s is incomplete and was not loaded.', mod_definition.identity)
 
     @classmethod
     def __extract_features(cls, doc, mod_definition):
@@ -134,26 +128,12 @@ class CircuitLibrary():
                 comp_definition = None
 
             if comp_definition is None:
-                logging.warning('%s not found.', func_comp.definition)
+                logging.warning('%s was not loaded since its component %s was not found', mod_definition.identity, func_comp.definition)
 
-                is_complete = False
+                return []
             elif BIOPAX_DNA in comp_definition.types:
-                dna_seqs = []
-
-                for seq_URI in comp_definition.sequences:
-                    try:
-                        seq = doc.getSequence(seq_URI)
-                    except RuntimeError:
-                        seq = None
-
-                    if seq is not None and seq.encoding == SBOL_ENCODING_IUPAC:
-                        dna_seqs.append(seq)
-
-                if len(dna_seqs) > 0:
-                    features.append(Feature(dna_seqs[0].elements, comp_definition.identity, set(comp_definition.roles),
-                        comp_definition.wasDerivedFrom))
-                else:
-                    logging.warning('DNA sequence for %s not found.', comp_definition.identity)
+                features.append(Feature('', comp_definition.identity, set(comp_definition.roles),
+                    comp_definition.wasDerivedFrom))
 
         for sub_mod in mod_definition.modules:
             try:
@@ -162,7 +142,18 @@ class CircuitLibrary():
                 sub_definition = None
 
             if sub_definition is not None:
-                features.extend(cls.__extract_features(doc, sub_definition))
+                sub_features = cls.__extract_features(doc, sub_definition)
+
+                if len(sub_features) == 0:
+                    logging.warning('%s was not loaded since its sub-module %s is incomplete or contains no features',
+                        mod_definition.identity, sub_mod.definition)
+
+                    return []
+                else:
+                    features.extend(sub_features)
+
+        if len(features) == 0:
+            logging.warning('%s was not loaded since it contains no DNA features', mod_definition.identity)
 
         return features
 
@@ -282,7 +273,7 @@ def main(args=None):
     for i in range (0, len(args.target_files)):
         target_doc = load_sbol(args.target_files[i])
         
-        target_library = FeatureLibrary([target_doc])
+        target_library = FeatureLibrary([target_doc], require_sequence=False)
 
         circuit_builder.build(args.circuit_id, target_doc, target_library, args.min_target_length)
 

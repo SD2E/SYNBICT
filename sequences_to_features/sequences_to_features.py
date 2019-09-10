@@ -54,12 +54,12 @@ class Feature():
 
 class FeatureLibrary():
 
-    def __init__(self, docs, is_copy=False):
+    def __init__(self, docs, import_namespace=False, version='1', require_sequence=True):
         self.features = []
         self.docs = docs
         self.__feature_map = {}
 
-        if is_copy:
+        if import_namespace:
             print('Loading and copying features')
         else:
             print('Loading features')
@@ -74,16 +74,22 @@ class FeatureLibrary():
                             comp_definition.wasDerivedFrom))
 
                         self.__feature_map[comp_definition.identity] = i
-                    else:
-                        logging.warning('DNA sequence for %s not found', comp_definition.identity)
+                    elif not require_sequence:
+                        self.features.append(Feature('', comp_definition.identity, set(comp_definition.roles),
+                            comp_definition.wasDerivedFrom))
 
-        if is_copy:
+                        self.__feature_map[comp_definition.identity] = i
+                    else:
+                        logging.warning('%s not loaded since its DNA sequence was not found', comp_definition.identity)
+
+        if import_namespace:
             for i in range(0, len(self.features)):
                 comp_definition = self.get_definition(self.features[i].identity)
 
                 feature_doc = self.get_document(self.features[i].identity)
 
-                definition_copy = self.copy_component_definition(comp_definition, feature_doc, feature_doc, False)
+                definition_copy = self.copy_component_definition(comp_definition, feature_doc, feature_doc, False,
+                    import_namespace, version)
 
                 self.__feature_map[definition_copy.identity] = self.__feature_map.pop(self.features[i].identity)
 
@@ -129,8 +135,11 @@ class FeatureLibrary():
         return dna_seqs
 
     @classmethod
-    def copy_component_definition(cls, comp_definition, source_doc, sink_doc, is_recursive=True):
-        definition_copy = comp_definition.copy(sink_doc)
+    def copy_component_definition(cls, comp_definition, source_doc, sink_doc, is_recursive=True, import_namespace=False, version='1'):
+        if import_namespace:
+            definition_copy = comp_definition.copy(sink_doc, '/'.join(comp_definition.identity.split('/')[:-2]), version)
+        else:
+            definition_copy = comp_definition.copy(sink_doc)
 
         for seq_anno in comp_definition.sequenceAnnotations:
             if seq_anno.component is not None:
@@ -145,7 +154,10 @@ class FeatureLibrary():
             try:
                 seq = source_doc.getSequence(seq_URI)
 
-                seq.copy(sink_doc)
+                if import_namespace:
+                    seq.copy(sink_doc, '/'.join(seq.identity.split('/')[:-2]), version)
+                else:
+                    seq.copy(sink_doc)
             except RuntimeError:
                 pass
 
@@ -154,7 +166,8 @@ class FeatureLibrary():
                 try:
                     sub_definition = source_doc.getComponentDefinition(sub_comp.definition)
 
-                    cls.__copy_component_definition(sub_definition, source_doc, sink_doc)
+                    cls.__copy_component_definition(sub_definition, source_doc, sink_doc, is_recursive,
+                        import_namespace, version)
                 except RuntimeError:
                     pass
 
@@ -531,12 +544,14 @@ def main(args=None):
     parser.add_argument('-n', '--namespace')
     parser.add_argument('-t', '--target_files', nargs='+')
     parser.add_argument('-f', '--feature_files', nargs='*', default=[])
+    parser.add_argument('-o', '--output_files', nargs='*', default=[])
     parser.add_argument('-l', '--curation_log', nargs='?', default='')
     parser.add_argument('-m', '--min_target_length', nargs='?', default=1000)
     parser.add_argument('-M', '--min_feature_length', nargs='?', default=40)
     parser.add_argument('-c', '--cover_offset', nargs='?', default=14)
     parser.add_argument('-r', '--roles', nargs='*', default=[])
-    parser.add_argument('-v', '--validate', action='store_true')
+    parser.add_argument('-v', '--version', nargs='?', default='1')
+    parser.add_argument('-x', '--validate', action='store_true')
     # parser.add_argument('-s', '--sbh_URL', nargs='?', default=None)
     # parser.add_argument('-u', '--username', nargs='?', default=None)
     # parser.add_argument('-p', '--password', nargs='?', default=None)
@@ -569,13 +584,16 @@ def main(args=None):
     for i in range (0, len(args.target_files)):
         target_doc = load_sbol(args.target_files[i])
         
-        target_library = FeatureLibrary([target_doc], True)
+        target_library = FeatureLibrary([target_doc], True, args.version)
         feature_annotater.annotate(target_doc, target_library.features, int(args.min_target_length))
 
         feature_pruner.prune(target_doc, target_library.features, int(args.cover_offset), int(args.min_target_length))
 
-        (target_file_base, file_extension) = os.path.splitext(args.target_files[i])
-        output_file = '_'.join([target_file_base, 'annotated']) + file_extension
+        if i < len(args.output_files):
+            output_file = args.output_files[i]
+        else:
+            (target_file_base, file_extension) = os.path.splitext(args.target_files[i])
+            output_file = target_file_base + '_annotated' + file_extension
 
         if Config.getOption('validate') == True:
             print('Validating and writing ' + output_file)

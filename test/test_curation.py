@@ -11,6 +11,7 @@ class CurationTests(unittest.TestCase):
         __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
         HOMESPACE = 'http://synbict.org'
+        VERSION = '1'
 
         MIN_TARGET_LENGTH = 2000
 
@@ -21,7 +22,7 @@ class CurationTests(unittest.TestCase):
         feature_library = FeatureLibrary([cello_doc])
 
         target_doc = load_sbol(os.path.join(__location__, 'genetic_nand.xml'))
-        target_construct_library = FeatureLibrary([target_doc], True)
+        target_construct_library = FeatureLibrary([target_doc], True, VERSION)
 
         feature_annotater = FeatureAnnotater(feature_library, 40)
         feature_annotater.annotate(target_doc, target_construct_library.features, MIN_TARGET_LENGTH)
@@ -30,7 +31,7 @@ class CurationTests(unittest.TestCase):
         feature_pruner.prune(target_doc, target_construct_library.features, 14, MIN_TARGET_LENGTH, False, feature_library)
 
         circuit_library = CircuitLibrary([cello_doc])
-        target_device_library = FeatureLibrary([target_doc])
+        target_device_library = FeatureLibrary([target_doc], require_sequence=False)
 
         circuit_ID = 'nand_circuit'
 
@@ -40,7 +41,7 @@ class CurationTests(unittest.TestCase):
         nand_circuit = target_doc.getModuleDefinition('/'.join([HOMESPACE, circuit_ID]))
 
         nand_devices = {
-            'https://hub.sd2e.org/user/sd2e/design/Strain_4_MG1655_Genomic_NAND_Circuit/2'
+            '/'.join([HOMESPACE, 'Strain_4_MG1655_Genomic_NAND_Circuit', VERSION])
         }
 
         devices = set()
