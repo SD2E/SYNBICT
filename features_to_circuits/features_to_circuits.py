@@ -201,14 +201,14 @@ class CircuitBuilder():
     def __init__(self, circuit_library):
         self.circuit_library = circuit_library
 
-    def build(self, circuit_id, target_doc, target_library, min_target_length):
+    def build(self, circuit_id, target_doc, target_library, min_target_length, version='1'):
         covered_circuits = []
 
         for circuit in self.circuit_library.circuits:
             if circuit.is_covered(target_library):
                 covered_circuits.append(circuit)
 
-        circuit_definition = ModuleDefinition(circuit_id, '1')
+        circuit_definition = ModuleDefinition(circuit_id, version)
 
         if len(covered_circuits) > 0:
             print('Building ' + circuit_definition.identity)
@@ -243,12 +243,14 @@ def main(args=None):
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-n', '--namespace')
-    parser.add_argument('-i', '--circuit_id')
+    parser.add_argument('-i', '--circuit_IDs', nargs='+')
     parser.add_argument('-t', '--target_files', nargs='+')
     parser.add_argument('-c', '--circuit_files', nargs='*', default=[])
-    parser.add_argument('-m', '--min_target_length', nargs='?', default=1000)
+    parser.add_argument('-o', '--output_files', nargs='*', default=[])
+    parser.add_argument('-m', '--min_target_length', nargs='?', default=2000)
     parser.add_argument('-l', '--curation_log', nargs='?', default='')
-    parser.add_argument('-v', '--validate', action='store_true')
+    parser.add_argument('-v', '--version', nargs='?', default='1')
+    parser.add_argument('-x', '--validate', action='store_true')
     
     args = parser.parse_args(args)
 
@@ -275,10 +277,26 @@ def main(args=None):
         
         target_library = FeatureLibrary([target_doc], require_sequence=False)
 
-        circuit_builder.build(args.circuit_id, target_doc, target_library, args.min_target_length)
+        if i < len(args.circuit_IDs):
+            circuit_ID = args.circuit_IDs[i]
+        else:
+            circuit_ID = 'circuit_' + str(i)
 
-        (target_file_base, file_extension) = os.path.splitext(args.target_files[i])
-        target_doc.write('_'.join([target_file_base, 'circuit']) + file_extension)
+        circuit_builder.build(circuit_ID, target_doc, target_library, args.min_target_length,
+            args.version)
+
+        if i < len(args.output_files):
+            output_file = args.output_files[i]
+        else:
+            (target_file_base, file_extension) = os.path.splitext(args.target_files[i])
+            output_file = target_file_base + '_circuit' + file_extension
+
+        if Config.getOption('validate') == True:
+            print('Validating and writing ' + output_file)
+        else:
+            print('Writing ' + output_file)
+
+        target_doc.write(output_file)
 
     print('Finished curating.')
 

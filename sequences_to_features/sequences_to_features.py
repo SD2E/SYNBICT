@@ -546,7 +546,7 @@ def main(args=None):
     parser.add_argument('-f', '--feature_files', nargs='*', default=[])
     parser.add_argument('-o', '--output_files', nargs='*', default=[])
     parser.add_argument('-l', '--curation_log', nargs='?', default='')
-    parser.add_argument('-m', '--min_target_length', nargs='?', default=1000)
+    parser.add_argument('-m', '--min_target_length', nargs='?', default=2000)
     parser.add_argument('-M', '--min_feature_length', nargs='?', default=40)
     parser.add_argument('-c', '--cover_offset', nargs='?', default=14)
     parser.add_argument('-r', '--roles', nargs='*', default=[])
