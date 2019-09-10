@@ -10,7 +10,7 @@ from sequences_to_features import Feature
 from sequences_to_features import FeatureLibrary
 
 def load_sbol(sbol_file):
-    print('Loading ' + sbol_file + '...')
+    print('Loading ' + sbol_file)
 
     doc = Document()
     doc.read(sbol_file)
@@ -51,7 +51,7 @@ class CircuitLibrary():
         self.__dna_to_dna_repression = {}
         self.__dna_to_dna_activation = {}
 
-        print('Loading circuits...\n')
+        print('Loading circuits')
 
         for i in range(0, len(self.docs)):
             for mod_definition in self.docs[i].moduleDefinitions:
@@ -123,12 +123,6 @@ class CircuitLibrary():
                 else:
                     logging.warning('%s is incomplete and was not loaded.', mod_definition.identity)
 
-        print(self.__template_to_product)
-        print(self.__activator_to_dna)
-        print(self.__repressor_to_dna)
-        print(self.__dna_to_dna_repression)
-        print(self.__dna_to_dna_activation)
-
     @classmethod
     def __extract_features(cls, doc, mod_definition):
         features = []
@@ -190,62 +184,45 @@ class CircuitLibrary():
         else:
             return set()
 
+    @classmethod
+    def copy_module_definition(cls, mod_definition, source_doc, sink_doc, is_recursive=True):
+        definition_copy = mod_definition.copy(sink_doc)
+
+        if is_recursive:
+            for sub_mod in mod_definition.modules:
+                try:
+                    sub_mod_definition = source_doc.getModuleDefinition(sub_mod.definition)
+
+                    cls.copy_module_definition(sub_mod_definition, source_doc, sink_doc)
+                except RuntimeError:
+                    pass
+
+            for func_comp in mod_definition.functionalComponents:
+                try:
+                    sub_comp_definition = source_doc.getComponentDefinition(func_comp.definition)
+
+                    FeatureLibrary.copy_component_definition(sub_comp_definition, source_doc, sink_doc)
+                except RuntimeError:
+                    pass
+
 class CircuitBuilder():
 
     def __init__(self, circuit_library):
         self.circuit_library = circuit_library
 
-    @classmethod
-    def __move_component_definition(cls, source_doc, sink_doc, component_definition):
-        try:
-            sink_doc.addComponentDefinition(component_definition)
-        except:
-            pass
-
-        for sub_comp in component_definition.components:
-            try:
-                sub_definition = source_doc.getComponentDefinition(sub_comp.definition)
-
-                cls.__move_component_definition(source_doc, sink_doc, sub_definition)
-            except RuntimeError:
-                pass
-
-    @classmethod
-    def __move_module_definition(cls, source_doc, sink_doc, module_definition):
-        try:
-            sink_doc.addModuleDefinition(module_definition)
-        except:
-            pass
-
-        for sub_mod in module_definition.modules:
-            try:
-                sub_definition = source_doc.getModuleDefinition(sub_mod.definition)
-
-                cls.__move_module_definition(source_doc, sink_doc, sub_definition)
-            except RuntimeError:
-                pass
-
-        for func_comp in module_definition.functionalComponents:
-            try:
-                sub_definition = source_doc.getComponentDefinition(func_comp.definition)
-
-                cls.__move_component_definition(source_doc, sink_doc, sub_definition)
-            except RuntimeError:
-                pass
-
-    def build(self, circuit_id, target_doc, target_library, min_feature_length):
+    def build(self, circuit_id, target_doc, target_library, min_target_length):
         covered_circuits = []
 
         for circuit in self.circuit_library.circuits:
             if circuit.is_covered(target_library):
                 covered_circuits.append(circuit)
 
+        circuit_definition = ModuleDefinition(circuit_id, '1')
+
         if len(covered_circuits) > 0:
-            circuit_definition = ModuleDefinition(circuit_id, '1')
+            print('Building ' + circuit_definition.identity)
 
-            print('Building ' + circuit_definition.identity + '...')
-
-            features = target_library.get_features(min_feature_length)
+            features = target_library.get_features(min_target_length)
 
             for i in range(0, len(features)):
                 func_comp = circuit_definition.functionalComponents.create('construct_' + str(i))
@@ -261,13 +238,13 @@ class CircuitBuilder():
 
                 sub_circuit_definition = self.circuit_library.get_definition(covered_circuits[i].identity)
 
-                self.__move_module_definition(sub_circuit_doc, target_doc, sub_circuit_definition)
+                CircuitLibrary.copy_module_definition(sub_circuit_definition, sub_circuit_doc, target_doc)
 
             target_doc.addModuleDefinition(circuit_definition)
 
             logging.info('Finished building %s.\n', circuit_definition.identity)
         else:
-            logging.info('Failed to build %s.\n', circuit_definition.identity)
+            logging.warning('Failed to build %s.\n', circuit_definition.identity)
 
 def main(args=None):
     if args is None:
@@ -278,7 +255,7 @@ def main(args=None):
     parser.add_argument('-i', '--circuit_id')
     parser.add_argument('-t', '--target_files', nargs='+')
     parser.add_argument('-c', '--circuit_files', nargs='*', default=[])
-    parser.add_argument('-m', '--min_feature_length', nargs='?', default=1000)
+    parser.add_argument('-m', '--min_target_length', nargs='?', default=1000)
     parser.add_argument('-l', '--curation_log', nargs='?', default='')
     parser.add_argument('-v', '--validate', action='store_true')
     
@@ -307,7 +284,7 @@ def main(args=None):
         
         target_library = FeatureLibrary([target_doc])
 
-        circuit_builder.build(args.circuit_id, target_doc, target_library, args.min_feature_length)
+        circuit_builder.build(args.circuit_id, target_doc, target_library, args.min_target_length)
 
         (target_file_base, file_extension) = os.path.splitext(args.target_files[i])
         target_doc.write('_'.join([target_file_base, 'circuit']) + file_extension)

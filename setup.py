@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 
-import pip
-from pkg_resources import parse_version
 from setuptools import setup, find_packages
 
 install_requires = [
     'biopython>=1.7.4',
     'flashtext>=2.7',
-    'pysbol>=2.3.1'
+    'pysbol>=2.3.1',
+    'matplotlib>=1.5.0'
 ]
 
 setup(

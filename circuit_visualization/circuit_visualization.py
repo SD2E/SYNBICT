@@ -92,7 +92,7 @@ def curved_repression(ax, type, num, from_part, to_part, scale, linewidth, arc_h
     ax.add_line(line_rep)
 
 def load_sbol(sbol_file):
-    print('Loading ' + sbol_file + '...')
+    print('Loading ' + sbol_file)
 
     doc = Document()
     doc.read(sbol_file)
@@ -136,8 +136,11 @@ class CircuitVisualizer():
         reg_renderers['CurvedActivation'] = curved_activation
 
         k = 0
+
         for circuit in circuit_library.circuits:
             if len(circuit.features) > min_features:
+                print('Visualizing ' + circuit.identity)
+
                 k = k + 1
 
                 designs = []
@@ -146,8 +149,6 @@ class CircuitVisualizer():
 
                 for feature in circuit.features:
                     comp_definition = feature_library.get_definition(feature.identity)
-
-                    # logging.info('Failed to visualize %s.\n', comp_definition.identity)
 
                     if comp_definition is not None and BIOPAX_DNA in comp_definition.types:
                         design = []
@@ -262,6 +263,10 @@ class CircuitVisualizer():
                 fig.savefig('test_circuit' + str(k) + '.png', dpi=300)
 
                 plt.close('all')
+
+                logging.info('Finished visualizing %s.\n', circuit.identity)
+            else:
+                logging.warning('Failed to visualize %s.\n', circuit.identity)
 
 def main(args=None):
     if args is None:

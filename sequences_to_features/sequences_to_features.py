@@ -60,23 +60,14 @@ class FeatureLibrary():
         self.__feature_map = {}
 
         if is_copy:
-            print('Loading and copying features\n')
+            print('Loading and copying features')
         else:
-            print('Loading features\n')
+            print('Loading features')
 
         for i in range(0, len(self.docs)):
             for comp_definition in self.docs[i].componentDefinitions:
                 if BIOPAX_DNA in comp_definition.types:
-                    dna_seqs = []
-
-                    for seq_URI in comp_definition.sequences:
-                        try:
-                            seq = self.docs[i].getSequence(seq_URI)
-                        except RuntimeError:
-                            seq = None
-
-                        if seq is not None and seq.encoding == SBOL_ENCODING_IUPAC:
-                            dna_seqs.append(seq)
+                    dna_seqs = self.get_DNA_sequences(comp_definition, self.docs[i])
 
                     if len(dna_seqs) > 0:
                         self.features.append(Feature(dna_seqs[0].elements, comp_definition.identity, set(comp_definition.roles),
@@ -92,7 +83,7 @@ class FeatureLibrary():
 
                 feature_doc = self.get_document(self.features[i].identity)
 
-                definition_copy = self.__copy_component_definition(comp_definition, feature_doc)
+                definition_copy = self.copy_component_definition(comp_definition, feature_doc, feature_doc, False)
 
                 self.__feature_map[definition_copy.identity] = self.__feature_map.pop(self.features[i].identity)
 
@@ -123,8 +114,23 @@ class FeatureLibrary():
         return identity in self.__feature_map
 
     @classmethod
-    def __copy_component_definition(cls, comp_definition, doc):
-        definition_copy = comp_definition.copy(doc)
+    def get_DNA_sequences(cls, comp_definition, doc):
+        dna_seqs = []
+
+        for seq_URI in comp_definition.sequences:
+            try:
+                seq = doc.getSequence(seq_URI)
+            except RuntimeError:
+                seq = None
+
+            if seq is not None and seq.encoding == SBOL_ENCODING_IUPAC:
+                dna_seqs.append(seq)
+
+        return dna_seqs
+
+    @classmethod
+    def copy_component_definition(cls, comp_definition, source_doc, sink_doc, is_recursive=True):
+        definition_copy = comp_definition.copy(sink_doc)
 
         for seq_anno in comp_definition.sequenceAnnotations:
             if seq_anno.component is not None:
@@ -134,6 +140,23 @@ class FeatureLibrary():
 
                 anno_copy = definition_copy.sequenceAnnotations.get(seq_anno.displayId)
                 anno_copy.component = sub_copy.identity
+
+        for seq_URI in comp_definition.sequences:
+            try:
+                seq = source_doc.getSequence(seq_URI)
+
+                seq.copy(sink_doc)
+            except RuntimeError:
+                pass
+
+        if is_recursive:
+            for sub_comp in comp_definition.components:
+                try:
+                    sub_definition = source_doc.getComponentDefinition(sub_comp.definition)
+
+                    cls.__copy_component_definition(sub_definition, source_doc, sink_doc)
+                except RuntimeError:
+                    pass
 
         return definition_copy
 
@@ -215,21 +238,6 @@ class FeatureAnnotater():
 
         return seq_anno
 
-    @classmethod
-    def __move_component_definition(cls, source_doc, sink_doc, component_definition):
-        try:
-            sink_doc.addComponentDefinition(component_definition)
-        except:
-            pass
-
-        for sub_comp in component_definition.components:
-            try:
-                sub_definition = source_doc.getComponentDefinition(sub_comp.definition)
-
-                cls.__move_component_definition(source_doc, sink_doc, sub_definition)
-            except RuntimeError:
-                pass
-
     def __process_feature_matches(self, target_doc, target_definition, feature_matches, orientation, rc_factor=0):
         for feature_match in feature_matches:
             temp_start = feature_match[1]//2 + 1
@@ -251,15 +259,18 @@ class FeatureAnnotater():
 
                 feature_doc = self.feature_library.get_document(feature.identity)
 
-                self.__move_component_definition(feature_doc, target_doc, feature_definition)
+                try:
+                    FeatureLibrary.copy_component_definition(feature_definition, feature_doc, target_doc)
+                except RuntimeError:
+                    pass
 
                 logging.info('Annotated %s at [%s, %s] in %s', feature_definition.identity, start, end, target_definition.identity)
 
     def annotate(self, target_doc, targets, min_target_length):
         for target in targets:
-            print('Annotating ' + target.identity)
-
             if self.__has_min_length(target, min_target_length):
+                print('Annotating ' + target.identity)
+
                 inline_elements = ' '.join(target.nucleotides)
                 rc_elements = ' '.join(target.reverse_complement_nucleotides())
 
@@ -269,8 +280,8 @@ class FeatureAnnotater():
                 target_definition = target_doc.getComponentDefinition(target.identity)
                 
                 self.__process_feature_matches(target_doc, target_definition, inline_matches, SBOL_ORIENTATION_INLINE)
-                self.__process_feature_matches(target_doc, target_definition, rc_matches, SBOL_ORIENTATION_REVERSE_COMPLEMENT,
-                                       len(target.nucleotides) + 1)
+                self.__process_feature_matches(target_doc, target_definition, rc_matches,
+                    SBOL_ORIENTATION_REVERSE_COMPLEMENT, len(target.nucleotides) + 1)
 
                 logging.info('Finished annotating %s\n', target.identity)
 
@@ -285,6 +296,10 @@ class FeaturePruner():
     def __init__(self, feature_library, roles=set()):
         self.feature_library = feature_library
         self.roles = roles
+
+    @classmethod
+    def __has_min_length(cls, feature, min_feature_length):
+        return len(feature.nucleotides) >= min_feature_length
 
     @classmethod
     def __is_covered(cls, anno, cover_annos, cover_offset):
@@ -321,7 +336,9 @@ class FeaturePruner():
         return ''
 
     @classmethod
-    def __select_annotations(cls, doc, target_definition, annos):
+    def __select_annotations(cls, doc, target_definition, annos, ask_user=True, canonical_library=None):
+        kept_indices = []
+
         feature_messages = []
 
         for i in range(0, len(annos)):
@@ -332,38 +349,56 @@ class FeaturePruner():
                     feature_ID = annos[i][4]
 
                 feature_role = cls.__get_common_role(annos[i][6])
+
+                if ask_user:
+                    if len(feature_role) > 0:
+                        feature_messages.append('{nx}: {fi} ({ro}) at [{st}, {en}]'.format(nx=str(i), fi=feature_ID,
+                            ro=feature_role, st=annos[i][0], en=annos[i][1]))
+                    else:
+                        feature_messages.append('{nx}: {fi} at [{st}, {en}]'.format(nx=str(i), fi=feature_ID,
+                            st=annos[i][0], en=annos[i][1]))
             else:
                 feature_identity = target_definition.components.get(annos[i][5]).definition
-                feature_definition = doc.getComponentDefinition(feature_identity)
-                
-                if feature_definition.name is None:
-                    feature_ID = feature_definition.displayId
-                else:
-                    feature_ID = feature_definition.name
 
-                feature_role = cls.__get_common_role(feature_definition.roles)
+                if canonical_library is not None and canonical_library.has_feature(feature_identity):
+                    kept_indices.append(i)
+                elif ask_user:
+                    feature_definition = doc.getComponentDefinition(feature_identity)
+                    
+                    if feature_definition.name is None:
+                        feature_ID = feature_definition.displayId
+                    else:
+                        feature_ID = feature_definition.name
 
-            if len(feature_role) > 0:
-                feature_messages.append('{nx}: {fi} ({ro}) at [{st}, {en}]'.format(nx=str(i), fi=feature_ID, 
-                    ro=feature_role, st=annos[i][0], en=annos[i][1]))
+                    feature_role = cls.__get_common_role(feature_definition.roles)
+
+                    if len(feature_role) > 0:
+                        feature_messages.append('{nx}: {fi} ({ro}) at [{st}, {en}]'.format(nx=str(i), fi=feature_ID,
+                            ro=feature_role, st=annos[i][0], en=annos[i][1]))
+                    else:
+                        feature_messages.append('{nx}: {fi} at [{st}, {en}]'.format(nx=str(i), fi=feature_ID,
+                            st=annos[i][0], en=annos[i][1]))
+
+        if ask_user:
+            if target_definition.name is None:
+                target_ID = target_definition.displayId
             else:
-                feature_messages.append('{nx}: {fi} at [{st}, {en}]'.format(nx=str(i), fi=feature_ID, st=annos[i][0], en=annos[i][1]))
+                target_ID = target_definition.name
 
-        if target_definition.name is None:
-            target_ID = target_definition.displayId
+            select_message = '\nThere appear to be redundant features in {pi}:\n{fm}\nPlease select which ones to remove if any (comma-separated list of indices, for example 0,2,5):\n'.format(fm='\n'.join(feature_messages), pi=target_ID)
+
+            selected_message = input(select_message)
+
+            try:
+                selected_indices = [int(si.strip()) for si in selected_message.split(',')]
+            except ValueError:
+                selected_indices = []
+
+            return set(selected_indices)
+        elif len(kept_indices) > 0:
+            return set(range(0, len(annos))).difference(set(kept_indices))
         else:
-            target_ID = target_definition.name
-
-        select_message = '\nThere appear to be redundant features in {pi}:\n{fm}\nPlease select which ones to remove if any (comma-separated list of indices, for example 0,2,5):\n'.format(fm='\n'.join(feature_messages), pi=target_ID)
-
-        selected_message = input(select_message)
-
-        try:
-            selected_indices = [int(si.strip()) for si in selected_message.split(',')]
-        except ValueError:
-            selected_indices = []
-
-        return set(selected_indices)
+            return set()
 
     @classmethod
     def __get_linked_definitions_identities(cls, doc, identity):
@@ -419,7 +454,7 @@ class FeaturePruner():
             else:
                 feature_ID = feature_definition.name
 
-            print('\nMerging {ai} and {fi}'.format(ai=anno_ID, fi=feature_ID))
+            print('Merging {ai} and {fi}'.format(ai=anno_ID, fi=feature_ID))
 
             seq_anno = target_definition.sequenceAnnotations.get(anno[2])
 
@@ -430,44 +465,48 @@ class FeaturePruner():
 
             logging.info('Merged %s at [%s, %s] and %s at [%s, %s] in %s', anno[2], anno[0], anno[1], feature_identity, sub_anno[0], sub_anno[1], target_definition.identity)
 
-    def prune(self, target_doc, targets, cover_offset):
+    def prune(self, target_doc, targets, cover_offset, min_target_length, ask_user=True, canonical_library=None):
         for target in targets:
-            target_definition = target_doc.getComponentDefinition(target.identity)
+            print('Pruning ' + target.identity)
 
-            cut_annos = [(sa.locations.getCut().at, sa.locations.getCut().at, sa.identity, sa.displayId, sa.name, sa.component, set(sa.roles)) for sa in target_definition.sequenceAnnotations if len(sa.locations) > 0 and sa.locations[0].getTypeURI() == SBOL_CUT]
-            annos = [(sa.locations.getRange().start, sa.locations.getRange().end, sa.identity, sa.displayId, sa.name, sa.component, set(sa.roles)) for sa in target_definition.sequenceAnnotations if len(sa.locations) > 0 and sa.locations[0].getTypeURI() == SBOL_RANGE]
-            
-            annos.extend(cut_annos)
+            if self.__has_min_length(target, min_target_length):
+                target_definition = target_doc.getComponentDefinition(target.identity)
 
-            if len(self.roles) > 0:
-                self.__filter_annotations(annos, target_definition)
+                cut_annos = [(sa.locations.getCut().at, sa.locations.getCut().at, sa.identity, sa.displayId, sa.name, sa.component, set(sa.roles)) for sa in target_definition.sequenceAnnotations if len(sa.locations) > 0 and sa.locations[0].getTypeURI() == SBOL_CUT]
+                annos = [(sa.locations.getRange().start, sa.locations.getRange().end, sa.identity, sa.displayId, sa.name, sa.component, set(sa.roles)) for sa in target_definition.sequenceAnnotations if len(sa.locations) > 0 and sa.locations[0].getTypeURI() == SBOL_RANGE]
+                
+                annos.extend(cut_annos)
 
-            annos.sort()
+                if len(self.roles) > 0:
+                    self.__filter_annotations(annos, target_definition)
 
-            grouped_annos = [[]]
+                annos.sort()
 
-            for anno in annos:
-                if len(grouped_annos) > 1 and self.__is_covered(anno, grouped_annos[-2], cover_offset):
-                    grouped_annos[-2].append(anno)
-                elif self.__is_covered(anno, grouped_annos[-1], cover_offset):
-                    grouped_annos[-1].append(anno)
-                else:
-                    grouped_annos.append([anno])
+                grouped_annos = [[]]
 
-            for anno_group in grouped_annos:
-                if len(anno_group) > 1:
-                    selected_indices = self.__select_annotations(target_doc, target_definition, anno_group)
+                for anno in annos:
+                    if len(grouped_annos) > 1 and self.__is_covered(anno, grouped_annos[-2], cover_offset):
+                        grouped_annos[-2].append(anno)
+                    elif self.__is_covered(anno, grouped_annos[-1], cover_offset):
+                        grouped_annos[-1].append(anno)
+                    else:
+                        grouped_annos.append([anno])
 
-                    self.__remove_annotations(selected_indices, anno_group, target_definition)
+                for anno_group in grouped_annos:
+                    if len(anno_group) > 1:
+                        selected_indices = self.__select_annotations(target_doc, target_definition, anno_group,
+                            ask_user, canonical_library)
 
-            for anno_group in grouped_annos:
-                if len(anno_group) == 2:
-                    if anno_group[0][5] is None and anno_group[1][5] is not None:
-                        self.__merge_annotations(anno_group[0], anno_group[1], target_definition)
-                    elif anno_group[0][5] is not None and anno_group[1][5] is None:
-                        self.__merge_annotations(anno_group[1], anno_group[0], target_definition)
-             
-            logging.info('Finished pruning %s\n', target.identity)
+                        self.__remove_annotations(selected_indices, anno_group, target_definition)
+
+                for anno_group in grouped_annos:
+                    if len(anno_group) == 2:
+                        if anno_group[0][5] is None and anno_group[1][5] is not None:
+                            self.__merge_annotations(anno_group[0], anno_group[1], target_definition)
+                        elif anno_group[0][5] is not None and anno_group[1][5] is None:
+                            self.__merge_annotations(anno_group[1], anno_group[0], target_definition)
+                 
+                logging.info('Finished pruning %s\n', target.identity)
 
         kept_identities = set()
 
@@ -533,19 +572,19 @@ def main(args=None):
         target_library = FeatureLibrary([target_doc], True)
         feature_annotater.annotate(target_doc, target_library.features, int(args.min_target_length))
 
-        feature_pruner.prune(target_doc, target_library.features, int(args.cover_offset))
+        feature_pruner.prune(target_doc, target_library.features, int(args.cover_offset), int(args.min_target_length))
 
         (target_file_base, file_extension) = os.path.splitext(args.target_files[i])
         output_file = '_'.join([target_file_base, 'annotated']) + file_extension
 
         if Config.getOption('validate') == True:
-            print('\nValidating and writing ' + output_file)
+            print('Validating and writing ' + output_file)
         else:
-            print('\nWriting ' + output_file)
+            print('Writing ' + output_file)
 
         target_doc.write(output_file)
 
-    print('\nFinished curating')
+    print('Finished curating')
 
 if __name__ == '__main__':
     main()
