@@ -216,12 +216,12 @@ class CircuitBuilder():
             features = target_library.get_features(min_target_length)
 
             for i in range(0, len(features)):
-                func_comp = circuit_definition.functionalComponents.create('construct_' + str(i))
+                func_comp = circuit_definition.functionalComponents.create('construct_' + str(i + 1))
 
                 func_comp.definition = features[i].identity
 
             for i in range(0, len(covered_circuits)):
-                sub_mod = circuit_definition.modules.create('sub_circuit_' + str(i))
+                sub_mod = circuit_definition.modules.create('sub_circuit_' + str(i + 1))
 
                 sub_mod.definition = covered_circuits[i].identity
 
@@ -243,9 +243,9 @@ def main(args=None):
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-n', '--namespace')
-    parser.add_argument('-i', '--circuit_IDs', nargs='+')
     parser.add_argument('-t', '--target_files', nargs='+')
-    parser.add_argument('-c', '--circuit_files', nargs='*', default=[])
+    parser.add_argument('-c', '--sub_circuit_files', nargs='+')
+    parser.add_argument('-i', '--circuit_IDs', nargs='*', default=[])
     parser.add_argument('-o', '--output_files', nargs='*', default=[])
     parser.add_argument('-m', '--min_target_length', nargs='?', default=2000)
     parser.add_argument('-l', '--curation_log', nargs='?', default='')
@@ -266,11 +266,14 @@ def main(args=None):
     Config.setOption('sbol_typed_uris', False)
 
     circuit_docs = []
-    for circuit_file in args.circuit_files:
+    for circuit_file in args.sub_circuit_files:
         circuit_docs.append(load_sbol(circuit_file))
     circuit_library = CircuitLibrary(circuit_docs)
 
     circuit_builder = CircuitBuilder(circuit_library)
+
+    circuit_memo = set()
+    circuit_index = 0
 
     for i in range (0, len(args.target_files)):
         target_doc = load_sbol(args.target_files[i])
@@ -280,7 +283,18 @@ def main(args=None):
         if i < len(args.circuit_IDs):
             circuit_ID = args.circuit_IDs[i]
         else:
-            circuit_ID = 'circuit_' + str(i)
+            (circuit_ID, file_extension) = os.path.splitext(os.path.basename(args.target_files[i]))
+
+            circuit_ID = circuit_ID + '_circuit'
+
+        unique_ID = circuit_ID
+
+        while unique_ID in circuit_memo:
+            circuit_index = circuit_index + 1
+
+            unique_ID = circuit_ID + str(circuit_index)
+        
+        circuit_memo.add(unique_ID)
 
         circuit_builder.build(circuit_ID, target_doc, target_library, args.min_target_length,
             args.version)

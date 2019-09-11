@@ -37,7 +37,7 @@ Argument | Short Arg | Type | Description | Example
 `--namespace` | `-n` | `String` | **Required**. Annotation namespace that you own or that you are reasonably certain is only used by you. | http://mynamespace.org
 `--target_files` | `-t` | `String` | **Required**. List of paths to SBOL files containing sequences to curate. | mytargets_1.xml mytargets_2.xml
 `--feature_files` | `-f` | `String` | **Optional**. List of paths to SBOL files containing sequence features with which to annotate. Default is an empty list. | myfeatures_1.xml myfeatures_2.xml
-`--output_files` | `-o` | `String` | **Optional**. List of paths to output annotated SBOL files. By default postfixes the target files with \"annotated\". | mytargets_1_annotated.xml mytargets_2_annotated.xml
+`--output_files` | `-o` | `String` | **Optional**. List of paths to output annotated SBOL files. By default uses the target file paths postfixed with \"annotated\". | mytargets_1_annotated.xml mytargets_2_annotated.xml
 `--version` | `-v` | `String` | **Optional**. Version given to annotated sequences. Default is 1. | 1
 `--curation_log` | `-l` | `String` | **Optional**. Path to log file to populate with curation history. Default is to not generate a log file. | mycuration.log
 `--min_target_length` | `-m` | `Integer` | **Optional**. Minimum length that a sequence must be to curate. Default is 2000 bp. | 2000
@@ -51,13 +51,13 @@ Argument | Short Arg | Type | Description | Example
 Argument | Short Arg | Type | Description | Example
 --- | --- | --- | --- | ---
 `--namespace` | `-n` | `String` | **Required**. Annotation namespace that you own or that you are reasonably certain is only used by you. | http://mynamespace.org
-`--circuit_IDs` | `-i` | `String` | **Required**. List of IDs given to the inferred genetic circuits. | circuit_1 circuit_2
-`--target_files` | `-t` | `String` | **Required**. List of paths to SBOL files containing DNA features from which to infer genetic circuits. | mytargets_1.xml mytargets_2.xml
-`--circuit_files` | `-c` | `String` | **Optional**. List of paths to SBOL files containing sub-circuits to use in inferring genetic circuits. Default is an empty list. | mycircuits_1.xml mycircuits_2.xml
-`--output_files` | `-o` | `String` | **Optional**. List of paths to output circuit SBOL files. By default postfixes the target files with \"annotated\". | mytargets_1_annotated.xml mytargets_2_annotated.xml
+`--target_files` | `-t` | `String` | **Required**. List of paths to SBOL files containing DNA features from which to infer genetic circuits. | mytargets_1_annotated.xml mytargets_2_annotated.xml
+`--sub_circuit_files` | `-c` | `String` | **Required**. List of paths to SBOL files containing sub-circuits to use in inferring genetic circuits. Default is an empty list. | subcircuits_1.xml subcircuits_2.xml
+`--circuit_IDs` | `-i` | `String` | **Optional**. List of IDs given to the inferred genetic circuits (one per target file). By default uses the names of the target files postfixed with \"circuit\". | mytargets_1_annotated_circuit mytargets_2_annotated_circuit
+`--output_files` | `-o` | `String` | **Optional**. List of paths to output circuit SBOL files. By default uses the target file paths postfixed with \"circuit\". | mytargets_1_annotated_circuit.xml mytargets_2_annotated_circuit.xml
 `--version` | `-v` | `String` | **Optional**. Version given to the inferred genetic circuits. Default is 1. | 1
 `--curation_log` | `-l` | `String` | **Optional**. Path to log file to populate with curation history. Default is to not generate a log file. | mycuration.log
-`--min_target_length` | `-m` | `Integer` | **Optional**. Minimum length that a DNA feature must be to include as a genetic device. Default is 2000 bp. | 2000
+`--min_target_length` | `-m` | `Integer` | **Optional**. Minimum length that a DNA feature must be to include it as a genetic device in the inferred circuit. Default is 2000 bp. | 2000
 `--validate` | `-x` | `Boolean` | **Optional**. If included, output SBOL files will be be validated. Default is to not validate output files. | -x
 
 
