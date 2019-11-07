@@ -166,7 +166,7 @@ class FeatureLibrary():
                 try:
                     sub_definition = source_doc.getComponentDefinition(sub_comp.definition)
 
-                    cls.__copy_component_definition(sub_definition, source_doc, sink_doc, is_recursive,
+                    cls.copy_component_definition(sub_definition, source_doc, sink_doc, is_recursive,
                         import_namespace, version)
                 except RuntimeError:
                     pass
@@ -457,17 +457,7 @@ class FeaturePruner():
         feature_definition = self.feature_library.get_definition(feature_identity)
 
         if not Feature.has_non_generic_role(anno[6]) or Feature.has_same_roles(anno[6], set(feature_definition.roles)):
-            if anno[4] == None:
-                anno_ID = anno[3]
-            else:
-                anno_ID = anno[4]
-
-            if feature_definition.name == None:
-                feature_ID = feature_definition.displayId
-            else:
-                feature_ID = feature_definition.name
-
-            print('Merging {ai} and {fi}'.format(ai=anno_ID, fi=feature_ID))
+            print('Merging {ai} and {fi}'.format(ai=anno[2], fi=feature_identity))
 
             seq_anno = target_definition.sequenceAnnotations.get(anno[2])
 
@@ -478,15 +468,33 @@ class FeaturePruner():
 
             logging.info('Merged %s at [%s, %s] and %s at [%s, %s] in %s', anno[2], anno[0], anno[1], feature_identity, sub_anno[0], sub_anno[1], target_definition.identity)
 
+    # @classmethod
+    # def __get_annotations(cls, doc, comp_definition):
+    #     cut_annos = [(sa.locations.getCut().at, sa.locations.getCut().at, sa.identity, sa.displayId, sa.name, sa.component, set(sa.roles)) for sa in comp_definition.sequenceAnnotations if len(sa.locations) == 1 and sa.locations[0].getTypeURI() == SBOL_CUT]
+    #     annos = [(sa.locations.getRange().start, sa.locations.getRange().end, sa.identity, sa.displayId, sa.name, sa.component, set(sa.roles)) for sa in comp_definition.sequenceAnnotations if len(sa.locations) == 1 and sa.locations[0].getTypeURI() == SBOL_RANGE]
+            
+    #     annos.extend(cut_annos)
+
+    #     for sub_comp in comp_definition.components:
+    #         try:
+    #             sub_definition = doc.getComponentDefinition(comp_definition.identity)
+    #         except RuntimeError:
+    #             sub_definition = None
+
+    #         if sub_definition is not None:
+    #             annos.extend(cls.__get_annotations(doc, sub_definition))
+
+    #     return annos
+
     def prune(self, target_doc, targets, cover_offset, min_target_length, ask_user=True, canonical_library=None):
         for target in targets:
-            print('Pruning ' + target.identity)
-
             if self.__has_min_length(target, min_target_length):
+                print('Pruning ' + target.identity)
+
                 target_definition = target_doc.getComponentDefinition(target.identity)
 
-                cut_annos = [(sa.locations.getCut().at, sa.locations.getCut().at, sa.identity, sa.displayId, sa.name, sa.component, set(sa.roles)) for sa in target_definition.sequenceAnnotations if len(sa.locations) > 0 and sa.locations[0].getTypeURI() == SBOL_CUT]
-                annos = [(sa.locations.getRange().start, sa.locations.getRange().end, sa.identity, sa.displayId, sa.name, sa.component, set(sa.roles)) for sa in target_definition.sequenceAnnotations if len(sa.locations) > 0 and sa.locations[0].getTypeURI() == SBOL_RANGE]
+                cut_annos = [(sa.locations.getCut().at, sa.locations.getCut().at, sa.identity, sa.displayId, sa.name, sa.component, set(sa.roles)) for sa in target_definition.sequenceAnnotations if len(sa.locations) == 1 and sa.locations[0].getTypeURI() == SBOL_CUT]
+                annos = [(sa.locations.getRange().start, sa.locations.getRange().end, sa.identity, sa.displayId, sa.name, sa.component, set(sa.roles)) for sa in target_definition.sequenceAnnotations if len(sa.locations) == 1 and sa.locations[0].getTypeURI() == SBOL_RANGE]
                 
                 annos.extend(cut_annos)
 
