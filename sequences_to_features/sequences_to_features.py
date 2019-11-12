@@ -171,6 +171,8 @@ class FeatureLibrary():
                 except RuntimeError:
                     pass
 
+        definition_copy.wasGeneratedBy = []
+
         return definition_copy
 
 class FeatureAnnotater():
@@ -486,7 +488,17 @@ class FeaturePruner():
 
     #     return annos
 
-    def prune(self, target_doc, targets, cover_offset, min_target_length, ask_user=True, canonical_library=None):
+    @classmethod
+    def __get_flat_annotation_indices(self, anno_group):
+        flat_indices = []
+
+        for i in range(0, len(anno_group)):
+            if anno_group[i][5] is None:
+                flat_indices.append(i)
+
+        return flat_indices
+
+    def prune(self, target_doc, targets, cover_offset, min_target_length, ask_user=True, canonical_library=None, delete_flat=False):
         for target in targets:
             if self.__has_min_length(target, min_target_length):
                 print('Pruning ' + target.identity)
@@ -512,6 +524,12 @@ class FeaturePruner():
                         grouped_annos[-1].append(anno)
                     else:
                         grouped_annos.append([anno])
+
+                if delete_flat:
+                    for anno_group in grouped_annos:
+                        flat_indices = self.__get_flat_annotation_indices(anno_group)
+
+                        self.__remove_annotations(flat_indices, anno_group, target_definition)
 
                 for anno_group in grouped_annos:
                     if len(anno_group) > 1:
@@ -560,6 +578,7 @@ def main(args=None):
     parser.add_argument('-r', '--roles', nargs='*', default=[])
     parser.add_argument('-v', '--version', nargs='?', default='1')
     parser.add_argument('-x', '--validate', action='store_true')
+    parser.add_argument('-d', '--delete_flat_annotations', action='store_true')
     # parser.add_argument('-s', '--sbh_URL', nargs='?', default=None)
     # parser.add_argument('-u', '--username', nargs='?', default=None)
     # parser.add_argument('-p', '--password', nargs='?', default=None)
@@ -595,7 +614,8 @@ def main(args=None):
         target_library = FeatureLibrary([target_doc], True, args.version)
         feature_annotater.annotate(target_doc, target_library.features, int(args.min_target_length))
 
-        feature_pruner.prune(target_doc, target_library.features, int(args.cover_offset), int(args.min_target_length))
+        feature_pruner.prune(target_doc, target_library.features, int(args.cover_offset), int(args.min_target_length),
+            delete_flat=args.delete_flat_annotations)
 
         if i < len(args.output_files):
             output_file = args.output_files[i]
