@@ -268,10 +268,16 @@ class CircuitBuilder():
                 target_doc.addModuleDefinition(circuit_definition)
 
                 logging.info('Finished building %s', circuit_definition.identity)
+
+                return True
             else:
-                logging.warning('Failed to build %s, no sub-circuits found for constructs', circuit_definition.identity)
+                logging.error('Failed to build %s, no sub-circuits found for constructs', circuit_definition.identity)
+
+                return False
         else:
-            logging.warning('Failed to build %s, no constructs found with minimum length %s', circuit_definition.identity, str(min_target_length))
+            logging.error('Failed to build %s, no constructs found with minimum length %s', circuit_definition.identity, str(min_target_length))
+
+            return False
 
 def main(args=None):
     if args is None:
@@ -341,23 +347,24 @@ def main(args=None):
         
         circuit_memo.add(unique_ID)
 
-        circuit_builder.build(circuit_ID, target_doc, target_library, int(args.min_target_length),
+        build_success = circuit_builder.build(circuit_ID, target_doc, target_library, int(args.min_target_length),
             args.version)
 
-        if i < len(args.output_files):
-            output_file = args.output_files[i]
-        else:
-            (target_file_base, file_extension) = os.path.splitext(args.target_files[i])
-            output_file = target_file_base + '_circuit' + file_extension
+        if build_success:
+            if i < len(args.output_files):
+                output_file = args.output_files[i]
+            else:
+                (target_file_base, file_extension) = os.path.splitext(args.target_files[i])
+                output_file = target_file_base + '_circuit' + file_extension
 
-        if Config.getOption('validate') == True:
-            logging.info('Validating and writing %s', output_file)
-        else:
-            logging.info('Writing %s', output_file)
+            if Config.getOption('validate') == True:
+                logging.info('Validating and writing %s', output_file)
+            else:
+                logging.info('Writing %s', output_file)
 
-        target_doc.write(output_file)
+            target_doc.write(output_file)
 
-        logging.info('Finished writing %s', output_file)
+            logging.info('Finished writing %s', output_file)
 
     logging.info('Finished curating')
 
