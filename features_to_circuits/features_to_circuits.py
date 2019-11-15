@@ -10,7 +10,7 @@ from sequences_to_features import Feature
 from sequences_to_features import FeatureLibrary
 
 def load_sbol(sbol_file):
-    print('Loading ' + sbol_file)
+    logging.info('Loading %s', sbol_file)
 
     doc = Document()
     doc.read(sbol_file)
@@ -18,6 +18,8 @@ def load_sbol(sbol_file):
     doc.addNamespace('http://purl.org/dc/elements/1.1/', 'dc')
     doc.addNamespace('http://wiki.synbiohub.org/wiki/Terms/igem#', 'igem')
     doc.addNamespace('http://wiki.synbiohub.org/wiki/Terms/synbiohub#', 'sbh')
+
+    logging.info('Finished loading %s', sbol_file)
 
     return doc
 
@@ -51,7 +53,7 @@ class CircuitLibrary():
         self.__dna_to_dna_repression = {}
         self.__dna_to_dna_activation = {}
 
-        print('Loading circuits')
+        logging.info('Loading circuits')
 
         for i in range(0, len(self.docs)):
             for mod_definition in self.docs[i].moduleDefinitions:
@@ -117,6 +119,8 @@ class CircuitLibrary():
 
                     self.__circuit_map[mod_definition.identity] = i
 
+        logging.info('Finished loading circuits')
+
     @classmethod
     def __extract_features(cls, doc, mod_definition):
         features = []
@@ -128,12 +132,12 @@ class CircuitLibrary():
                 comp_definition = None
 
             if comp_definition is None:
-                logging.warning('%s was not loaded since its component %s was not found', mod_definition.identity, func_comp.definition)
+                logging.warning('%s was not loaded since its sub-ComponentDefinition %s was not found', mod_definition.identity, func_comp.definition)
 
                 return []
             elif BIOPAX_DNA in comp_definition.types:
                 features.append(Feature('', comp_definition.identity, set(comp_definition.roles),
-                    comp_definition.wasDerivedFrom))
+                    parent_identities=comp_definition.wasDerivedFrom))
 
         for sub_mod in mod_definition.modules:
             try:
@@ -145,7 +149,7 @@ class CircuitLibrary():
                 sub_features = cls.__extract_features(doc, sub_definition)
 
                 if len(sub_features) == 0:
-                    logging.warning('%s was not loaded since its sub-module %s is incomplete or contains no features',
+                    logging.warning('%s was not loaded since its sub-ModuleDefinition %s is incomplete or contains no DNA features',
                         mod_definition.identity, sub_mod.definition)
 
                     return []
@@ -202,40 +206,72 @@ class CircuitBuilder():
         self.circuit_library = circuit_library
 
     def build(self, circuit_id, target_doc, target_library, min_target_length, version='1'):
-        covered_circuits = []
-
-        for circuit in self.circuit_library.circuits:
-            if circuit.is_covered(target_library):
-                covered_circuits.append(circuit)
-
         circuit_definition = ModuleDefinition(circuit_id, version)
 
-        if len(covered_circuits) > 0:
-            print('Building ' + circuit_definition.identity)
+        logging.info('Building %s', circuit_definition.identity)
 
-            features = target_library.get_features(min_target_length)
+        constructs = target_library.get_features(min_target_length)
 
-            for i in range(0, len(features)):
-                func_comp = circuit_definition.functionalComponents.create('construct_' + str(i + 1))
+        if len(constructs) > 0:
+            construct_feature_identities = set()
 
-                func_comp.definition = features[i].identity
+            for construct in constructs:
+                for sub_identity in construct.sub_identities:
+                    construct_feature_identities.add(sub_identity)
 
-            for i in range(0, len(covered_circuits)):
-                sub_mod = circuit_definition.modules.create('sub_circuit_' + str(i + 1))
+            circuit_feature_identities = set()
 
-                sub_mod.definition = covered_circuits[i].identity
+            covered_circuits = []
 
-                sub_circuit_doc = self.circuit_library.get_document(covered_circuits[i].identity)
+            for circuit in self.circuit_library.circuits:
+                covered_features = []
 
-                sub_circuit_definition = self.circuit_library.get_definition(covered_circuits[i].identity)
+                for feature in circuit.features:
+                    if feature.identity in construct_feature_identities:
+                        covered_features.append(feature)
 
-                CircuitLibrary.copy_module_definition(sub_circuit_definition, sub_circuit_doc, target_doc)
+                if len(circuit.features) == len(covered_features):
+                    covered_circuits.append(circuit)
 
-            target_doc.addModuleDefinition(circuit_definition)
+                    for covered_feature in covered_features:
+                        circuit_feature_identities.add(covered_feature.identity)
 
-            logging.info('Finished building %s.\n', circuit_definition.identity)
+            if len(covered_circuits) > 0:
+                covered_constructs = []
+
+                for construct in constructs:
+                    covered_count = 0
+
+                    for sub_identity in construct.sub_identities:
+                        if sub_identity in circuit_feature_identities:
+                            covered_count = covered_count + 1
+
+                    if covered_count > 0:
+                        covered_constructs.append(construct)
+            
+                for i in range(0, len(covered_constructs)):
+                    func_comp = circuit_definition.functionalComponents.create('construct_' + str(i + 1))
+
+                    func_comp.definition = covered_constructs[i].identity
+
+                for i in range(0, len(covered_circuits)):
+                    sub_mod = circuit_definition.modules.create('sub_circuit_' + str(i + 1))
+
+                    sub_mod.definition = covered_circuits[i].identity
+
+                    sub_circuit_doc = self.circuit_library.get_document(covered_circuits[i].identity)
+
+                    sub_circuit_definition = self.circuit_library.get_definition(covered_circuits[i].identity)
+
+                    CircuitLibrary.copy_module_definition(sub_circuit_definition, sub_circuit_doc, target_doc)
+
+                target_doc.addModuleDefinition(circuit_definition)
+
+                logging.info('Finished building %s', circuit_definition.identity)
+            else:
+                logging.warning('Failed to build %s, no sub-circuits found for constructs', circuit_definition.identity)
         else:
-            logging.warning('Failed to build %s.\n', circuit_definition.identity)
+            logging.warning('Failed to build %s, no constructs found with minimum length %s', circuit_definition.identity, str(min_target_length))
 
 def main(args=None):
     if args is None:
@@ -254,12 +290,15 @@ def main(args=None):
     
     args = parser.parse_args(args)
 
-    if len(args.curation_log) > 0:
-        for handler in logging.root.handlers[:]:
-            logging.root.removeHandler(handler)
+    
+    for handler in logging.root.handlers[:]:
+        logging.root.removeHandler(handler)
 
-        logging.basicConfig(level=logging.INFO, filename=args.curation_log, filemode='w',
-                            format='%(levelname)s : %(message)s')
+    if len(args.curation_log) > 0:
+        logging.basicConfig(level=logging.DEBUG, filename=args.curation_log, filemode='w',
+                                format='%(levelname)s : %(message)s')
+    else:
+        logging.basicConfig(level=logging.DEBUG, format='%(levelname)s : %(message)s')
 
     setHomespace(args.namespace)
     Config.setOption('validate', args.validate)
@@ -296,7 +335,7 @@ def main(args=None):
         
         circuit_memo.add(unique_ID)
 
-        circuit_builder.build(circuit_ID, target_doc, target_library, args.min_target_length,
+        circuit_builder.build(circuit_ID, target_doc, target_library, int(args.min_target_length),
             args.version)
 
         if i < len(args.output_files):
@@ -306,13 +345,15 @@ def main(args=None):
             output_file = target_file_base + '_circuit' + file_extension
 
         if Config.getOption('validate') == True:
-            print('Validating and writing ' + output_file)
+            logging.info('Validating and writing %s', output_file)
         else:
-            print('Writing ' + output_file)
+            logging.info('Writing %s', output_file)
 
         target_doc.write(output_file)
 
-    print('Finished curating.')
+        logging.info('Finished writing %s', output_file)
+
+    logging.info('Finished curating')
 
 if __name__ == '__main__':
     main()

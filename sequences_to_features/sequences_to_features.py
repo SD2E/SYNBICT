@@ -29,9 +29,10 @@ class Feature():
         SO_SEQUENCE_FEATURE
     }
 
-    def __init__(self, nucleotides, identity, roles, parent_identities=[]):
+    def __init__(self, nucleotides, identity, roles, sub_identities=[], parent_identities=[]):
         self.nucleotides = nucleotides
         self.identity = identity
+        self.sub_identities = sub_identities
         self.parent_identities = parent_identities
         self.roles = roles
 
@@ -69,14 +70,19 @@ class FeatureLibrary():
                 if BIOPAX_DNA in comp_definition.types:
                     dna_seqs = self.get_DNA_sequences(comp_definition, self.docs[i])
 
+                    sub_identities = []
+
+                    for sub_comp in comp_definition.components:
+                        sub_identities.append(sub_comp.definition)
+
                     if len(dna_seqs) > 0:
                         self.features.append(Feature(dna_seqs[0].elements, comp_definition.identity, set(comp_definition.roles),
-                            comp_definition.wasDerivedFrom))
+                            sub_identities, comp_definition.wasDerivedFrom))
 
                         self.__feature_map[comp_definition.identity] = i
                     elif not require_sequence:
                         self.features.append(Feature('', comp_definition.identity, set(comp_definition.roles),
-                            comp_definition.wasDerivedFrom))
+                            sub_identities, comp_definition.wasDerivedFrom))
 
                         self.__feature_map[comp_definition.identity] = i
                     else:
