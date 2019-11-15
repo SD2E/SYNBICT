@@ -284,21 +284,27 @@ def main(args=None):
     parser.add_argument('-i', '--circuit_IDs', nargs='*', default=[])
     parser.add_argument('-o', '--output_files', nargs='*', default=[])
     parser.add_argument('-m', '--min_target_length', nargs='?', default=2000)
-    parser.add_argument('-l', '--curation_log', nargs='?', default='')
+    parser.add_argument('-l', '--log_file', nargs='?', default='')
     parser.add_argument('-v', '--version', nargs='?', default='1')
     parser.add_argument('-x', '--validate', action='store_true')
     
     args = parser.parse_args(args)
 
-    
-    for handler in logging.root.handlers[:]:
-        logging.root.removeHandler(handler)
+    if len(args.log_file) > 0:
+        logging.basicConfig(level=logging.DEBUG,
+                        format='%(asctime)s ; %(levelname)s ; %(message)s',
+                        datefmt='%m-%d-%y %H:%M',
+                        filename=args.log_file,
+                        filemode='w')
 
-    if len(args.curation_log) > 0:
-        logging.basicConfig(level=logging.DEBUG, filename=args.curation_log, filemode='w',
-                                format='%(levelname)s : %(message)s')
-    else:
-        logging.basicConfig(level=logging.DEBUG, format='%(levelname)s : %(message)s')
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.INFO)
+
+    console_formatter = logging.Formatter('%(levelname)s ; %(message)s')
+    
+    console_handler.setFormatter(console_formatter)
+    
+    logging.getLogger('').addHandler(console_handler)
 
     setHomespace(args.namespace)
     Config.setOption('validate', args.validate)

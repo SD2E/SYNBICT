@@ -39,7 +39,7 @@ Argument | Short Arg | Type | Description | Example
 `--feature_files` | `-f` | `String` | **Optional**. List of paths to SBOL files containing sequence features with which to annotate. Default is an empty list. | myfeatures_1.xml myfeatures_2.xml
 `--output_files` | `-o` | `String` | **Optional**. List of paths to output annotated SBOL files. By default uses the target file paths postfixed with \"annotated\". | mytargets_1_annotated.xml mytargets_2_annotated.xml
 `--version` | `-v` | `String` | **Optional**. Version given to annotated sequences. Default is 1. | 1
-`--curation_log` | `-l` | `String` | **Optional**. Path to log file to populate with curation history. Default is to not generate a log file. | mycuration.log
+`--curation_log` | `-l` | `String` | **Optional**. Path to log file to populate with curation history. Default is to not generate a log file and log to the console instead. | mycuration.log
 `--min_target_length` | `-m` | `Integer` | **Optional**. Minimum length that a sequence must be to curate. Default is 2000 bp. | 2000
 `--min_feature_length` | `-M` | `Integer` | **Optional**. Minimum length that a sequence feature must be to use for annotation. Default is 40 bp. | 40
 `--cover_offset` | `-c` | `Integer` | **Optional**. Maximum distance between the start/end of one sequence feature and the start/end of another sequence feature for pruning to initiate. Default is 14 bp. | 14
@@ -57,7 +57,7 @@ Argument | Short Arg | Type | Description | Example
 `--circuit_IDs` | `-i` | `String` | **Optional**. List of IDs given to the inferred genetic circuits (one per target file). By default uses the names of the target files postfixed with \"circuit\". | mytargets_1_annotated_circuit mytargets_2_annotated_circuit
 `--output_files` | `-o` | `String` | **Optional**. List of paths to output circuit SBOL files. By default uses the target file paths postfixed with \"circuit\". | mytargets_1_annotated_circuit.xml mytargets_2_annotated_circuit.xml
 `--version` | `-v` | `String` | **Optional**. Version given to the inferred genetic circuits. Default is 1. | 1
-`--curation_log` | `-l` | `String` | **Optional**. Path to log file to populate with curation history. Default is to not generate a log file. | mycuration.log
+`--log_file` | `-l` | `String` | **Optional**. Path to log file to populate with more verbose curation history. Default is to not generate a log file. | mycuration.log
 `--min_target_length` | `-m` | `Integer` | **Optional**. Minimum length that a DNA feature must be to include it as a genetic device in the inferred circuit. Default is 2000 bp. | 2000
 `--validate` | `-x` | `Boolean` | **Optional**. If included, output SBOL files will be be validated. Default is to not validate output files. | -x
 
