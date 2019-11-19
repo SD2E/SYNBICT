@@ -8,7 +8,7 @@ from sbol import *
 from flashtext import KeywordProcessor
 
 def load_sbol(sbol_file):
-    print('Loading ' + sbol_file)
+    logging.info('Loading %s', sbol_file)
 
     doc = Document()
     doc.read(sbol_file)
@@ -61,9 +61,9 @@ class FeatureLibrary():
         self.__feature_map = {}
 
         if import_namespace:
-            print('Loading and copying features')
+            logging.info('Loading and copying features')
         else:
-            print('Loading features')
+            logging.info('Loading features')
 
         for i in range(0, len(self.docs)):
             for comp_definition in self.docs[i].componentDefinitions:
@@ -285,12 +285,14 @@ class FeatureAnnotater():
                 except RuntimeError:
                     pass
 
-                logging.info('Annotated %s at [%s, %s] in %s', feature_definition.identity, start, end, target_definition.identity)
+                logging.debug('Annotated %s at [%s, %s] in %s', feature_definition.identity, start, end, target_definition.identity)
 
     def annotate(self, target_doc, targets, min_target_length):
+        has_annotated = False
+
         for target in targets:
             if self.__has_min_length(target, min_target_length):
-                print('Annotating ' + target.identity)
+                logging.info('Annotating %s', target.identity)
 
                 inline_elements = ' '.join(target.nucleotides)
                 rc_elements = ' '.join(target.reverse_complement_nucleotides())
@@ -304,7 +306,11 @@ class FeatureAnnotater():
                 self.__process_feature_matches(target_doc, target_definition, rc_matches,
                     SBOL_ORIENTATION_REVERSE_COMPLEMENT, len(target.nucleotides) + 1)
 
-                logging.info('Finished annotating %s\n', target.identity)
+                has_annotated = True
+
+                logging.info('Finished annotating %s', target.identity)
+
+        return has_annotated
 
 class FeaturePruner():
 
@@ -344,7 +350,7 @@ class FeaturePruner():
                 if annos[i][5] is not None:
                     target_definition.components.remove(annos[i][5])
 
-                logging.info('Removed %s at [%s, %s] in %s', feature_identity, annos[i][0], annos[i][1], target_definition.identity)
+                logging.debug('Removed %s at [%s, %s] in %s', feature_identity, annos[i][0], annos[i][1], target_definition.identity)
 
                 del annos[i]
 
@@ -406,7 +412,7 @@ class FeaturePruner():
             else:
                 target_ID = target_definition.name
 
-            select_message = '\nThere appear to be redundant features in {pi}:\n{fm}\nPlease select which ones to remove if any (comma-separated list of indices, for example 0,2,5):\n'.format(fm='\n'.join(feature_messages), pi=target_ID)
+            select_message = 'There appear to be redundant features in {pi}:\n{fm}\nPlease select which ones to remove if any (comma-separated list of indices, for example 0,2,5):\n'.format(fm='\n'.join(feature_messages), pi=target_ID)
 
             selected_message = input(select_message)
 
@@ -455,7 +461,7 @@ class FeaturePruner():
                 if annos[i][5] is not None:
                     target_definition.components.remove(annos[i][5])
 
-                logging.info('Removed %s at [%s, %s] in %s', feature_identity, annos[i][0], annos[i][1], target_definition.identity)
+                logging.debug('Removed %s at [%s, %s] in %s', feature_identity, annos[i][0], annos[i][1], target_definition.identity)
 
                 del annos[i]
 
@@ -465,8 +471,6 @@ class FeaturePruner():
         feature_definition = self.feature_library.get_definition(feature_identity)
 
         if not Feature.has_non_generic_role(anno[6]) or Feature.has_same_roles(anno[6], set(feature_definition.roles)):
-            print('Merging {ai} and {fi}'.format(ai=anno[2], fi=feature_identity))
-
             seq_anno = target_definition.sequenceAnnotations.get(anno[2])
 
             seq_anno.roles = []
@@ -474,7 +478,7 @@ class FeaturePruner():
 
             target_definition.sequenceAnnotations.remove(sub_anno[2])
 
-            logging.info('Merged %s at [%s, %s] and %s at [%s, %s] in %s', anno[2], anno[0], anno[1], feature_identity, sub_anno[0], sub_anno[1], target_definition.identity)
+            logging.debug('Merged %s at [%s, %s] and %s at [%s, %s] in %s', anno[2], anno[0], anno[1], feature_identity, sub_anno[0], sub_anno[1], target_definition.identity)
 
     # @classmethod
     # def __get_annotations(cls, doc, comp_definition):
@@ -507,7 +511,7 @@ class FeaturePruner():
     def prune(self, target_doc, targets, cover_offset, min_target_length, ask_user=True, canonical_library=None, delete_flat=False):
         for target in targets:
             if self.__has_min_length(target, min_target_length):
-                print('Pruning ' + target.identity)
+                logging.info('Pruning %s', target.identity)
 
                 target_definition = target_doc.getComponentDefinition(target.identity)
 
@@ -551,7 +555,7 @@ class FeaturePruner():
                         elif anno_group[0][5] is not None and anno_group[1][5] is None:
                             self.__merge_annotations(anno_group[1], anno_group[0], target_definition)
                  
-                logging.info('Finished pruning %s\n', target.identity)
+                logging.info('Finished pruning %s', target.identity)
 
         kept_identities = set()
 
@@ -577,7 +581,7 @@ def main(args=None):
     parser.add_argument('-t', '--target_files', nargs='+')
     parser.add_argument('-f', '--feature_files', nargs='*', default=[])
     parser.add_argument('-o', '--output_files', nargs='*', default=[])
-    parser.add_argument('-l', '--curation_log', nargs='?', default='')
+    parser.add_argument('-l', '--log_file', nargs='?', default='')
     parser.add_argument('-m', '--min_target_length', nargs='?', default=2000)
     parser.add_argument('-M', '--min_feature_length', nargs='?', default=40)
     parser.add_argument('-c', '--cover_offset', nargs='?', default=14)
@@ -594,12 +598,21 @@ def main(args=None):
     
     args = parser.parse_args(args)
 
-    if len(args.curation_log) > 0:
-        for handler in logging.root.handlers[:]:
-            logging.root.removeHandler(handler)
+    if len(args.log_file) > 0:
+        logging.basicConfig(level=logging.DEBUG,
+                        format='%(asctime)s ; %(levelname)s ; %(message)s',
+                        datefmt='%m-%d-%y %H:%M',
+                        filename=args.log_file,
+                        filemode='w')
 
-        logging.basicConfig(level=logging.INFO, filename=args.curation_log, filemode='w',
-                            format='%(levelname)s : %(message)s')
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.INFO)
+
+    console_formatter = logging.Formatter('%(levelname)s ; %(message)s')
+    
+    console_handler.setFormatter(console_formatter)
+    
+    logging.getLogger('').addHandler(console_handler)
 
     setHomespace(args.namespace)
     Config.setOption('validate', args.validate)
@@ -618,25 +631,29 @@ def main(args=None):
         target_doc = load_sbol(args.target_files[i])
         
         target_library = FeatureLibrary([target_doc], True, args.version)
-        feature_annotater.annotate(target_doc, target_library.features, int(args.min_target_length))
+        has_annotated = feature_annotater.annotate(target_doc, target_library.features, int(args.min_target_length))
 
-        feature_pruner.prune(target_doc, target_library.features, int(args.cover_offset), int(args.min_target_length),
-            delete_flat=args.delete_flat_annotations)
+        if has_annotated:
+            feature_pruner.prune(target_doc, target_library.features, int(args.cover_offset), int(args.min_target_length),
+                delete_flat=args.delete_flat_annotations)
 
-        if i < len(args.output_files):
-            output_file = args.output_files[i]
+            if i < len(args.output_files):
+                output_file = args.output_files[i]
+            else:
+                (target_file_base, file_extension) = os.path.splitext(args.target_files[i])
+                output_file = target_file_base + '_annotated' + file_extension
+
+            if Config.getOption('validate') == True:
+                logging.info('Validating and writing %s', output_file)
+            else:
+                logging.info('Writing %s', output_file)
+
+            target_doc.write(output_file)
         else:
-            (target_file_base, file_extension) = os.path.splitext(args.target_files[i])
-            output_file = target_file_base + '_annotated' + file_extension
+            logging.error('Failed to annotate %s, no constructs found with minimum length %s', args.target_files[i],
+                args.min_target_length)
 
-        if Config.getOption('validate') == True:
-            print('Validating and writing ' + output_file)
-        else:
-            print('Writing ' + output_file)
-
-        target_doc.write(output_file)
-
-    print('Finished curating')
+    logging.info('Finished curating')
 
 if __name__ == '__main__':
     main()

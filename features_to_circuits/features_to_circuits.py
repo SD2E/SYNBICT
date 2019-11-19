@@ -248,6 +248,8 @@ class CircuitBuilder():
 
                     if covered_count > 0:
                         covered_constructs.append(construct)
+                    else:
+                        logging.warning('No sub-circuits found for construct %s', construct.identity)
             
                 for i in range(0, len(covered_constructs)):
                     func_comp = circuit_definition.functionalComponents.create('construct_' + str(i + 1))
