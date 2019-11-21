@@ -137,7 +137,7 @@ class CircuitLibrary():
                 return []
             elif BIOPAX_DNA in comp_definition.types:
                 features.append(Feature('', comp_definition.identity, set(comp_definition.roles),
-                    parent_identities=comp_definition.wasDerivedFrom))
+                    comp_definition.wasDerivedFrom))
 
         for sub_mod in mod_definition.modules:
             try:
@@ -180,37 +180,33 @@ class CircuitLibrary():
             return set()
 
     @classmethod
-    def copy_module_definition(cls, mod_definition, source_doc, sink_doc, is_recursive=True):
-        definition_copy = mod_definition.copy(sink_doc)
+    def copy_module_definition(cls, mod_definition, source_doc, sink_doc):
+        try:
+            return sink_doc.getComponentDefinition(mod_definition.identity)
+        except RuntimeError:
+            definition_copy = mod_definition.copy(sink_doc)
 
-        if is_recursive:
-            for sub_mod in mod_definition.modules:
-                try:
-                    sub_mod_definition = source_doc.getModuleDefinition(sub_mod.definition)
+        for sub_mod in mod_definition.modules:
+            sub_mod_definition = source_doc.getModuleDefinition(sub_mod.definition)
 
-                    cls.copy_module_definition(sub_mod_definition, source_doc, sink_doc)
-                except RuntimeError:
-                    pass
+            cls.copy_module_definition(sub_mod_definition, source_doc, sink_doc)
 
-            for func_comp in mod_definition.functionalComponents:
-                try:
-                    sub_comp_definition = source_doc.getComponentDefinition(func_comp.definition)
+        for func_comp in mod_definition.functionalComponents:
+            sub_comp_definition = source_doc.getComponentDefinition(func_comp.definition)
 
-                    FeatureLibrary.copy_component_definition(sub_comp_definition, source_doc, sink_doc)
-                except RuntimeError:
-                    pass
+            FeatureLibrary.copy_component_definition(sub_comp_definition, source_doc, sink_doc)
+
+        return definition_copy
 
 class CircuitBuilder():
 
     def __init__(self, circuit_library):
         self.circuit_library = circuit_library
 
-    def build(self, circuit_id, target_doc, target_library, min_target_length, version='1'):
+    def build(self, circuit_id, target_doc, constructs, version='1'):
         circuit_definition = ModuleDefinition(circuit_id, version)
 
         logging.info('Building %s', circuit_definition.identity)
-
-        constructs = target_library.get_features(min_target_length)
 
         if len(constructs) > 0:
             construct_feature_identities = set()
@@ -331,7 +327,7 @@ def main(args=None):
     for i in range (0, len(args.target_files)):
         target_doc = load_sbol(args.target_files[i])
         
-        target_library = FeatureLibrary([target_doc], require_sequence=False)
+        target_library = FeatureLibrary([target_doc], False)
 
         if i < len(args.circuit_IDs):
             circuit_ID = args.circuit_IDs[i]
@@ -349,7 +345,7 @@ def main(args=None):
         
         circuit_memo.add(unique_ID)
 
-        build_success = circuit_builder.build(circuit_ID, target_doc, target_library, int(args.min_target_length),
+        build_success = circuit_builder.build(circuit_ID, target_doc, target_library.get_features(int(args.min_target_length), True),
             args.version)
 
         if build_success:
