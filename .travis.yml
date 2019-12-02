@@ -1,9 +1,7 @@
 language: python
 python:
-  - 3.6
-cache: pip
+  - "3.6"
 install:
-  - pip install -r put_requirements_here
+  - python setup.py install
 script:
-  - python3 ./tests/test_fails_because_it_doesnt_exist.py
-
+  - python -m unittest discover test
