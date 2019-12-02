@@ -36,7 +36,8 @@ class CurationTests(unittest.TestCase):
         circuit_ID = 'nand_circuit'
 
         circuit_builder = CircuitBuilder(circuit_library)
-        circuit_builder.build(circuit_ID, target_doc, target_device_library, MIN_TARGET_LENGTH)
+        circuit_builder.build(circuit_ID, target_doc,
+            target_device_library.get_features(MIN_TARGET_LENGTH, True), VERSION)
 
         nand_circuit = target_doc.getModuleDefinition('/'.join([HOMESPACE, circuit_ID]))
 
