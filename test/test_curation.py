@@ -22,10 +22,10 @@ class CurationTests(unittest.TestCase):
         feature_library = FeatureLibrary([cello_doc])
 
         target_doc = load_sbol(os.path.join(__location__, 'genetic_nand.xml'))
-        target_construct_library = FeatureLibrary([target_doc], True, VERSION)
+        target_construct_library = FeatureLibrary([target_doc], True)
 
         feature_annotater = FeatureAnnotater(feature_library, 40)
-        feature_annotater.annotate(target_doc, target_construct_library.features, MIN_TARGET_LENGTH)
+        feature_annotater.annotate(target_doc, target_construct_library.features, MIN_TARGET_LENGTH, VERSION)
 
         feature_pruner = FeaturePruner(feature_library)
         feature_pruner.prune(target_doc, target_construct_library.features, 14, MIN_TARGET_LENGTH, False, feature_library)
