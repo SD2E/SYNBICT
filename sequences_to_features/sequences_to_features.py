@@ -281,6 +281,8 @@ class FeatureAnnotater():
                 sub_comp.name = child_definition.name
                 sub_comp.definition = child_definition.identity
 
+                sub_comp.roleIntegration = None
+
                 i = -1
 
         return sub_comp
@@ -444,7 +446,14 @@ class FeaturePruner():
                 feature_role = cls.__get_common_role(annos[i][6])
 
                 if ask_user:
-                    if len(feature_role) > 0:
+                    if annos[i][7] is not None and len(annos[i][7]) > 0:
+                        if len(feature_role) > 0:
+                            feature_messages.append('{nx}: {id} ({fi}, {ro}) at [{st}, {en}]. {de}'.format(nx=str(i), id=annos[i][2],
+                                fi=feature_ID, ro=feature_role, st=annos[i][0], en=annos[i][1], de=annos[i][7]))
+                        else:
+                            feature_messages.append('{nx}: {id} ({fi}) at [{st}, {en}]. {de}'.format(nx=str(i), id=annos[i][2],
+                                fi=feature_ID, st=annos[i][0], en=annos[i][1], de=annos[i][7]))
+                    elif len(feature_role) > 0:
                         feature_messages.append('{nx}: {id} ({fi}, {ro}) at [{st}, {en}]'.format(nx=str(i), id=annos[i][2],
                             fi=feature_ID, ro=feature_role, st=annos[i][0], en=annos[i][1]))
                     else:
@@ -465,7 +474,16 @@ class FeaturePruner():
 
                     feature_role = cls.__get_common_role(feature_definition.roles)
 
-                    if len(feature_role) > 0:
+                    feature_description = feature_definition.description
+
+                    if feature_description is not None and len(feature_description) > 0:
+                        if len(feature_role) > 0:
+                            feature_messages.append('{nx}: {id} ({fi}, {ro}) at [{st}, {en}]. {de}'.format(nx=str(i), id=feature_identity,
+                                fi=feature_ID, ro=feature_role, st=annos[i][0], en=annos[i][1], de=feature_description))
+                        else:
+                            feature_messages.append('{nx}: {id} ({fi}) at [{st}, {en}]. {de}'.format(nx=str(i), id=feature_identity,
+                                fi=feature_ID, st=annos[i][0], en=annos[i][1], de=feature_description))
+                    elif len(feature_role) > 0:
                         feature_messages.append('{nx}: {id} ({fi}, {ro}) at [{st}, {en}]'.format(nx=str(i), id=feature_identity,
                             fi=feature_ID, ro=feature_role, st=annos[i][0], en=annos[i][1]))
                     else:
@@ -621,8 +639,8 @@ class FeaturePruner():
 
                 target_definition = target_doc.getComponentDefinition(target.identity)
 
-                cut_annos = [(sa.locations.getCut().at, sa.locations.getCut().at, sa.identity, sa.displayId, sa.name, sa.component, set(sa.roles)) for sa in target_definition.sequenceAnnotations if len(sa.locations) == 1 and sa.locations[0].getTypeURI() == SBOL_CUT]
-                annos = [(sa.locations.getRange().start, sa.locations.getRange().end, sa.identity, sa.displayId, sa.name, sa.component, set(sa.roles)) for sa in target_definition.sequenceAnnotations if len(sa.locations) == 1 and sa.locations[0].getTypeURI() == SBOL_RANGE]
+                cut_annos = [(sa.locations.getCut().at, sa.locations.getCut().at, sa.identity, sa.displayId, sa.name, sa.component, set(sa.roles), sa.description) for sa in target_definition.sequenceAnnotations if len(sa.locations) == 1 and sa.locations[0].getTypeURI() == SBOL_CUT]
+                annos = [(sa.locations.getRange().start, sa.locations.getRange().end, sa.identity, sa.displayId, sa.name, sa.component, set(sa.roles), sa.description) for sa in target_definition.sequenceAnnotations if len(sa.locations) == 1 and sa.locations[0].getTypeURI() == SBOL_RANGE]
                 
                 annos.extend(cut_annos)
 
