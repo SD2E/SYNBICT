@@ -2,6 +2,8 @@ import logging
 import argparse
 import os
 import sys
+import requests
+import json
 
 from Bio.Seq import Seq
 from sbol import *
@@ -14,6 +16,44 @@ def load_sbol(sbol_file):
     doc.read(sbol_file)
 
     doc.name = sbol_file
+
+    doc.addNamespace('http://purl.org/dc/elements/1.1/', 'dc')
+    doc.addNamespace('http://wiki.synbiohub.org/wiki/Terms/igem#', 'igem')
+    doc.addNamespace('http://wiki.synbiohub.org/wiki/Terms/synbiohub#', 'sbh')
+
+    return doc
+
+def load_genbank(gb_file):
+    logging.info('Loading %s', gb_file)
+
+    conversion_request = {
+        'options': {
+            'language' : 'SBOL2',
+            'test_equality': False,
+            'check_uri_compliance': False,
+            'check_completeness': False,
+            'check_best_practices': False,
+            'fail_on_first_error': False,
+            'provide_detailed_stack_trace': False,
+            'subset_uri': '',
+            'uri_prefix': getHomespace(),
+            'version': '1',
+            'insert_type': False,
+            'main_file_name': 'main file',
+            'diff_file_name': 'comparison file'
+        },
+        'return_file': True,
+        'main_file': open(gb_file).read()
+    }
+
+    conversion_response = requests.post("https://validator.sbolstandard.org/validate/", json=conversion_request)
+
+    response_dict = json.loads(conversion_response.content.decode('utf-8'))
+
+    doc = Document()
+    doc.readString(response_dict['result'])
+
+    doc.name = gb_file.replace('.gb', '.xml')
 
     doc.addNamespace('http://purl.org/dc/elements/1.1/', 'dc')
     doc.addNamespace('http://wiki.synbiohub.org/wiki/Terms/igem#', 'igem')
@@ -698,6 +738,7 @@ def main(args=None):
     parser.add_argument('-v', '--version', nargs='?', default='1')
     parser.add_argument('-x', '--validate', action='store_true')
     parser.add_argument('-d', '--delete_flat_annotations', action='store_true')
+    parser.add_argument('-T', '--target_format', nargs='?', default='SBOL2')
     # parser.add_argument('-s', '--sbh_URL', nargs='?', default=None)
     # parser.add_argument('-u', '--username', nargs='?', default=None)
     # parser.add_argument('-p', '--password', nargs='?', default=None)
@@ -737,7 +778,10 @@ def main(args=None):
     feature_pruner = FeaturePruner(feature_library, set(args.roles))
 
     for i in range (0, len(args.target_files)):
-        target_doc = load_sbol(args.target_files[i])
+        if args.target_format == 'GENBANK':
+            target_doc = load_genbank(args.target_files[i])
+        else:
+            target_doc = load_sbol(args.target_files[i])
         
         target_library = FeatureLibrary([target_doc])
 
@@ -755,7 +799,7 @@ def main(args=None):
                 output_file = args.output_files[i]
             else:
                 (target_file_base, file_extension) = os.path.splitext(args.target_files[i])
-                output_file = target_file_base + '_annotated' + file_extension
+                output_file = target_file_base + '_annotated' + file_extension.replace('gb', 'xml')
 
             if Config.getOption('validate') == True:
                 logging.info('Validating and writing %s', output_file)
@@ -764,8 +808,8 @@ def main(args=None):
 
             target_doc.write(output_file)
         else:
-            logging.error('Failed to annotate %s, no constructs found with minimum length %s', args.target_files[i],
-                args.min_target_length)
+            logging.error('Failed to annotate %s, no constructs found with minimum length %s',
+                args.target_files[i], args.min_target_length)
 
     logging.info('Finished curating')
 
