@@ -25,7 +25,7 @@ class CurationTests(unittest.TestCase):
         target_construct_library = FeatureLibrary([target_doc], True)
 
         feature_annotater = FeatureAnnotater(feature_library, 40)
-        feature_annotater.annotate(target_construct_library, MIN_TARGET_LENGTH, VERSION)
+        feature_annotater.annotate(target_construct_library, MIN_TARGET_LENGTH)
 
         feature_pruner = FeaturePruner(feature_library)
         feature_pruner.prune(target_construct_library, 14, MIN_TARGET_LENGTH, False, feature_library)
