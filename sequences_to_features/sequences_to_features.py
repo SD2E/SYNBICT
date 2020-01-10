@@ -23,8 +23,8 @@ def load_sbol(sbol_file):
 
     return doc
 
-def load_genbank(gb_file):
-    logging.info('Loading %s', gb_file)
+def load_non_sbol(non_sbol_file):
+    logging.info('Loading %s', non_sbol_file)
 
     conversion_request = {
         'options': {
@@ -43,7 +43,7 @@ def load_genbank(gb_file):
             'diff_file_name': 'comparison file'
         },
         'return_file': True,
-        'main_file': open(gb_file).read()
+        'main_file': open(non_sbol_file).read()
     }
 
     conversion_response = requests.post("https://validator.sbolstandard.org/validate/", json=conversion_request)
@@ -53,7 +53,8 @@ def load_genbank(gb_file):
     doc = Document()
     doc.readString(response_dict['result'])
 
-    doc.name = gb_file.replace('.gb', '.xml')
+    (file_base, file_extension) = os.path.splitext(non_sbol_file)
+    doc.name = file_base + '.xml'
 
     doc.addNamespace('http://purl.org/dc/elements/1.1/', 'dc')
     doc.addNamespace('http://wiki.synbiohub.org/wiki/Terms/igem#', 'igem')
@@ -738,7 +739,6 @@ def main(args=None):
     parser.add_argument('-v', '--version', nargs='?', default='1')
     parser.add_argument('-x', '--validate', action='store_true')
     parser.add_argument('-d', '--delete_flat_annotations', action='store_true')
-    parser.add_argument('-T', '--target_format', nargs='?', default='SBOL2')
     # parser.add_argument('-s', '--sbh_URL', nargs='?', default=None)
     # parser.add_argument('-u', '--username', nargs='?', default=None)
     # parser.add_argument('-p', '--password', nargs='?', default=None)
@@ -778,38 +778,49 @@ def main(args=None):
     feature_pruner = FeaturePruner(feature_library, set(args.roles))
 
     for i in range (0, len(args.target_files)):
-        if args.target_format == 'GENBANK':
-            target_doc = load_genbank(args.target_files[i])
-        else:
+        if args.target_files[i].endswith('.xml') or args.target_files[i].endswith('.sbol'):
             target_doc = load_sbol(args.target_files[i])
-        
-        target_library = FeatureLibrary([target_doc])
-
-        has_annotated = feature_annotater.annotate(target_library, int(args.min_target_length), args.version)
-
-        if has_annotated:
-            added_targets = target_library.update()
-
-            feature_pruner.prune(target_library, int(args.cover_offset), int(args.min_target_length),
-                delete_flat=args.delete_flat_annotations)
-
-            feature_pruner.clean(target_library, added_targets)
-
-            if i < len(args.output_files):
-                output_file = args.output_files[i]
-            else:
-                (target_file_base, file_extension) = os.path.splitext(args.target_files[i])
-                output_file = target_file_base + '_annotated' + file_extension.replace('gb', 'xml')
-
-            if Config.getOption('validate') == True:
-                logging.info('Validating and writing %s', output_file)
-            else:
-                logging.info('Writing %s', output_file)
-
-            target_doc.write(output_file)
+        elif (args.target_files[i].endswith('.gb')
+                or args.target_files[i].endswith('.genbank')
+                or args.target_files[i].endswith('.fasta')
+                or args.target_files[i].endswith('.faa')
+                or args.target_files[i].endswith('.fa')
+                or args.target_files[i].endswith('.fas')
+                or args.target_files[i].endswith('.fsa')):
+            target_doc = load_non_sbol(args.target_files[i])
         else:
-            logging.error('Failed to annotate %s, no constructs found with minimum length %s',
-                args.target_files[i], args.min_target_length)
+            target_doc = None
+
+            logging.error('Extension of target file %s is unrecognized.', args.target_files[i])
+        
+        if target_doc is not None:
+            target_library = FeatureLibrary([target_doc])
+
+            has_annotated = feature_annotater.annotate(target_library, int(args.min_target_length), args.version)
+
+            if has_annotated:
+                added_targets = target_library.update()
+
+                feature_pruner.prune(target_library, int(args.cover_offset), int(args.min_target_length),
+                    delete_flat=args.delete_flat_annotations)
+
+                feature_pruner.clean(target_library, added_targets)
+
+                if i < len(args.output_files):
+                    output_file = args.output_files[i]
+                else:
+                    (target_file_base, file_extension) = os.path.splitext(args.target_files[i])
+                    output_file = target_file_base + '_annotated.xml'
+
+                if Config.getOption('validate') == True:
+                    logging.info('Validating and writing %s', output_file)
+                else:
+                    logging.info('Writing %s', output_file)
+
+                target_doc.write(output_file)
+            else:
+                logging.error('Failed to annotate %s, no constructs found with minimum length %s',
+                    args.target_files[i], args.min_target_length)
 
     logging.info('Finished curating')
 
