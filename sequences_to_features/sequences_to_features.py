@@ -204,7 +204,8 @@ class FeatureLibrary():
         return dna_seqs
 
     @classmethod
-    def copy_component_definition(cls, comp_definition, source_doc, sink_doc, import_namespace=False, version='1', min_dna_length=0):
+    def copy_component_definition(cls, comp_definition, source_doc, sink_doc, import_namespace=False, min_dna_length=0,
+            increment_version=False):
         if min_dna_length > 0:
             dna_seqs = FeatureLibrary.get_DNA_sequences(comp_definition, source_doc)
 
@@ -221,7 +222,31 @@ class FeatureLibrary():
 
                     seq.copy(sink_doc)
 
-            if import_namespace:
+            try:
+                version = int(comp_definition.version)
+            except (TypeError, ValueError):
+                version = 1
+
+            if increment_version:
+                is_copied = False
+
+                if import_namespace:
+                    while not is_copied:
+                        try:
+                            definition_copy = comp_definition.copy(sink_doc, '/'.join(comp_definition.identity.split('/')[:-2]), str(version))
+                        
+                            is_copied = True
+                        except RuntimeError:
+                            version = version + 1
+                else:
+                    while not is_copied:
+                        try:
+                            definition_copy = comp_definition.copy(sink_doc, '', str(version))
+
+                            is_copied = True
+                        except RuntimeError:
+                            version = version + 1
+            elif import_namespace:
                 try:
                     definition_copy = comp_definition.copy(sink_doc, '/'.join(comp_definition.identity.split('/')[:-2]), version)
                 except RuntimeError:
@@ -231,19 +256,6 @@ class FeatureLibrary():
                     return sink_doc.getComponentDefinition(comp_definition.identity)
                 except RuntimeError:
                     definition_copy = comp_definition.copy(sink_doc)
-
-            # try:
-            #     if import_namespace:
-            #         definition_copy = comp_definition.copy(sink_doc, '/'.join(comp_definition.identity.split('/')[:-2]), version)
-            #     else:
-            #         sink_doc.getComponentDefinition(comp_definition.identity)
-
-            #         definition_copy = comp_definition.copy(sink_doc)
-            # except RuntimeError:
-            #     if import_namespace:
-            #         return sink_doc.getComponentDefinition('/'.join([getHomespace(), comp_definition.displayId, version]))
-            #     else:
-            #         return sink_doc.getComponentDefinition(comp_definition.identity)
 
             definition_copy.sequences = list(comp_definition.sequences)
 
@@ -261,7 +273,8 @@ class FeatureLibrary():
 
                 sub_copy = definition_copy.components.get(sub_comp.displayId)
 
-                sub_definition_copy = cls.copy_component_definition(sub_definition, source_doc, sink_doc, import_namespace, version, min_dna_length)
+                sub_definition_copy = cls.copy_component_definition(sub_definition, source_doc, sink_doc, import_namespace, min_dna_length,
+                    increment_version)
 
                 sub_copy.definition = sub_definition_copy.identity
 
@@ -389,7 +402,7 @@ class FeatureAnnotater():
 
                     logging.debug('Annotated %s at [%s, %s] in %s', feature_definition.identity, start, end, target_definition.identity)
 
-    def annotate(self, target_library, min_target_length, version='1'):
+    def annotate(self, target_library, min_target_length):
         has_annotated = False
 
         for target in target_library.features:
@@ -408,7 +421,7 @@ class FeatureAnnotater():
                     target_definition = target_doc.getComponentDefinition(target.identity)
 
                     definition_copy = FeatureLibrary.copy_component_definition(target_definition, target_doc, target_doc,
-                        True, version, min_target_length)
+                        True, min_target_length, True)
                     
                     self.__process_feature_matches(target_doc, definition_copy, inline_matches, SBOL_ORIENTATION_INLINE,
                         len(target.nucleotides))
@@ -552,23 +565,6 @@ class FeaturePruner():
         else:
             return set()
 
-    # @classmethod
-    # def __get_linked_definitions_identities(cls, doc, identity):
-    #     linked_identities = {identity}
-
-    #     try:
-    #         component_definition = doc.getComponentDefinition(identity)
-    #     except RuntimeError:
-    #         pass
-
-    #     for parent_identity in component_definition.wasDerivedFrom:
-    #         linked_identities.add(parent_identity)
-
-    #     for sub_comp in component_definition.components:
-    #         linked_identities = linked_identities.union(cls.__get_linked_definitions_identities(doc, sub_comp.definition))
-
-    #     return linked_identities
-
     def __filter_annotations(self, annos, target_definition):
         for i in range(len(annos) - 1, -1, -1):
             if annos[i][5] is None:
@@ -590,20 +586,20 @@ class FeaturePruner():
 
                 del annos[i]
 
-    def __merge_annotations(self, anno, sub_anno, target_definition):
-        feature_identity = target_definition.components.get(sub_anno[5]).definition
+    # def __merge_annotations(self, anno, sub_anno, target_definition):
+    #     feature_identity = target_definition.components.get(sub_anno[5]).definition
 
-        feature_definition = self.feature_library.get_definition(feature_identity)
+    #     feature_definition = self.feature_library.get_definition(feature_identity)
 
-        if not Feature.has_non_generic_role(anno[6]) or Feature.has_same_roles(anno[6], set(feature_definition.roles)):
-            seq_anno = target_definition.sequenceAnnotations.get(anno[2])
+    #     if not Feature.has_non_generic_role(anno[6]) or Feature.has_same_roles(anno[6], set(feature_definition.roles)):
+    #         seq_anno = target_definition.sequenceAnnotations.get(anno[2])
 
-            seq_anno.roles = []
-            seq_anno.component = sub_anno[5]
+    #         seq_anno.roles = []
+    #         seq_anno.component = sub_anno[5]
 
-            target_definition.sequenceAnnotations.remove(sub_anno[2])
+    #         target_definition.sequenceAnnotations.remove(sub_anno[2])
 
-            logging.debug('Merged %s at [%s, %s] and %s at [%s, %s] in %s', anno[2], anno[0], anno[1], feature_identity, sub_anno[0], sub_anno[1], target_definition.identity)
+    #         logging.debug('Merged %s at [%s, %s] and %s at [%s, %s] in %s', anno[2], anno[0], anno[1], feature_identity, sub_anno[0], sub_anno[1], target_definition.identity)
 
     # @classmethod
     # def __get_annotations(cls, doc, comp_definition):
@@ -713,12 +709,12 @@ class FeaturePruner():
 
                         self.__remove_annotations(selected_indices, anno_group, target_definition)
 
-                for anno_group in grouped_annos:
-                    if len(anno_group) == 2:
-                        if anno_group[0][5] is None and anno_group[1][5] is not None:
-                            self.__merge_annotations(anno_group[0], anno_group[1], target_definition)
-                        elif anno_group[0][5] is not None and anno_group[1][5] is None:
-                            self.__merge_annotations(anno_group[1], anno_group[0], target_definition)
+                # for anno_group in grouped_annos:
+                #     if len(anno_group) == 2:
+                #         if anno_group[0][5] is None and anno_group[1][5] is not None:
+                #             self.__merge_annotations(anno_group[0], anno_group[1], target_definition)
+                #         elif anno_group[0][5] is not None and anno_group[1][5] is None:
+                #             self.__merge_annotations(anno_group[1], anno_group[0], target_definition)
                  
                 logging.info('Finished pruning %s', target.identity)
 
@@ -736,8 +732,7 @@ def main(args=None):
     parser.add_argument('-M', '--min_feature_length', nargs='?', default=40)
     parser.add_argument('-c', '--cover_offset', nargs='?', default=14)
     parser.add_argument('-r', '--roles', nargs='*', default=[])
-    parser.add_argument('-v', '--version', nargs='?', default='1')
-    parser.add_argument('-x', '--validate', action='store_true')
+    parser.add_argument('-v', '--validate', action='store_true')
     parser.add_argument('-d', '--delete_flat_annotations', action='store_true')
     # parser.add_argument('-s', '--sbh_URL', nargs='?', default=None)
     # parser.add_argument('-u', '--username', nargs='?', default=None)
@@ -796,7 +791,7 @@ def main(args=None):
         if target_doc is not None:
             target_library = FeatureLibrary([target_doc])
 
-            has_annotated = feature_annotater.annotate(target_library, int(args.min_target_length), args.version)
+            has_annotated = feature_annotater.annotate(target_library, int(args.min_target_length))
 
             if has_annotated:
                 added_targets = target_library.update()

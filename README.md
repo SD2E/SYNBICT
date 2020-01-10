@@ -45,7 +45,7 @@ Argument | Short Arg | Type | Description | Example
 `--cover_offset` | `-c` | `Integer` | **Optional**. Maximum distance between the start/end of one sequence feature and the start/end of another sequence feature for pruning to initiate. Default is 14 bp. | 14
 `--roles` | `-r` | `String` | **Optional**. List of URIs for Sequence Ontology term to filter sequence features and remove any without at least one such term as a role. Default is an empty list. | http://identifiers.org/so/SO:0000167 http://identifiers.org/so/SO:0000316
 `--delete_flat_annotations` | `-d` | `Boolean` | **Optional**. If included, flat sequence annotations that do not refer to a sub-part will be automatically deleted. Default is to not automatically delete flat sequence annotations. | -d
-`--validate` | `-x` | `Boolean` | **Optional**. If included, output SBOL files will be be validated. Default is to not validate output files. | -x
+`--validate` | `-v` | `Boolean` | **Optional**. If included, output SBOL files will be be validated. Default is to not validate output files. | -v
 
 ## features\_to\_circuits.py 
 
