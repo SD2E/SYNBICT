@@ -482,7 +482,7 @@ class FeaturePruner():
         return ''
 
     @classmethod
-    def __select_annotations(cls, doc, target_definition, annos, ask_user=True, canonical_library=None):
+    def __select_annotations(cls, doc, target_definition, annos, ask_user=True, canonical_library=None, delete_flat=False):
         kept_indices = []
 
         feature_messages = []
@@ -510,6 +510,8 @@ class FeaturePruner():
                     else:
                         feature_messages.append('{nx}: {id} ({fi}) at [{st}, {en}]'.format(nx=str(i), id=annos[i][2],
                             fi=feature_ID, st=annos[i][0], en=annos[i][1]))
+                elif not delete_flat:
+                    kept_indices.append(i)
             else:
                 feature_identity = target_definition.components.get(annos[i][5]).definition
 
@@ -718,7 +720,7 @@ class FeaturePruner():
                 for anno_group in grouped_annos:
                     if len(anno_group) > 1:
                         selected_indices = self.__select_annotations(target_doc, target_definition, anno_group,
-                            ask_user, canonical_library)
+                            ask_user, canonical_library, delete_flat)
 
                         self.__remove_annotations(selected_indices, anno_group, target_definition)
 
