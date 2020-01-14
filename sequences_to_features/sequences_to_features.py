@@ -559,10 +559,8 @@ class FeaturePruner():
                 selected_indices = []
 
             return set(selected_indices)
-        elif len(kept_indices) > 0:
-            return set(range(0, len(annos))).difference(set(kept_indices))
         else:
-            return set()
+            return set(range(0, len(annos))).difference(set(kept_indices))
 
     def __filter_annotations(self, annos, target_definition):
         for i in range(len(annos) - 1, -1, -1):
