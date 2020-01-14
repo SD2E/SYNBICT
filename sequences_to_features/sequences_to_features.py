@@ -180,7 +180,10 @@ class FeatureLibrary():
         return added_feature_identities
 
     def get_document(self, identity):
-        return self.docs[self.__feature_map[identity]]
+        if identity in self.__feature_map:
+            return self.docs[self.__feature_map[identity]]
+        else:
+            return None
 
     def get_definition(self, identity):
         return self.get_document(identity).getComponentDefinition(identity)
@@ -204,8 +207,7 @@ class FeatureLibrary():
         return dna_seqs
 
     @classmethod
-    def copy_component_definition(cls, comp_definition, source_doc, sink_doc, import_namespace=False, min_dna_length=0,
-            increment_version=False):
+    def copy_component_definition(cls, comp_definition, source_doc, sink_doc, import_namespace=False, min_dna_length=0):
         if min_dna_length > 0:
             dna_seqs = FeatureLibrary.get_DNA_sequences(comp_definition, source_doc)
 
@@ -214,46 +216,29 @@ class FeatureLibrary():
             copy_valid = True
 
         if copy_valid:
-            for seq_URI in comp_definition.sequences:
-                try:
-                    sink_doc.getSequence(seq_URI)
-                except RuntimeError:
-                    seq = source_doc.getSequence(seq_URI)
+            namespace = '/'.join(comp_definition.identity.split('/')[:-2])
 
-                    seq.copy(sink_doc)
+            if import_namespace:
+                if namespace == getHomespace():
+                    try:
+                        version = int(comp_definition.version)
+                    except (TypeError, ValueError):
+                        return None
 
-            try:
-                version = int(comp_definition.version)
-            except (TypeError, ValueError):
-                version = 1
-
-            if increment_version:
-                is_copied = False
-
-                if import_namespace:
-                    while not is_copied:
-                        try:
-                            definition_copy = comp_definition.copy(sink_doc, '/'.join(comp_definition.identity.split('/')[:-2]), str(version))
-                        
-                            is_copied = True
-                        except RuntimeError:
-                            version = version + 1
+                    try:
+                        definition_copy = comp_definition.copy(sink_doc, namespace, str(version + 1))
+                    except RuntimeError:
+                        return None
                 else:
-                    while not is_copied:
-                        try:
-                            definition_copy = comp_definition.copy(sink_doc, '', str(version))
-
-                            is_copied = True
-                        except RuntimeError:
-                            version = version + 1
-            elif import_namespace:
-                try:
-                    definition_copy = comp_definition.copy(sink_doc, '/'.join(comp_definition.identity.split('/')[:-2]), version)
-                except RuntimeError:
-                    return sink_doc.getComponentDefinition('/'.join([getHomespace(), comp_definition.displayId, version]))
+                    try:
+                        definition_copy = comp_definition.copy(sink_doc, namespace, '1')
+                    except RuntimeError:
+                        return None
             else:
                 try:
-                    return sink_doc.getComponentDefinition(comp_definition.identity)
+                    sink_doc.getComponentDefinition(comp_definition.identity)
+                    
+                    return None
                 except RuntimeError:
                     definition_copy = comp_definition.copy(sink_doc)
 
@@ -273,10 +258,11 @@ class FeatureLibrary():
 
                 sub_copy = definition_copy.components.get(sub_comp.displayId)
 
-                sub_definition_copy = cls.copy_component_definition(sub_definition, source_doc, sink_doc, import_namespace, min_dna_length,
-                    increment_version)
+                sub_definition_copy = cls.copy_component_definition(sub_definition, source_doc, sink_doc, import_namespace,
+                    min_dna_length)
 
-                sub_copy.definition = sub_definition_copy.identity
+                if sub_definition_copy is not None:
+                    sub_copy.definition = sub_definition_copy.identity
 
             if import_namespace:
                 try:
@@ -291,9 +277,17 @@ class FeatureLibrary():
 
                 definition_copy.wasGeneratedBy = []
 
+            for seq_URI in comp_definition.sequences:
+                try:
+                    sink_doc.getSequence(seq_URI)
+                except RuntimeError:
+                    seq = source_doc.getSequence(seq_URI)
+
+                    seq.copy(sink_doc)
+
             return definition_copy
         else:
-            return comp_definition
+            return None
 
 class FeatureAnnotater():
 
@@ -403,7 +397,7 @@ class FeatureAnnotater():
                     logging.debug('Annotated %s at [%s, %s] in %s', feature_definition.identity, start, end, target_definition.identity)
 
     def annotate(self, target_library, min_target_length):
-        has_annotated = False
+        annotated_identities = []
 
         for target in target_library.features:
             if self.__has_min_length(target, min_target_length):
@@ -421,18 +415,27 @@ class FeatureAnnotater():
                     target_definition = target_doc.getComponentDefinition(target.identity)
 
                     definition_copy = FeatureLibrary.copy_component_definition(target_definition, target_doc, target_doc,
-                        True, min_target_length, True)
+                        True, min_target_length)
                     
-                    self.__process_feature_matches(target_doc, definition_copy, inline_matches, SBOL_ORIENTATION_INLINE,
-                        len(target.nucleotides))
-                    self.__process_feature_matches(target_doc, definition_copy, rc_matches,
-                        SBOL_ORIENTATION_REVERSE_COMPLEMENT, len(target.nucleotides), len(target.nucleotides) + 1)
+                    if definition_copy is not None:
+                        self.__process_feature_matches(target_doc, definition_copy, inline_matches, SBOL_ORIENTATION_INLINE,
+                            len(target.nucleotides))
+                        self.__process_feature_matches(target_doc, definition_copy, rc_matches,
+                            SBOL_ORIENTATION_REVERSE_COMPLEMENT, len(target.nucleotides), len(target.nucleotides) + 1)
 
-                has_annotated = True
+                        annotated_identities.append(definition_copy.identity)
+                    else:
+                        target_namespace = '/'.join(target_definition.identity.split('/')[:-2])
+
+                        if target_namespace == getHomespace():
+                            logging.warning('%s was not annotated because its version could not be incremented.', target_definition.identity)
+                        else:
+                            logging.warning('%s was not annotated because it could not be imported into annotation namespace %s.', target_definition.identity,
+                                getHomespace())
 
                 logging.info('Finished annotating %s', target.identity)
 
-        return has_annotated
+        return annotated_identities
 
 class FeaturePruner():
 
@@ -629,41 +632,57 @@ class FeaturePruner():
 
         return flat_indices
 
-    def clean(self, target_library, targets):
+    def clean(self, feature_library, annotated_features, annotating_features):
         logging.info('Cleaning up')
 
-        doc_to_identities = {}
+        sub_definitions = set()
 
-        doc_to_sub_identities = {}
+        for annotated_feature in annotated_features:
+            annotated_doc = feature_library.get_document(annotated_feature.identity)
+            annotated_definition = annotated_doc.getComponentDefinition(annotated_feature.identity)
 
-        for target in targets:
-            target_doc = target_library.get_document(target.identity)
+            sub_IDs = set()
+            temp_sub_definitions = set()
 
-            if target_doc.name not in doc_to_identities:
-                doc_to_identities[target_doc.name] = set()
+            for comp in annotated_definition.components:
+                sub_IDs.add(comp.displayId)
+                temp_sub_definitions.add(comp.definition)
+            for seq_anno in annotated_definition.sequenceAnnotations:
+                sub_IDs.add(seq_anno.displayId)
 
-            doc_to_identities[target_doc.name].add(target.identity)
+            parent_sub_IDs = set()
 
-            if target_doc.name not in doc_to_sub_identities:
-                doc_to_sub_identities[target_doc.name] = set()
+            for parent_identity in annotated_definition.wasDerivedFrom:
+                parent_doc = feature_library.get_document(parent_identity)
 
-            for comp_definition in target_doc.componentDefinitions:
-                for sub_comp in comp_definition.components:
-                    doc_to_sub_identities[target_doc.name].add(sub_comp.definition)
+                if parent_doc is not None:
+                    parent_definition = parent_doc.getComponentDefinition(parent_identity)
 
-        for name in doc_to_sub_identities:
-            doc_to_sub_identities[name] = doc_to_sub_identities[name].intersection(doc_to_identities[name])
+                    for comp in parent_definition.components:
+                        parent_sub_IDs.add(comp.displayId)
+                    for seq_anno in parent_definition.sequenceAnnotations:
+                        parent_sub_IDs.add(seq_anno.displayId)
 
-        for target in targets:
-            target_doc = target_library.get_document(target.identity)
+            if len(sub_IDs) == len(parent_sub_IDs) and len(sub_IDs) == len(sub_IDs.intersection(parent_sub_IDs)):
+                annotated_doc.componentDefinitions.remove(annotated_feature.identity)
 
-            sub_identities = doc_to_sub_identities[target_doc.name]
+                logging.debug('Removed %s from %s', annotated_feature.identity, annotated_doc.name)
+            else:
+                sub_definitions.update(temp_sub_definitions)
 
-            if (target.identity not in sub_identities
-                    and len(sub_identities.intersection(set(target.sub_identities))) == 0):
-                target_doc.componentDefinitions.remove(target.identity)
+        for annotating_feature in annotating_features:
+            if annotating_feature.identity not in sub_definitions:
+                annotating_doc = feature_library.get_document(annotating_feature.identity)
+                annotating_definition = annotating_doc.getComponentDefinition(annotating_feature.identity)
 
-                logging.debug('Removed %s from %s', target.identity, target_doc.name)
+                annotating_doc.componentDefinitions.remove(annotating_feature.identity)
+                for seq_identity in annotating_definition.sequences:
+                    try:
+                        annotating_doc.sequences.remove(seq_identity)
+                    except ValueError:
+                        pass
+
+                logging.debug('Removed %s from %s', annotating_feature.identity, annotating_doc.name)
 
         logging.info('Finished cleaning up')
 
@@ -791,31 +810,40 @@ def main(args=None):
         if target_doc is not None:
             target_library = FeatureLibrary([target_doc])
 
-            has_annotated = feature_annotater.annotate(target_library, int(args.min_target_length))
+            annotated_identities = feature_annotater.annotate(target_library, int(args.min_target_length))
 
-            if has_annotated:
-                added_targets = target_library.update()
+            added_features = target_library.update()
 
-                feature_pruner.prune(target_library, int(args.cover_offset), int(args.min_target_length),
-                    delete_flat=args.delete_flat_annotations)
+            feature_pruner.prune(target_library, int(args.cover_offset), int(args.min_target_length),
+                delete_flat=args.delete_flat_annotations)
 
-                feature_pruner.clean(target_library, added_targets)
+            if len(annotated_identities) > 0:
+                annotated_features = []
+                annotating_features = []
 
-                if i < len(args.output_files):
-                    output_file = args.output_files[i]
-                else:
-                    (target_file_base, file_extension) = os.path.splitext(args.target_files[i])
-                    output_file = target_file_base + '_annotated.xml'
+                for added_feature in added_features:
+                    if added_feature.identity in annotated_identities:
+                        annotated_features.append(added_feature)
+                    else:
+                        annotating_features.append(added_feature)
 
-                if Config.getOption('validate') == True:
-                    logging.info('Validating and writing %s', output_file)
-                else:
-                    logging.info('Writing %s', output_file)
-
-                target_doc.write(output_file)
+                feature_pruner.clean(target_library, annotated_features, annotating_features)
             else:
-                logging.error('Failed to annotate %s, no constructs found with minimum length %s',
+                logging.warning('Failed to annotate %s, possibly no constructs found with minimum length %s',
                     args.target_files[i], args.min_target_length)
+
+            if i < len(args.output_files):
+                output_file = args.output_files[i]
+            else:
+                (target_file_base, file_extension) = os.path.splitext(args.target_files[i])
+                output_file = target_file_base + '_curated.xml'
+
+            if Config.getOption('validate') == True:
+                logging.info('Validating and writing %s', output_file)
+            else:
+                logging.info('Writing %s', output_file)
+
+            target_doc.write(output_file)
 
     logging.info('Finished curating')
 
