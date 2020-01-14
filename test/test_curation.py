@@ -7,6 +7,51 @@ from features_to_circuits import *
 
 class CurationTests(unittest.TestCase):
 
+    def test_pruning(self):
+        __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
+
+        HOMESPACE = 'http://synbict.org'
+
+        MIN_TARGET_LENGTH = 800
+
+        setHomespace(HOMESPACE)
+        Config.setOption('validate', False)
+        Config.setOption('sbol_typed_uris', False)
+
+        cello_doc = load_sbol(os.path.join(__location__, 'cello_library.xml'))
+        feature_library = FeatureLibrary([cello_doc])
+
+        target_doc = load_sbol(os.path.join(__location__, 'simple_device.xml'))
+        target_construct_library = FeatureLibrary([target_doc], True)
+
+        feature_annotater = FeatureAnnotater(feature_library, 40)
+        annotated_identities = feature_annotater.annotate(target_construct_library, MIN_TARGET_LENGTH)
+
+        added_features = target_construct_library.update()
+
+        feature_pruner = FeaturePruner(feature_library)
+        feature_pruner.prune(target_construct_library, 14, MIN_TARGET_LENGTH, False)
+
+        annotated_features = []
+        annotating_features = []
+
+        for added_feature in added_features:
+            if added_feature.identity in annotated_identities:
+                annotated_features.append(added_feature)
+            else:
+                annotating_features.append(added_feature)
+
+        feature_pruner.clean(target_construct_library, annotated_features, annotating_features)
+
+        pruned_definition = target_doc.getComponentDefinition('/'.join[HOMESPACE, 'UnnamedPart', '1'])
+
+        self.assertEqual(len(target_doc.componentDefinitions), 2,
+            "Cleaned document does not contain exactly two ComponentDefinitions.")
+        self.assertEqual(len(target_doc.sequences), 1,
+            "Cleaned document does not contain exactly one Sequence.")
+        self.assertEqual(len(pruned_definition.sequenceAnnotations), 1,
+            "Pruned ComponentDefinition does not contain exactly one SequenceAnnotation.")
+
     def test_curate_nand_circuit(self):
         __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
@@ -16,6 +61,7 @@ class CurationTests(unittest.TestCase):
         MIN_TARGET_LENGTH = 2000
 
         setHomespace(HOMESPACE)
+        Config.setOption('validate', False)
         Config.setOption('sbol_typed_uris', False)
 
         cello_doc = load_sbol(os.path.join(__location__, 'cello_library.xml'))
