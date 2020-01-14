@@ -228,12 +228,12 @@ class FeatureLibrary():
                     try:
                         definition_copy = comp_definition.copy(sink_doc, namespace, str(version + 1))
                     except RuntimeError:
-                        return None
+                        return sink_doc.getComponentDefinition('/'.join([namespace, comp_definition.displayId, str(version + 1)]))
                 else:
                     try:
                         definition_copy = comp_definition.copy(sink_doc, namespace, '1')
                     except RuntimeError:
-                        return None
+                        return sink_doc.getComponentDefinition('/'.join([namespace, comp_definition.displayId, '1']))
             else:
                 try:
                     sink_doc.getComponentDefinition(comp_definition.identity)
@@ -425,13 +425,7 @@ class FeatureAnnotater():
 
                         annotated_identities.append(definition_copy.identity)
                     else:
-                        target_namespace = '/'.join(target_definition.identity.split('/')[:-2])
-
-                        if target_namespace == getHomespace():
-                            logging.warning('%s was not annotated because its version could not be incremented.', target_definition.identity)
-                        else:
-                            logging.warning('%s was not annotated because it could not be imported into annotation namespace %s.', target_definition.identity,
-                                getHomespace())
+                        logging.warning('%s was not annotated because its version could not be incremented.', target.identity)
 
                 logging.info('Finished annotating %s', target.identity)
 
