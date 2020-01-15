@@ -30,7 +30,7 @@ class CurationTests(unittest.TestCase):
         added_features = target_construct_library.update()
 
         feature_pruner = FeaturePruner(feature_library)
-        feature_pruner.prune(target_construct_library, 14, MIN_TARGET_LENGTH, False, delete_flat=True)
+        feature_pruner.prune(target_construct_library, 14, MIN_TARGET_LENGTH, False)
 
         annotated_features = []
         annotating_features = []
@@ -77,7 +77,7 @@ class CurationTests(unittest.TestCase):
         added_features = target_construct_library.update()
 
         feature_pruner = FeaturePruner(feature_library)
-        feature_pruner.prune(target_construct_library, 14, MIN_TARGET_LENGTH, False)
+        feature_pruner.prune(target_construct_library, 14, MIN_TARGET_LENGTH, False, keep_flat=True)
 
         annotated_features = []
         annotating_features = []

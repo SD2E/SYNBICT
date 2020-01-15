@@ -482,7 +482,7 @@ class FeaturePruner():
         return ''
 
     @classmethod
-    def __select_annotations(cls, doc, target_definition, annos, ask_user=True, canonical_library=None, delete_flat=False):
+    def __select_annotations(cls, doc, target_definition, annos, ask_user=True, canonical_library=None, keep_flat=False):
         kept_indices = []
 
         feature_messages = []
@@ -510,7 +510,7 @@ class FeaturePruner():
                     else:
                         feature_messages.append('{nx}: {id} ({fi}) at [{st}, {en}]'.format(nx=str(i), id=annos[i][2],
                             fi=feature_ID, st=annos[i][0], en=annos[i][1]))
-                elif not delete_flat:
+                elif keep_flat:
                     kept_indices.append(i)
             else:
                 feature_identity = target_definition.components.get(annos[i][5]).definition
@@ -680,7 +680,7 @@ class FeaturePruner():
 
         logging.info('Finished cleaning up')
 
-    def prune(self, target_library, cover_offset, min_target_length, ask_user=True, canonical_library=None, delete_flat=False):
+    def prune(self, target_library, cover_offset, min_target_length, ask_user=True, canonical_library=None, delete_flat=False, keep_flat=False):
         for target in target_library.features:
             if self.__has_min_length(target, min_target_length):
                 logging.info('Pruning %s', target.identity)
@@ -718,7 +718,7 @@ class FeaturePruner():
                 for anno_group in grouped_annos:
                     if len(anno_group) > 1:
                         selected_indices = self.__select_annotations(target_doc, target_definition, anno_group,
-                            ask_user, canonical_library, delete_flat)
+                            ask_user, canonical_library, keep_flat)
 
                         self.__remove_annotations(selected_indices, anno_group, target_definition)
 
