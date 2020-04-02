@@ -9,6 +9,15 @@ from Bio.Seq import Seq
 from sbol import *
 from flashtext import KeywordProcessor
 
+# Set up the not found error for catching
+try:
+    # SBOLError is in the native python module
+    NotFoundError = SBOLError
+except NameError:
+    # The swig wrapper raises RuntimeError on not found
+    NotFoundError = RuntimeError
+
+
 def load_sbol(sbol_file):
     logging.info('Loading %s', sbol_file)
 
@@ -237,9 +246,9 @@ class FeatureLibrary():
             else:
                 try:
                     sink_doc.getComponentDefinition(comp_definition.identity)
-                    
+
                     return None
-                except RuntimeError:
+                except NotFoundError:
                     definition_copy = comp_definition.copy(sink_doc)
 
             definition_copy.sequences = list(comp_definition.sequences)
@@ -280,7 +289,7 @@ class FeatureLibrary():
             for seq_URI in comp_definition.sequences:
                 try:
                     sink_doc.getSequence(seq_URI)
-                except RuntimeError:
+                except NotFoundError:
                     seq = source_doc.getSequence(seq_URI)
 
                     seq.copy(sink_doc)
