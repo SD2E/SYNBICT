@@ -331,6 +331,11 @@ class FeatureAnnotater():
                 sub_comp = parent_definition.components.create('_'.join([child_definition.displayId, str(i)]))
             except RuntimeError:
                 sub_comp = None
+            except SBOLError as exc:
+                if exc.error_code() == SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE:
+                    sub_comp = None
+                else:
+                    raise
 
             if sub_comp is None:
                 i = i + 1
@@ -356,6 +361,11 @@ class FeatureAnnotater():
                                                                                   str(i)]))
             except RuntimeError:
                 seq_anno = None
+            except SBOLError as exc:
+                if exc.error_code() == SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE:
+                    seq_anno = None
+                else:
+                    raise
 
             if seq_anno is None:
                 i = i + 1
