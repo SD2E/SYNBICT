@@ -1,6 +1,6 @@
 import unittest
 import os
-from sbol import *
+from sbol2 import *
 
 from sequences_to_features import *
 from features_to_circuits import *

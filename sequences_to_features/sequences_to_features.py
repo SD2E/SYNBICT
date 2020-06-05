@@ -6,7 +6,7 @@ import requests
 import json
 
 from Bio.Seq import Seq
-from sbol import *
+from sbol2 import *
 from flashtext import KeywordProcessor
 
 # Set up the not found error for catching

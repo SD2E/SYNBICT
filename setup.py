@@ -4,8 +4,9 @@ from setuptools import setup, find_packages
 
 install_requires = [
     'biopython>=1.7.4',
+    'dnaplotlib>=1.0',
     'flashtext>=2.7',
-    'pysbol>=2.3.1',
+    'sbol2',
     'matplotlib>=1.5.0'
 ]
 

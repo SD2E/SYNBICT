@@ -4,7 +4,7 @@ import os
 import sys
 
 from Bio.Seq import Seq
-from sbol import *
+from sbol2 import *
 from flashtext import KeywordProcessor
 from sequences_to_features import Feature
 from sequences_to_features import FeatureLibrary
