@@ -30,7 +30,7 @@ class CurationTests(unittest.TestCase):
         added_features = target_construct_library.update()
 
         feature_pruner = FeaturePruner(feature_library)
-        feature_pruner.prune(target_construct_library, 14, MIN_TARGET_LENGTH, False)
+        feature_pruner.prune(target_construct_library, 14, MIN_TARGET_LENGTH, False, keep_flat=False)
 
         annotated_features = []
         annotating_features = []
@@ -77,7 +77,7 @@ class CurationTests(unittest.TestCase):
         added_features = target_construct_library.update()
 
         feature_pruner = FeaturePruner(feature_library)
-        feature_pruner.prune(target_construct_library, 14, MIN_TARGET_LENGTH, False, keep_flat=True)
+        feature_pruner.prune(target_construct_library, 14, MIN_TARGET_LENGTH, False)
 
         annotated_features = []
         annotating_features = []
@@ -117,7 +117,7 @@ class CurationTests(unittest.TestCase):
         feature_annotater.annotate(target_construct_library, MIN_TARGET_LENGTH)
 
         feature_pruner = FeaturePruner(feature_library)
-        feature_pruner.prune(target_construct_library, 14, MIN_TARGET_LENGTH, False, feature_library, True)
+        feature_pruner.prune(target_construct_library, 14, MIN_TARGET_LENGTH, False, feature_library, True, False)
 
         circuit_library = CircuitLibrary([cello_doc])
         target_device_library = FeatureLibrary([target_doc], require_sequence=False)
