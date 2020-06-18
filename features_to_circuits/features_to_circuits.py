@@ -4,7 +4,7 @@ import os
 import sys
 
 from Bio.Seq import Seq
-from sbol import *
+from sbol2 import *
 from flashtext import KeywordProcessor
 from sequences_to_features import Feature
 from sequences_to_features import FeatureLibrary
@@ -185,6 +185,11 @@ class CircuitLibrary():
             return sink_doc.getComponentDefinition(mod_definition.identity)
         except RuntimeError:
             definition_copy = mod_definition.copy(sink_doc)
+        except SBOLError as exc:
+            if exc.error_code() == SBOLErrorCode.NOT_FOUND_ERROR:
+                definition_copy = mod_definition.copy(sink_doc)
+            else:
+                raise
 
         for sub_mod in mod_definition.modules:
             sub_mod_definition = source_doc.getModuleDefinition(sub_mod.definition)

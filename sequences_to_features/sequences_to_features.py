@@ -6,8 +6,17 @@ import requests
 import json
 
 from Bio.Seq import Seq
-from sbol import *
+from sbol2 import *
 from flashtext import KeywordProcessor
+
+# Set up the not found error for catching
+try:
+    # SBOLError is in the native python module
+    NotFoundError = SBOLError
+except NameError:
+    # The swig wrapper raises RuntimeError on not found
+    NotFoundError = RuntimeError
+
 
 def load_sbol(sbol_file):
     logging.info('Loading %s', sbol_file)
@@ -237,9 +246,9 @@ class FeatureLibrary():
             else:
                 try:
                     sink_doc.getComponentDefinition(comp_definition.identity)
-                    
+
                     return None
-                except RuntimeError:
+                except NotFoundError:
                     definition_copy = comp_definition.copy(sink_doc)
 
             definition_copy.sequences = list(comp_definition.sequences)
@@ -280,7 +289,7 @@ class FeatureLibrary():
             for seq_URI in comp_definition.sequences:
                 try:
                     sink_doc.getSequence(seq_URI)
-                except RuntimeError:
+                except NotFoundError:
                     seq = source_doc.getSequence(seq_URI)
 
                     seq.copy(sink_doc)
@@ -322,6 +331,11 @@ class FeatureAnnotater():
                 sub_comp = parent_definition.components.create('_'.join([child_definition.displayId, str(i)]))
             except RuntimeError:
                 sub_comp = None
+            except SBOLError as exc:
+                if exc.error_code() == SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE:
+                    sub_comp = None
+                else:
+                    raise
 
             if sub_comp is None:
                 i = i + 1
@@ -347,6 +361,11 @@ class FeatureAnnotater():
                                                                                   str(i)]))
             except RuntimeError:
                 seq_anno = None
+            except SBOLError as exc:
+                if exc.error_code() == SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE:
+                    seq_anno = None
+                else:
+                    raise
 
             if seq_anno is None:
                 i = i + 1
