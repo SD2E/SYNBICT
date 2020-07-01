@@ -81,7 +81,7 @@ class LogicGate():
             elif self.__gate_type == self.AND:
                 return input_1_value & input_2_value
             elif self.__gate_type == self.NAND:
-                return ~(input_1_value & input_2_value - 2)
+                return ~((input_1_value & input_2_value) - 2)
             else:
                 return -1
         else:
@@ -116,37 +116,19 @@ class LogicCircuit():
     SBO_MODIFIER = 'http://identifiers.org/biomodels.sbo/SBO:0000019'
     SBO_MODIFIED = 'http://identifiers.org/biomodels.sbo/SBO:0000644'
 
-    def __init__(self, circuit_def=None, circuit_doc=None, product_to_gates={}, is_canonical=True):
-        self.__product_to_gates = product_to_gates
-
+    def __init__(self, circuit_def=None, circuit_doc=None, is_canonical=True):
         self.__circuit_inputs = []
         self.__circuit_outputs = []
         self.__species_dict = {}
 
         if circuit_def and circuit_doc:
-            production_map = self.__build_production_map(circuit_def, circuit_doc, is_canonical=is_canonical)
-            repression_map = self.__build_repression_map(circuit_def, circuit_doc, is_canonical=is_canonical)
-            activation_map = self.__build_activation_map(circuit_def, circuit_doc, is_canonical=is_canonical)
-            transcription_map = self.__distill_transcription_map(circuit_def, circuit_doc, activation_map, is_canonical=is_canonical)
-            
-            # print('Production')
-            # for key in production_map:
-            #     for producer in production_map[key]:
-            #         print(producer.get_identity(is_canonical) + ' : ' + key)
-            # print('Repression')
-            # for key in repression_map:
-            #     for repressors in repression_map[key]:
-            #         for repressor in repressors:
-            #             print(repressor.get_identity(is_canonical) + ' : ' + key)
-            # print('Activation')
-            # for key in activation_map:
-            #     for activators in activation_map[key]:
-            #         for activator in activators:
-            #             print(activator.get_identity(is_canonical) + ' : ' + key)
-            # print('Transcription')
-            # for key in transcription_map:
-            #     for transcriber in transcription_map[key]:
-            #         print(transcriber.get_identity(is_canonical) + ' : ' + key)
+            production_map = self.__build_production_map(circuit_def, circuit_doc, is_canonical)
+            repression_map = self.__build_repression_map(circuit_def, circuit_doc, is_canonical)
+            activation_map = self.__build_activation_map(circuit_def, circuit_doc, is_canonical)
+
+            transcription_map = self.__distill_transcription_map(circuit_def, circuit_doc, activation_map, is_canonical)
+            positive_induction_map = self.__distill_induction_map(circuit_def, circuit_doc, activation_map, is_canonical)
+            negative_induction_map = self.__distill_induction_map(circuit_def, circuit_doc, repression_map, is_canonical)
 
             for fc in circuit_def.functionalComponents:
                 if fc.direction == sbol.SBOL_DIRECTION_IN:
@@ -160,11 +142,13 @@ class LogicCircuit():
                     else:
                         self.__circuit_outputs.append(self.__species_dict[fc.identity])
 
-            self.__product_to_gates.update(self.__build_gate_map(production_map,
-                                                                 repression_map,
-                                                                 activation_map,
-                                                                 transcription_map,
-                                                                 is_canonical))
+            self.__product_to_gates = self.__build_gate_map(production_map,
+                                                            repression_map,
+                                                            activation_map,
+                                                            transcription_map,
+                                                            positive_induction_map,
+                                                            negative_induction_map,
+                                                            is_canonical)
 
         if len(self.__circuit_inputs) == 0 or len(self.__circuit_outputs) == 0:
             gate_input_dict = {
@@ -209,7 +193,7 @@ class LogicCircuit():
                                     }
 
         circuit_intermediates = [
-                                    self.__product_to_gates[product_identity]
+                                    self.__species_dict[product_identity]
                                     for product_identity in self.__product_to_gates
                                     if (
                                         product_identity not in circuit_input_identities
@@ -267,7 +251,8 @@ class LogicCircuit():
                             ]
                         )
 
-    def __build_gate_map(self, production_map, repression_map, activation_map, transcription_map, is_canonical=True):
+    def __build_gate_map(self, production_map, repression_map, activation_map, transcription_map,
+            positive_induction_map, negative_induction_map, is_canonical=True):
         product_to_gates = {}
 
         for product_identity in production_map:
@@ -293,18 +278,48 @@ class LogicCircuit():
                                     cooperativity_flag = True
 
                                 for activator in activators:
-                                    gate_input_dict[activator.get_identity(is_canonical)] = activator
+                                    if activator.get_identity(is_canonical) in negative_induction_map:
+                                        inducers = negative_induction_map[activator.get_identity(is_canonical)]
 
-                            activation_flag = True
+                                        for inducer in inducers:
+                                            gate_input_dict[inducer.get_identity(is_canonical)] = inducer
+
+                                        repression_flag = True
+                                    elif activator.get_identity(is_canonical) in positive_induction_map:
+                                        inducers = positive_induction_map[activator.get_identity(is_canonical)]
+
+                                        for inducer in inducers:
+                                            gate_input_dict[inducer.get_identity(is_canonical)] = inducer
+
+                                        activation_flag = True
+                                    else:
+                                        gate_input_dict[activator.get_identity(is_canonical)] = activator
+
+                                        activation_flag = True
                         elif promoter_identity in repression_map:
                             for repressors in repression_map[promoter_identity]:
                                 if len(repressors) == 2:
                                     cooperativity_flag = True
 
                                 for repressor in repressors:
-                                    gate_input_dict[repressor.get_identity(is_canonical)] = repressor
+                                    if repressor.get_identity(is_canonical) in negative_induction_map:
+                                        inducers = negative_induction_map[repressor.get_identity(is_canonical)]
 
-                            repression_flag = True
+                                        for inducer in inducers:
+                                            gate_input_dict[inducer.get_identity(is_canonical)] = inducer
+
+                                        activation_flag = True
+                                    elif repressor.get_identity(is_canonical) in positive_induction_map:
+                                        inducers = positive_induction_map[activator.get_identity(is_canonical)]
+
+                                        for inducer in inducers:
+                                            gate_input_dict[inducer.get_identity(is_canonical)] = inducer
+
+                                        repression_flag = True
+                                    else:
+                                        gate_input_dict[repressor.get_identity(is_canonical)] = repressor
+
+                                        repression_flag = True
                 elif template_identity in activation_map:
                     for activators in activation_map[template_identity]:
                         if len(activators) == 2:
@@ -347,23 +362,25 @@ class LogicCircuit():
                         if activation_flag:
                             if len(promoters) < 2:
                                 if cooperativity_flag:
-                                    product_to_gates[product_identity] = LogicGate(product, gate_inputs, LogicGate.AND)
+                                    product_to_gates[product_identity].append(LogicGate(product, gate_inputs, LogicGate.AND))
                                 else:
-                                    product_to_gates[product_identity] = LogicGate(product, gate_inputs, LogicGate.OR)
+                                    product_to_gates[product_identity].append(LogicGate(product, gate_inputs, LogicGate.OR))
                             else:
-                                product_to_gates[product_identity] = LogicGate(product, gate_inputs, LogicGate.OR)
+                                product_to_gates[product_identity].append(LogicGate(product, gate_inputs, LogicGate.OR))
                         else:
                             if len(promoters) < 2:
                                 if cooperativity_flag:
-                                    product_to_gates[product_identity] = LogicGate(product, gate_inputs, LogicGate.NAND)
+                                    product_to_gates[product_identity].append(LogicGate(product, gate_inputs, LogicGate.NAND))
                                 else:
-                                    product_to_gates[product_identity] = LogicGate(product, gate_inputs, LogicGate.NOR)
+                                    product_to_gates[product_identity].append(LogicGate(product, gate_inputs, LogicGate.NOR))
                             else:
-                                product_to_gates[product_identity] = LogicGate(product, gate_inputs, LogicGate.NAND)
+                                product_to_gates[product_identity].append(LogicGate(product, gate_inputs, LogicGate.NAND))
 
         return product_to_gates
 
-    def __build_production_map(self, circuit_def, circuit_doc, production_map={}, is_canonical=True):
+    def __build_production_map(self, circuit_def, circuit_doc, is_canonical=True):
+        production_map = {}
+
         for intxn in circuit_def.interactions:
             if sbol.SBO_GENETIC_PRODUCTION in intxn.types:
                 regulator_dict = {}
@@ -403,11 +420,13 @@ class LogicCircuit():
         for sub_circuit in circuit_def.modules:
             sub_circuit_def = circuit_doc.moduleDefinitions.get(sub_circuit.definition)
 
-            self.__build_production_map(sub_circuit_def, circuit_doc, production_map, is_canonical)
+            production_map.update(self.__build_production_map(sub_circuit_def, circuit_doc, is_canonical))
 
         return production_map
 
-    def __build_activation_map(self, circuit_def, circuit_doc, activation_map={}, is_canonical=True):
+    def __build_activation_map(self, circuit_def, circuit_doc, is_canonical=True):
+        activation_map = {}
+
         for intxn in circuit_def.interactions:
             if sbol.SBO_STIMULATION in intxn.types:
                 activator_dict = {}
@@ -441,11 +460,13 @@ class LogicCircuit():
         for sub_circuit in circuit_def.modules:
             sub_circuit_def = circuit_doc.moduleDefinitions.get(sub_circuit.definition)
 
-            self.__build_activation_map(sub_circuit_def, circuit_doc, activation_map, is_canonical)
+            activation_map.update(self.__build_activation_map(sub_circuit_def, circuit_doc, is_canonical))
 
         return activation_map
 
-    def __build_repression_map(self, circuit_def, circuit_doc, repression_map={}, is_canonical=True):
+    def __build_repression_map(self, circuit_def, circuit_doc, is_canonical=True):
+        repression_map = {}
+
         for intxn in circuit_def.interactions:
             if sbol.SBO_INHIBITION in intxn.types:
                 repressor_dict = {}
@@ -479,12 +500,14 @@ class LogicCircuit():
         for sub_circuit in circuit_def.modules:
             sub_circuit_def = circuit_doc.moduleDefinitions.get(sub_circuit.definition)
 
-            self.__build_repression_map(sub_circuit_def, circuit_doc, repression_map, is_canonical)
+            repression_map.update(self.__build_repression_map(sub_circuit_def, circuit_doc, is_canonical))
 
         return repression_map
 
-    def __distill_transcription_map(self, circuit_def, circuit_doc, activation_map, transcription_map={}, is_canonical=True):
-        deleted_keys = []
+    def __distill_transcription_map(self, circuit_def, circuit_doc, activation_map, is_canonical=True):
+        transcription_map = {}
+
+        deleted_keys = set()
 
         for activated_identity in activation_map:
             for activators in activation_map[activated_identity]:
@@ -499,7 +522,7 @@ class LogicCircuit():
 
                         transcription_map[activated_identity].append(activators[0])
 
-                        deleted_keys.append(activated_identity)
+                        deleted_keys.add(activated_identity)
 
         for deleted_key in deleted_keys:
             del activation_map[deleted_key]
@@ -507,9 +530,38 @@ class LogicCircuit():
         for sub_circuit in circuit_def.modules:
             sub_circuit_def = circuit_doc.moduleDefinitions.get(sub_circuit.definition)
 
-            self.__distill_transcription_map(sub_circuit_def, circuit_doc, activation_map, transcription_map, is_canonical)
+            transcription_map.update(self.__distill_transcription_map(sub_circuit_def, circuit_doc, activation_map, is_canonical))
 
         return transcription_map
+
+    def __distill_induction_map(self, circuit_def, circuit_doc, regulation_map, is_canonical=True):
+        induction_map = {}
+
+        deleted_keys = []
+
+        for regulated_identity in regulation_map:
+            for regulators in regulation_map[regulated_identity]:
+                if len(regulators) == 1:
+                    regulated_def = circuit_doc.componentDefinitions.get(self.__species_dict[regulated_identity].canonical_identity)
+                    regulator_def = circuit_doc.componentDefinitions.get(regulators[0].canonical_identity)
+
+                    if sbol.BIOPAX_PROTEIN in regulated_def.types and sbol.BIOPAX_SMALL_MOLECULE in regulator_def.types:
+                        if regulated_identity not in induction_map:
+                            induction_map[regulated_identity] = []
+
+                        induction_map[regulated_identity].append(regulators[0])
+
+                        deleted_keys.append(regulated_identity)
+
+        for deleted_key in deleted_keys:
+            del regulation_map[deleted_key]
+
+        for sub_circuit in circuit_def.modules:
+            sub_circuit_def = circuit_doc.moduleDefinitions.get(sub_circuit.definition)
+
+            induction_map.update(self.__distill_induction_map(sub_circuit_def, circuit_doc, regulation_map, is_canonical))
+
+        return induction_map
 
     def compute_truth_table(self, is_canonical=True):
         truth_table = []
@@ -586,8 +638,16 @@ def main(args=None):
     sbol.Config.setOption('validate', args.validate)
     sbol.Config.setOption('sbol_typed_uris', False)
 
-    for i in range (0, len(args.target_files)):
-        target_doc = load_sbol(args.target_files[i])
+    target_files = []
+    for target_file in args.target_files:
+        if os.path.isdir(target_file):
+            target_files.extend([os.path.join(target_file, tf) for tf in os.listdir(target_file) if
+                                 os.path.isfile(os.path.join(target_file, tf)) and tf.endswith('.xml')])
+        else:
+            target_files.append(target_file)
+
+    for i in range (0, len(target_files)):
+        target_doc = load_sbol(target_files[i])
 
         sub_network_identities = set()
         network_identities = set()
@@ -606,38 +666,39 @@ def main(args=None):
 
             truth_table = logic_circuit.compute_truth_table()
 
-            print(logic_circuit.serialize())
+            # print(logic_circuit.serialize())
+
+            # for csv_row in logic_circuit.serialize_truth_table(truth_table):
+                # print(csv_row)
+        
+        if len(args.output_files) == 1 and os.path.isdir(args.output_files[0]):
+            (target_file_path, target_filename) = os.path.split(target_files[i])
+            (target_file_base, target_file_extension) = os.path.splitext(target_filename)
+
+            if len(args.table_suffix) > 0:
+                output_file = os.path.join(args.output_files[0], '_'.join([target_file_base, args.table_suffix + '.csv']))
+            else:
+                output_file = os.path.join(args.output_files[0], target_file_base + '.csv')
+
+        elif i < len(args.output_files):
+            output_file = args.output_files[i]
+        else:
+            (target_file_base, target_file_extension) = os.path.splitext(target_files[i])
+
+            if len(args.table_suffix) > 0:
+                output_file = '_'.join([target_file_base, args.table_suffix + '.csv'])
+            else:
+                output_file = target_file_base + '.csv'
+
+        logging.info('Writing %s', output_file)
+
+        with open(output_file, 'w', newline='\n') as csv_file:
+            tt_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
             for csv_row in logic_circuit.serialize_truth_table(truth_table):
-                print(csv_row)
-        
-        # if len(args.output_files) == 1 and os.path.isdir(args.output_files[0]):
-        #     (target_file_path, target_filename) = os.path.split(target_files[i])
-        #     (target_file_base, target_file_extension) = os.path.splitext(target_filename)
+                tt_writer.writerow(csv_row)
 
-        #     if len(args.circuit_suffix) > 0:
-        #         output_file = os.path.join(args.output_files[0], '_'.join([target_file_base, args.circuit_suffix + target_file_extension]))
-        #     else:
-        #         output_file = os.path.join(args.output_files[0], target_file_base + target_file_extension)
-
-        # elif i < len(args.output_files):
-        #     output_file = args.output_files[i]
-        # else:
-        #     (target_file_base, target_file_extension) = os.path.splitext(target_files[i])
-
-        #     if len(args.circuit_suffix) > 0:
-        #         output_file = '_'.join([target_file_base, args.circuit_suffix + target_file_extension])
-        #     else:
-        #         output_file = target_file_base + target_file_extension
-
-        #     if sbol.Config.getOption('validate') == True:
-        #         logging.info('Validating and writing %s', output_file)
-        #     else:
-        #         logging.info('Writing %s', output_file)
-
-        # target_doc.write(output_file)
-
-    #     logging.info('Finished writing %s', output_file)
+        logging.info('Finished writing %s', output_file)
 
     logging.info('Finished generating truth tables')
 

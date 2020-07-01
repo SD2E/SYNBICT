@@ -777,8 +777,8 @@ class FeatureAnnotater():
                                             best_score = score
                                             best_nucleotides = target_nucleotides
 
-                                        if len(best_nucleotides) < len(feature_nucleotides):
-                                            max_score = len(best_nucleotides)
+                                        if len(target_nucleotides) < len(feature_nucleotides):
+                                            max_score = len(target_nucleotides)
                                         else:
                                             max_score = len(feature_nucleotides)
 
@@ -1231,6 +1231,7 @@ def main(args=None):
     parser.add_argument('-np', '--no_pruning', action='store_true')
     parser.add_argument('-e', '--extend_features', action='store_true')
     parser.add_argument('-x', '--extension_threshold', nargs='?', default=0.05)
+    parser.add_argument('-xs', '--extension_suffix', nargs='?', default='')
     parser.add_argument('-s', '--curation_suffix', nargs='?', default='')
     parser.add_argument('-p', '--in_place', action='store_true')
     # parser.add_argument('-s', '--sbh_URL', nargs='?', default=None)
@@ -1266,7 +1267,7 @@ def main(args=None):
     for target_file in args.target_files:
         if os.path.isdir(target_file):
             target_files.extend([os.path.join(target_file, tf) for tf in os.listdir(target_file) if
-                                 os.path.isfile(os.path.join(target_file, tf))])
+                                 os.path.isfile(os.path.join(target_file, tf)) and tf.endswith('.xml')])
         else:
             target_files.append(target_file)
 
@@ -1318,7 +1319,11 @@ def main(args=None):
 
         for extended_doc in feature_annotater.get_updated_documents():
             (extended_file_base, extended_file_extension) = os.path.splitext(extended_doc.name)
-            extended_file = extended_file_base + '_extended.xml'
+
+            if len(args.extension_suffix) > 0:
+                extended_file = '_'.join([extended_file_base, args.extension_suffix]) + '.xml'
+            else:
+                extended_file = extended_file_base + '_extended.xml'
 
             logging.info('Writing %s', extended_file)
 

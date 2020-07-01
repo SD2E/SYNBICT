@@ -5,6 +5,7 @@ import sys
 
 from Bio.Seq import Seq
 from Bio import Align
+from Bio.Alphabet import generic_dna
 import sbol
 from flashtext import KeywordProcessor
 from sequences_to_features import Feature
@@ -30,9 +31,7 @@ def load_sbol(sbol_file):
 
 class FeatureAnnotation():
 
-    def __init__(self, identity, displayId, start, end, definition, roles):
-        self.identity = identity
-        self.displayId = displayId
+    def __init__(self, start, end, definition, roles):
         self.start = start
         self.end = end
         self.definition = definition
@@ -59,10 +58,17 @@ class Circuit():
 
 class Sensor():
 
-    def __init__(self, identity, sensor_element, sensed_element):
+    def __init__(self, identity, sensor_element, sensed_element, sensor_type):
         self.identity = identity
         self.sensor_element = sensor_element
         self.sensed_element = sensed_element
+        self.sensor_types = {sensor_type}
+
+    def add_sensor_type(self, sensor_type):
+        self.sensor_types.add(sensor_type)
+
+    def get_abstraction_types(self):
+        return list(self.sensor_types.difference({CircuitLibrary.SBO_NON_COVALENT_BINDING}))
 
 class CircuitLibrary():
 
@@ -87,12 +93,13 @@ class CircuitLibrary():
 
         for i in range(0, len(self.docs)):
             for mod_definition in self.docs[i].moduleDefinitions:
-                if len(mod_definition.interactions) == 1:
-                    intxn = mod_definition.interactions[0]
+                # if len(mod_definition.interactions) == 1:
+                features = self.__extract_features(self.docs[i], mod_definition)
 
-                    features = self.__extract_features(self.docs[i], mod_definition)
+                if len(features) > 0:
+                    for intxn in mod_definition.interactions:
+                        # intxn = mod_definition.interactions[0]
 
-                    if len(features) > 0:
                         if sbol.SBO_STIMULATION in intxn.types:
                             stimulator = None
                             stimulated = None
@@ -103,7 +110,7 @@ class CircuitLibrary():
                                 elif sbol.SBO_STIMULATED in par.roles:
                                     stimulated = mod_definition.functionalComponents.get(par.participant).definition
 
-                            if stimulator is not None and stimulated is not None:
+                            if stimulator and stimulated:
                                 if stimulator not in self.__activator_to_dna:
                                     self.__activator_to_dna[stimulator] = []
 
@@ -118,7 +125,7 @@ class CircuitLibrary():
                                 elif sbol.SBO_INHIBITED in par.roles:
                                     inhibited = mod_definition.functionalComponents.get(par.participant).definition
 
-                            if inhibitor is not None and inhibited is not None:
+                            if inhibitor and inhibited:
                                 if inhibitor not in self.__repressor_to_dna:
                                     self.__repressor_to_dna[inhibitor] = []
 
@@ -133,45 +140,57 @@ class CircuitLibrary():
                                 elif self.SBO_TEMPLATE in par.roles:
                                     template = mod_definition.functionalComponents.get(par.participant).definition
 
-                            if template is not None and product is not None:
+                            if template and product:
                                 if template not in self.__template_to_product:
                                     self.__template_to_product[template] = []
 
                                 self.__template_to_product[template].append(product)
 
-                        for template in self.__template_to_product:
-                            for product in self.__template_to_product[template]:
-                                if product in self.__activator_to_dna:
-                                    self.__dna_to_dna_activation[template] = list(self.__activator_to_dna[product])
+                    for template in self.__template_to_product:
+                        for product in self.__template_to_product[template]:
+                            if product in self.__activator_to_dna:
+                                self.__dna_to_dna_activation[template] = list(self.__activator_to_dna[product])
 
-                                if product in self.__repressor_to_dna:
-                                    self.__dna_to_dna_repression[template] = list(self.__repressor_to_dna[product])
+                            if product in self.__repressor_to_dna:
+                                self.__dna_to_dna_repression[template] = list(self.__repressor_to_dna[product])
 
-                        self.circuits.append(Circuit(mod_definition.identity, features))
+                    self.circuits.append(Circuit(mod_definition.identity, features))
 
-                        self.__circuit_map[mod_definition.identity] = i
-                    else:
-                        if self.SBO_NON_COVALENT_BINDING in intxn.types:
-                            sensor_element = None
-                            sensed_element = None
+                    self.__circuit_map[mod_definition.identity] = i
+                elif self.SBO_NON_COVALENT_BINDING in intxn.types:
+                    sensor_element = None
+                    sensed_element = None
 
-                            for par in intxn.participations:
-                                if sbol.SBO_REACTANT in par.roles:
-                                    fc = mod_definition.functionalComponents.get(par.participant)
+                    for par in intxn.participations:
+                        if sbol.SBO_REACTANT in par.roles:
+                            reactant = mod_definition.functionalComponents.get(par.participant).definition
 
-                                    reactant_definition = self.docs[i].componentDefinitions.get(fc.definition)
+                            reactant_definition = self.docs[i].componentDefinitions.get(reactant)
 
-                                    if sbol.BIOPAX_PROTEIN in reactant_definition.types:
-                                        sensor_element = reactant_definition.identity
-                                    elif sbol.BIOPAX_SMALL_MOLECULE in reactant_definition.types:
-                                        sensed_element = reactant_definition.identity
+                            if sbol.BIOPAX_PROTEIN in reactant_definition.types:
+                                sensor_element = reactant_definition.identity
+                            elif sbol.BIOPAX_SMALL_MOLECULE in reactant_definition.types:
+                                sensed_element = reactant_definition.identity
 
-                            if sensor_element and sensed_element:
-                                self.sensors.append(Sensor(mod_definition.identity, sensor_element, sensed_element))
+                    if sensor_element and sensed_element:
+                        self.sensors.append(Sensor(mod_definition.identity,
+                                                   sensor_element,
+                                                   sensed_element,
+                                                   self.SBO_NON_COVALENT_BINDING))
 
-                                self.__sensor_map[mod_definition.identity] = i
+                        self.__sensor_map[mod_definition.identity] = i
+
+        self.__abstract_sensors()
 
         logging.info('Finished loading circuits')
+
+    def __abstract_sensors(self):
+        for sensor in self.sensors:
+            if self.SBO_NON_COVALENT_BINDING in sensor.sensor_types:
+                if sensor.sensor_element in self.__activator_to_dna:
+                    sensor.add_sensor_type(sbol.SBO_STIMULATION)
+                elif sensor.sensor_element in self.__repressor_to_dna:
+                    sensor.add_sensor_type(sbol.SBO_INHIBITION)
 
     def __extract_features(self, doc, mod_definition):
         features = []
@@ -189,7 +208,7 @@ class CircuitLibrary():
             except:
                 sub_definition = None
 
-            if sub_definition is not None:
+            if sub_definition:
                 sub_features = cls.__extract_features(doc, sub_definition)
 
                 if len(sub_features) == 0:
@@ -266,8 +285,13 @@ class CircuitLibrary():
                                 best_score = score
                                 best_nucleotides = feature_nucleotides
 
-                            if len(best_nucleotides) < len(circuit.features[0].nucleotides):
-                                max_score = len(best_nucleotides)
+                            # if len(best_nucleotides) < len(circuit.features[0].nucleotides):
+                            #     max_score = len(best_nucleotides)
+                            # else:
+                            #     max_score = len(circuit.features[0].nucleotides)
+
+                            if len(feature_nucleotides) < len(circuit.features[0].nucleotides):
+                                max_score = len(feature_nucleotides)
                             else:
                                 max_score = len(circuit.features[0].nucleotides)
 
@@ -314,10 +338,17 @@ class CircuitLibrary():
     @classmethod
     def reidentify_SBOL(cls, sbol_obj, target_path, replacement_path):
         sbol_obj.identity = sbol_obj.identity.replace(target_path, replacement_path)
+        split_identity = sbol_obj.identity.split('/')
+        sbol_obj.identity = '/'.join(split_identity[:-1] + ['1'])
+
+        sbol_obj.version = '1'
+
         sbol_obj.persistentIdentity = sbol_obj.persistentIdentity.replace(target_path, replacement_path)
 
         try:
             sbol_obj.participant = sbol_obj.participant.replace(target_path, replacement_path)
+            split_par_identity = sbol_obj.participant.split('/')
+            sbol_obj.participant = '/'.join(split_par_identity[:-1] + ['1'])
         except AttributeError:
             pass
 
@@ -329,7 +360,7 @@ class CircuitLibrary():
         circuit_doc.moduleDefinitions.remove(circuit_definition.identity)
 
         variant_seqs = FeatureLibrary.get_DNA_sequences(variant_definition, variant_doc)
-        variant_amino_acids = str(Seq(variant_seqs[0].elements, generic_dna).translate(stop_to=True)).upper()
+        variant_amino_acids = str(Seq(variant_seqs[0].elements, generic_dna).translate(to_stop=True)).upper()
 
         variant_index = 1
         unique_flag = False
@@ -338,16 +369,18 @@ class CircuitLibrary():
             variant_ID = '_'.join([circuit_definition.displayId, 'v' + str(variant_index)])
 
             split_identity = circuit_definition.identity.split('/')
-            variant_identity = '/'.join(split_identity[:-2] + [variant_ID, split_identity[-1]])
+            variant_identity = '/'.join(split_identity[:-2] + [variant_ID, '1'])
             variant_p_identity = '/'.join(split_identity[:-2] + [variant_ID])
 
             original_identity = circuit_definition.identity
             original_ID = circuit_definition.displayId
             original_p_identity = circuit_definition.persistentIdentity
+            original_version = circuit_definition.version
 
             circuit_definition.identity = variant_identity
             circuit_definition.displayId = variant_ID
             circuit_definition.persistentIdentity = variant_p_identity
+            circuit_definition.version = '1'
 
             try:
                 circuit_doc.moduleDefinitions.add(circuit_definition)
@@ -357,6 +390,7 @@ class CircuitLibrary():
                 circuit_definition.identity = original_identity
                 circuit_definition.displayId = original_ID
                 circuit_definition.persistentIdentity = original_p_identity
+                circuit_definition.version = original_version
 
                 variant_index = variant_index + 1
 
@@ -431,6 +465,8 @@ class CircuitLibrary():
                     mod_definition_copy = None
 
                     copy_version = copy_version + 1
+
+            mod_definition_copy.wasDerivedFrom = [mod_definition.identity]
         else:
             try:
                 return sink_doc.moduleDefinitions.get(mod_definition.identity)
@@ -456,7 +492,7 @@ class CircuitLibrary():
 
                 sub_mod_copy = mod_definition_copy.modules.get(sub_mod.displayId)
 
-                if sub_mod_definition_copy is not None:
+                if sub_mod_definition_copy:
                     sub_mod_copy.definition = sub_mod_definition_copy.identity
 
             for func_comp in mod_definition.functionalComponents:
@@ -464,9 +500,9 @@ class CircuitLibrary():
 
                 sub_comp_definition_copy = FeatureLibrary.copy_component_definition(sub_comp_definition, source_doc, sink_doc)
 
-                sub_comp_copy = mod_definition_copy.components.get(func_comp.displayId)
+                sub_comp_copy = mod_definition_copy.functionalComponents.get(func_comp.displayId)
 
-                if sub_comp_definition_copy is not None:
+                if sub_comp_definition_copy:
                     sub_comp_copy.definition = sub_comp_definition_copy.identity
         else:
             for sub_mod in mod_definition.modules:
@@ -489,7 +525,7 @@ class CircuitBuilder():
         self.circuit_library = circuit_library
 
     def add_sensors(self, target_doc, circuit_definition, sub_circuits, input_identities=set(),
-            sensor_index=0, species_index=0):
+            output_identities=set(), sensor_index=0, species_index=0):
         product_identities = set()
 
         for sub_circuit in sub_circuits:
@@ -517,23 +553,116 @@ class CircuitBuilder():
 
             sensor_doc = self.circuit_library.get_document(covered_sensors[i].identity)
 
-            sensor_definition = self.circuit_library.get_definition(covered_sensors[i].identity)
+            abstraction_types = covered_sensors[i].get_abstraction_types()
 
-            for sub_fc in sensor_definition.functionalComponents:
-                if sub_fc.definition in input_identities:
-                    species_fc = circuit_definition.functionalComponents.create('circuit_species_' + str(species_index + k + 1))
+            if len(abstraction_types) == 1:
+                sensor_fc = self.get_circuit_species(covered_sensors[i].sensor_element, circuit_definition)
 
-                    if sub_fc.name:
-                        species_fc.name = sub_fc.name
-                    species_fc.definition = sub_fc.definition
-                    species_fc.direction = sbol.SBOL_DIRECTION_IN
-
+                if not sensor_fc:
+                    sensor_fc = self.create_circuit_species(covered_sensors[i].sensor_element,
+                                                sensor_doc,
+                                                circuit_definition,
+                                                species_index + k + 1,
+                                                input_identities,
+                                                output_identities)
+                    
                     k = k + 1
 
-            CircuitLibrary.copy_module_definition(sensor_definition, sensor_doc, target_doc)
+                sensed_fc = self.get_circuit_species(covered_sensors[i].sensed_element, circuit_definition)
+
+                if not sensed_fc:
+                    sensed_fc = self.create_circuit_species(covered_sensors[i].sensed_element,
+                                                sensor_doc,
+                                                circuit_definition,
+                                                species_index + k + 1,
+                                                input_identities,
+                                                output_identities)
+
+                    k = k + 1
+                
+                if abstraction_types[0] == sbol.SBO_STIMULATION:
+                    sensor_intxn_ID = '_stimulates_'.join([sensed_fc.displayId, sensor_fc.displayId])
+                elif abstraction_types[0] == sbol.SBO_INHIBITION:
+                    sensor_intxn_ID = '_inhibits_'.join([sensed_fc.displayId, sensor_fc.displayId])
+                else:
+                    sensor_intxn_ID = '_senses_'.join([sensor_fc.displayId, sensed_fc.displayId])
+
+                sensor_intxn = circuit_definition.interactions.create(sensor_intxn_ID)
+                sensor_intxn.types = abstraction_types
+
+                if sensed_fc.name and sensor_fc.name:
+                    if abstraction_types[0] == sbol.SBO_STIMULATION:
+                        sensor_intxn.name = ' stimulates '.join([sensed_fc.name, sensor_fc.name])
+                    elif abstraction_types[0] == sbol.SBO_INHIBITION:
+                        sensor_intxn.name = ' inhibits '.join([sensed_fc.name, sensor_fc.name])
+                    else:
+                        sensor_intxn.name = ' senses '.join([sensor_fc.name, sensed_fc.name])
+
+                sensor_par = sensor_intxn.participations.create(sensor_fc.displayId)
+                sensed_par = sensor_intxn.participations.create(sensed_fc.displayId)
+
+                if sensor_fc.name:
+                    sensor_par.name = sensor_fc.name
+                if sensed_fc.name:
+                    sensed_par.name = sensed_fc.name
+
+                sensor_par.participant = sensor_fc.identity
+                sensed_par.participant = sensed_fc.identity
+
+                if abstraction_types[0] == sbol.SBO_STIMULATION:
+                    sensor_par.roles = [sbol.SBO_STIMULATED]
+                    sensed_par.roles = [sbol.SBO_STIMULATOR]
+                elif abstraction_types[0] == sbol.SBO_INHIBITION:
+                    sensor_par.roles = [sbol.SBO_INHIBITED]
+                    sensed_par.roles = [sbol.SBO_INHIBITOR]
+
+                sensor_intxn.wasDerivedFrom = [covered_sensors[i].identity]
+            else:
+                sensor_definition = self.circuit_library.get_definition(covered_sensors[i].identity)
+
+                CircuitLibrary.copy_module_definition(sensor_definition, sensor_doc, target_doc)
+
+        return k
 
     @classmethod
-    def infer_transcription(cls, target_doc, circuit_definition, constructs, tx_threshold):
+    def get_circuit_species(cls, species_identity, circuit_definition):
+        for species_fc in circuit_definition.functionalComponents:
+            if species_fc.definition == species_identity:
+                return species_fc
+
+        return None
+
+    @classmethod
+    def create_circuit_species(cls, species_identity, species_doc, circuit_definition, species_index,
+            input_identities=set(), output_identities=set()):
+        species_ID = 'circuit_species_' + str(species_index)
+        species_fc = circuit_definition.functionalComponents.create(species_ID)
+
+        try:
+            species_definition = species_doc.componentDefinitions.get(species_identity)
+
+            if species_definition.name:
+                species_fc.name = species_definition.name
+        except RuntimeError:
+            pass
+
+        species_fc.definition = species_identity
+
+        if species_identity in input_identities:
+            if species_identity in output_identities:
+                species_fc.direction = sbol.SBOL_DIRECTION_IN_OUT
+            else:
+                species_fc.direction = sbol.SBOL_DIRECTION_IN
+        elif species_identity in output_identities:
+            species_fc.direction = sbol.SBOL_DIRECTION_OUT
+
+        return species_fc
+
+    @classmethod
+    def infer_transcription(cls, target_doc, circuit_definition, constructs, tx_threshold, species_index=0,
+            input_identities=set(), output_identities=set()):
+        k = 0
+
         for construct in constructs:
             construct_definition = target_doc.componentDefinitions.get(construct.identity)
 
@@ -549,9 +678,7 @@ class CircuitBuilder():
                     sub_comp = construct_definition.components.get(seq_anno.component)
                     part_definition = target_doc.componentDefinitions.get(sub_comp.definition)
 
-                    feature_anno = FeatureAnnotation(sub_comp.identity,
-                                                     sub_comp.displayId,
-                                                     anno_range.start,
+                    feature_anno = FeatureAnnotation(anno_range.start,
                                                      anno_range.end,
                                                      part_definition.identity,
                                                      part_definition.roles)
@@ -573,26 +700,41 @@ class CircuitBuilder():
                     elif (tx_distance > 0 
                             and sbol.SO_PROMOTER in inline_annos[i].roles
                             and sbol.SO_CDS in inline_annos[j].roles):
-                        stimulation = circuit_definition.interactions.create('_stimulates_'.join([inline_annos[i].displayId, inline_annos[j].displayId]))
+                        fc1 = cls.get_circuit_species(inline_annos[i].definition, circuit_definition)
+
+                        if not fc1:
+                            fc1 = cls.create_circuit_species(inline_annos[i].definition,
+                                                              target_doc,
+                                                              circuit_definition,
+                                                              species_index + k + 1,
+                                                              input_identities,
+                                                              output_identities)
+
+                            k = k + 1
+
+                        fc2 = cls.get_circuit_species(inline_annos[j].definition, circuit_definition)
+
+                        if not fc2:
+                            fc2 = cls.create_circuit_species(inline_annos[j].definition,
+                                                              target_doc,
+                                                              circuit_definition,
+                                                              species_index + k + 1,
+                                                              input_identities,
+                                                              output_identities)
+
+                            k = k + 1
+
+                        stimulation = circuit_definition.interactions.create('_stimulates_'.join([fc1.displayId, fc2.displayId]))
                         stimulation.types = [sbol.SBO_STIMULATION]
 
-                        try:
-                            fc1 = circuit_definition.functionalComponents.create(rc_annos[i].displayId)
-                            fc1.definition = rc_annos[i].definition
-                        except:
-                            fc1 = circuit_definition.functionalComponents.get(rc_annos[i].displayId)
+                        if fc1.name and fc2.name:
+                            stimulation.name = ' stimulates '.join([fc1.name, fc2.name])
 
-                        try:
-                            fc2 = circuit_definition.functionalComponents.create(rc_annos[j].displayId)
-                            fc2.definition = rc_annos[j].definition
-                        except:
-                            fc2 = circuit_definition.functionalComponents.get(rc_annos[j].displayId)
-
-                        stimulator = stimulation.participations.create(inline_annos[i].displayId)
+                        stimulator = stimulation.participations.create(fc1.displayId)
                         stimulator.roles = [sbol.SBO_STIMULATOR]
                         stimulator.participant = fc1.identity
 
-                        stimulated = stimulation.participations.create(inline_annos[j].displayId)
+                        stimulated = stimulation.participations.create(fc2.displayId)
                         stimulated.roles = [sbol.SBO_STIMULATED]
                         stimulated.participant = fc2.identity
 
@@ -607,34 +749,48 @@ class CircuitBuilder():
                     elif (tx_distance > 0
                             and sbol.SO_CDS in rc_annos[i].roles
                             and sbol.SO_PROMOTER in rc_annos[j].roles):
-                        stimulation = circuit_definition.interactions.create('_stimulates_'.join([rc_annos[j].displayId, rc_annos[i].displayId]))
+                        fc1 = cls.get_circuit_species(rc_annos[i].definition, circuit_definition)
+
+                        if not fc1:
+                            fc1 = cls.create_circuit_species(rc_annos[i].definition,
+                                                              target_doc,
+                                                              circuit_definition,
+                                                              species_index + k + 1,
+                                                              input_identities,
+                                                              output_identities)
+
+                            k = k + 1
+
+                        fc2 = cls.get_circuit_species(rc_annos[j].definition, circuit_definition)
+
+                        if not fc2:
+                            fc2 = cls.create_circuit_species(rc_annos[j].definition,
+                                                              target_doc,
+                                                              circuit_definition,
+                                                              species_index + k + 1,
+                                                              input_identities,
+                                                              output_identities)
+
+                            k = k + 1
+
+                        stimulation = circuit_definition.interactions.create('_stimulates_'.join([fc2.displayId, fc1.displayId]))
                         stimulation.types = [sbol.SBO_STIMULATION]
 
-                        try:
-                            fc1 = circuit_definition.functionalComponents.create(rc_annos[i].displayId)
-                            fc1.definition = rc_annos[i].definition
-                        except:
-                            fc1 = circuit_definition.functionalComponents.get(rc_annos[i].displayId)
+                        if fc1.name and fc2.name:
+                            stimulation.name = ' stimulates '.join([fc2.name, fc1.name])
 
-                        try:
-                            fc2 = circuit_definition.functionalComponents.create(rc_annos[j].displayId)
-                            fc2.definition = rc_annos[j].definition
-                        except:
-                            fc2 = circuit_definition.functionalComponents.get(rc_annos[j].displayId)
-
-                        stimulator = stimulation.participations.create(rc_annos[j].displayId)
+                        stimulator = stimulation.participations.create(fc2.displayId)
                         stimulator.roles = [sbol.SBO_STIMULATOR]
                         stimulator.participant = fc2.identity
 
-                        stimulated = stimulation.participations.create(rc_annos[i].displayId)
+                        stimulated = stimulation.participations.create(fc1.displayId)
                         stimulated.roles = [sbol.SBO_STIMULATED]
                         stimulated.participant = fc1.identity
                         
                         logging.debug('Inferred promoter-CDS stimulation %s', stimulation.identity)
 
-
     def build(self, circuit_id, target_doc, constructs, version='1', tx_threshold=0,
-            input_identities=set(), output_identities=set()):
+            input_identities=set(), output_identities=set(), no_sensors=False):
         circuit_definition = sbol.ModuleDefinition(circuit_id, version)
         circuit_definition.roles = [self.NCIT_BIOCHEMICAL_PATHWAY]
 
@@ -696,33 +852,29 @@ class CircuitBuilder():
                     sub_circuit_definition = self.circuit_library.get_definition(covered_circuits[i].identity)
 
                     for sub_fc in sub_circuit_definition.functionalComponents:
-                        if sub_fc.definition in input_identities:
-                            species_fc = circuit_definition.functionalComponents.create('species_' + str(k + 1))
+                        if sub_fc.definition in input_identities or sub_fc.definition in output_identities:
+                            species_fc = self.get_circuit_species(sub_fc.definition, circuit_definition)
 
-                            if sub_fc.name:
-                                species_fc.name = sub_fc.name
-                            species_fc.definition = sub_fc.definition
-                            species_fc.direction = sbol.SBOL_DIRECTION_IN
+                            if not species_fc:
+                                self.create_circuit_species(sub_fc.definition,
+                                                            sub_circuit_doc,
+                                                            circuit_definition,
+                                                            k + 1,
+                                                            input_identities,
+                                                            output_identities)
 
-                            k = k + 1
-                        elif sub_fc.definition in output_identities:
-                            species_fc = circuit_definition.functionalComponents.create('circuit_species_' + str(k + 1))
-                            
-                            if sub_fc.name:
-                                species_fc.name = sub_fc.name
-                            species_fc.definition = sub_fc.definition
-                            species_fc.direction = sbol.SBOL_DIRECTION_OUT
+                                k = k + 1
 
-                            k = k + 1
-
-                    CircuitLibrary.copy_module_definition(sub_circuit_definition, sub_circuit_doc, target_doc)
+                    CircuitLibrary.copy_module_definition(sub_circuit_definition, sub_circuit_doc, target_doc, deep_copy=True)
 
                     logging.debug('Added sub-circuit %s', sub_circuit_definition.identity)
 
-                self.add_sensors(target_doc, circuit_definition, covered_circuits, input_identities,
-                    len(covered_circuits), k)
+                if not no_sensors:
+                    k = self.add_sensors(target_doc, circuit_definition, covered_circuits, input_identities,
+                        output_identities, len(covered_circuits), k)
 
-                self.infer_transcription(target_doc, circuit_definition, constructs, tx_threshold)
+                self.infer_transcription(target_doc, circuit_definition, constructs, tx_threshold, k,
+                    input_identities, output_identities)
 
                 target_doc.addModuleDefinition(circuit_definition)
 
@@ -753,10 +905,12 @@ def main(args=None):
     parser.add_argument('-cv', '--circuit_version', nargs='?', default='1')
     parser.add_argument('-v', '--validate', action='store_true')
     parser.add_argument('-s', '--circuit_suffix', nargs='?', default='')
+    parser.add_argument('-xs', '--extension_suffix', nargs='?', default='')
     parser.add_argument('-e', '--extend_sub_circuits', action='store_true')
     parser.add_argument('-x', '--extension_threshold', nargs='?', default='0.05')
     parser.add_argument('-d', '--tx_threshold', nargs='?', default='200')
     parser.add_argument('-nb', '--no_build', action='store_true')
+    parser.add_argument('-ns', '--no_sensors', action='store_true')
     parser.add_argument('-ii', '--input_identities', nargs='*', default=[])
     parser.add_argument('-oi', '--output_identities', nargs='*', default=[])
     
@@ -793,7 +947,11 @@ def main(args=None):
 
         for extended_doc in circuit_library.get_updated_documents():
             (extended_file_base, extended_file_extension) = os.path.splitext(extended_doc.name)
-            extended_file = extended_file_base + '_extended.xml'
+
+            if len(args.extension_suffix) > 0:
+                extended_file = '_'.join([extended_file_base, args.extension_suffix]) + '.xml'
+            else:
+                extended_file = extended_file_base + '_extended.xml'
 
             logging.info('Writing %s', extended_file)
 
@@ -811,7 +969,7 @@ def main(args=None):
         for target_file in args.target_files:
             if os.path.isdir(target_file):
                 target_files.extend([os.path.join(target_file, tf) for tf in os.listdir(target_file) if
-                                     os.path.isfile(os.path.join(target_file, tf))])
+                                     os.path.isfile(os.path.join(target_file, tf)) and tf.endswith('.xml')])
             else:
                 target_files.append(target_file)
 
@@ -846,7 +1004,8 @@ def main(args=None):
                                                     args.circuit_version,
                                                     int(args.tx_threshold),
                                                     set(args.input_identities),
-                                                    set(args.output_identities))
+                                                    set(args.output_identities),
+                                                    args.no_sensors)
 
             if build_success:
                 if len(args.output_files) == 1 and os.path.isdir(args.output_files[0]):
