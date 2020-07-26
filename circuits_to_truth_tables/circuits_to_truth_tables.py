@@ -93,6 +93,49 @@ class LogicGate():
     def get_output(self):
         return self.__gate_output
 
+    def serialize_logic(self, display_ID=False):
+        if display_ID:
+            input_identities = [
+                                 gi.get_identity().split('/')[-2]
+                                 for gi in self.__gate_inputs
+                                 if len(gi.get_identity().split('/')) > 1
+                                ]
+        else:
+            input_identities = [
+                                 gi.get_identity()
+                                 for gi in self.__gate_inputs
+                                ]
+
+        if display_ID:
+            if len(self.__gate_output.get_identity().split('/')) > 1:
+                output_identity = self.__gate_output.get_identity().split('/')[-2]
+            else:
+                output_identity = ''
+        else:
+            output_identity = self.__gate_output.get_identity()
+
+        if len(input_identities) == len(self.__gate_inputs) and len(output_identity) > 0:
+            if len(input_identities) == 1:
+                if self.__gate_type == self.YES:
+                    return output_identity + '=(' + input_identities[0] + ')'
+                elif self.__gate_type == self.NOT:
+                    return output_identity + '=~(' + input_identities[0] + ')'
+                else:
+                    return '-'
+            elif len(input_identities) == 2:
+                if self.__gate_type == self.OR:
+                    return output_identity + '=(' + '|'.join([ii for ii in input_identities]) + ')'
+                elif self.__gate_type == self.NOR:
+                    return output_identity + '=~(' + '|'.join([ii for ii in input_identities]) + ')'
+                elif self.__gate_type == self.AND:
+                    return output_identity + '=(' + '&'.join([ii for ii in input_identities]) + ')'
+                elif self.__gate_type == self.NAND:
+                    return output_identity + '=~(' + '&'.join([ii for ii in input_identities]) + ')'
+                else:
+                    return '-'
+        else:
+            return '-' 
+
     def serialize(self, is_canonical=True):
         if len(self.__gate_inputs) == 1:
             input_1_identity = self.__gate_inputs[0].get_identity(is_canonical)
@@ -116,9 +159,11 @@ class LogicCircuit():
     SBO_MODIFIER = 'http://identifiers.org/biomodels.sbo/SBO:0000019'
     SBO_MODIFIED = 'http://identifiers.org/biomodels.sbo/SBO:0000644'
 
-    def __init__(self, circuit_def=None, circuit_doc=None, is_canonical=True):
+    def __init__(self, circuit_def=None, circuit_doc=None, is_canonical=True, infer_io=False):
         self.__circuit_inputs = []
         self.__circuit_outputs = []
+        self.__circuit_input_intermediates = []
+        self.__circuit_output_intermediates = []
         self.__species_dict = {}
 
         if circuit_def and circuit_doc:
@@ -164,33 +209,55 @@ class LogicCircuit():
                                }
 
             if len(self.__circuit_inputs) == 0:
-                self.__circuit_inputs.extend(
-                                                [
-                                                    gate_input_dict[gate_input_identity]
-                                                    for gate_input_identity in gate_input_dict
-                                                    if gate_input_identity not in gate_output_dict
-                                                ]
-                                            )
+                inferred_inputs = [
+                                    gate_input_dict[gate_input_identity]
+                                    for gate_input_identity in gate_input_dict
+                                    if gate_input_identity not in gate_output_dict
+                                  ]
+
+                if infer_io:
+                    self.__circuit_inputs.extend(inferred_inputs)
+                else:
+                    self.__circuit_input_intermediates.extend(inferred_inputs)
 
             if len(self.__circuit_outputs) == 0:
-                self.__circuit_outputs.extend(
-                                                [
-                                                    gate_output_dict[gate_output_identity]
-                                                    for gate_output_identity in gate_output_dict
-                                                    if gate_output_identity not in gate_input_dict
-                                                ]
-                                            )
+                inferred_outputs = [
+                                    gate_output_dict[gate_output_identity]
+                                    for gate_output_identity in gate_output_dict
+                                    if gate_output_identity not in gate_input_dict
+                                   ]
+
+                if infer_io:
+                    self.__circuit_outputs.extend(inferred_outputs)
+                else:
+                    self.__circuit_output_intermediates.extend(inferred_outputs)
+
+    def is_complete(self):
+        return ((len(self.__circuit_inputs) > 0 or len(self.__circuit_input_intermediates) > 0)
+                and (len(self.__circuit_outputs) > 0 or len(self.__circuit_output_intermediates) > 0))
 
     def get_intermediates(self, is_canonical=True):
         circuit_input_identities = {
-                                    circuit_input.get_identity(is_canonical)
-                                    for circuit_input in self.__circuit_inputs
+                                        circuit_input.get_identity(is_canonical)
+                                        for circuit_input in self.__circuit_inputs
                                    }
+        circuit_input_identities.update(
+                                            {
+                                                cii.get_identity(is_canonical)
+                                                for cii in self.__circuit_input_intermediates
+                                            }
+                                        )
 
         circuit_output_identities = {
                                         circuit_output.get_identity(is_canonical)
                                         for circuit_output in self.__circuit_outputs
                                     }
+        circuit_output_identities.update(
+                                            {
+                                                cio.get_identity(is_canonical)
+                                                for cio in self.__circuit_output_intermediates
+                                            }
+                                        )
 
         circuit_intermediates = [
                                     self.__species_dict[product_identity]
@@ -206,31 +273,98 @@ class LogicCircuit():
     def serialize_truth_table(self, truth_table, is_canonical=True):
         truth_csv = []
 
-        circuit_intermediates = self.get_intermediates(is_canonical)
+        if len(self.__circuit_input_intermediates) > 0:
+            table_inputs = [
+                            cii
+                            for cii in self.__circuit_input_intermediates
+                           ]
+        else:
+            table_inputs = [
+                            ci
+                            for ci in self.__circuit_inputs
+                           ]
 
-        truth_csv.append(
-                            [
-                                'input'
-                                for i in range(0, len(self.__circuit_inputs))
-                            ] +
-                            [
-                                'intermediate'
-                                for i in range(0, len(circuit_intermediates))
-                            ] +
-                            [
-                                'output'
-                                for i in range(0, len(self.__circuit_outputs))
+        table_intermediates = self.get_intermediates(is_canonical)
+
+        if len(self.__circuit_output_intermediates) > 0:
+            table_outputs = [
+                                cio
+                                for cio in self.__circuit_output_intermediates
                             ]
-                        )
+        else:
+            table_outputs = [
+                                co
+                                for co in self.__circuit_outputs
+                            ]
 
-        circuit_species = self.__circuit_inputs + circuit_intermediates + self.__circuit_outputs
+        if len(self.__circuit_input_intermediates) > 0:
+            table_input_headers = [
+                                    'intermediate'
+                                    for i in range(0, len(self.__circuit_input_intermediates))
+                                  ]
+        else:
+            table_input_headers = [
+                                    'input'
+                                    for i in range(0, len(self.__circuit_inputs))
+                                  ]
 
-        truth_csv.append(
-                            [
+        table_intermediate_headers = [
+                                        'intermediate'
+                                        for i in range(0, len(table_intermediates))
+                                     ]
+
+        if len(self.__circuit_output_intermediates) > 0:
+            table_output_headers = [
+                                    'intermediate'
+                                    for i in range(0, len(self.__circuit_output_intermediates))
+                                  ]
+        else:
+            table_output_headers = [
+                                    'output'
+                                    for i in range(0, len(self.__circuit_outputs))
+                                  ]
+
+        truth_csv.append(table_input_headers + table_intermediate_headers + table_output_headers)
+
+        circuit_species = table_inputs + table_intermediates + table_outputs
+
+        species_identities = [
                                 cs.get_identity(is_canonical)
                                 for cs in circuit_species
-                            ]
-                        )
+                             ]
+
+        truth_csv.append(species_identities)
+
+        species_logic = []
+
+        for i in range(0, len(species_identities)):
+            if species_identities[i] in self.__product_to_gates:
+                species_logic.append('|'.join([ga.serialize_logic()
+                                               for ga in self.__product_to_gates[species_identities[i]]]))
+            else:
+                species_logic.append(species_identities[i])
+
+        truth_csv.append(species_logic)
+
+        species_IDs = [
+                        si.split('/')[-2]
+                        for si in species_identities
+                        if len(si.split('/')) > 1
+                      ]
+
+        if len(species_IDs) == len(species_identities):
+            truth_csv.append(species_IDs)
+
+            species_ID_logic = []
+
+            for i in range(0, len(species_identities)):
+                if species_identities[i] in self.__product_to_gates:
+                    species_ID_logic.append('|'.join([ga.serialize_logic(True)
+                                                      for ga in self.__product_to_gates[species_identities[i]]]))
+                else:
+                    species_ID_logic.append(species_identities[i].split('/')[-2])
+
+            truth_csv.append(species_ID_logic)
 
         for truth_row in truth_table:
             truth_csv.append(
@@ -566,23 +700,33 @@ class LogicCircuit():
     def compute_truth_table(self, is_canonical=True):
         truth_table = []
 
-        circuit_input_ranges = [[0, 1] for i in range(0, len(self.__circuit_inputs))]
+        if len(self.__circuit_inputs) > 0:
+            table_inputs = [ci for ci in self.__circuit_inputs]
+        else:
+            table_inputs = [ci for ci in self.__circuit_input_intermediates]
 
-        for circuit_input_values in product(*circuit_input_ranges):
+        table_input_ranges = [[0, 1] for i in range(0, len(table_inputs))]
+
+        for table_input_values in product(*table_input_ranges):
             truth_table.append(
                                 {
-                                    self.__circuit_inputs[i].get_identity(is_canonical) : circuit_input_values[i] 
-                                    for i in range(0, len(self.__circuit_inputs))
+                                    table_inputs[i].get_identity(is_canonical) : table_input_values[i] 
+                                    for i in range(0, len(table_inputs))
                                 }
                               )
 
-        for truth_row in truth_table:
-            for circuit_output in self.__circuit_outputs:
-                circuit_output_identity = circuit_output.get_identity(is_canonical)
+        if len(self.__circuit_outputs) > 0:
+            table_outputs = [co for co in self.__circuit_outputs]
+        else:
+            table_outputs = [co for co in self.__circuit_output_intermediates]
 
-                if circuit_output_identity in self.__product_to_gates:
-                    for output_gate in self.__product_to_gates[circuit_output_identity]:
-                        truth_row[circuit_output_identity] = self.__calculate_row_value(output_gate, truth_row)
+        for truth_row in truth_table:
+            for table_output in table_outputs:
+                table_output_identity = table_output.get_identity(is_canonical)
+
+                if table_output_identity in self.__product_to_gates:
+                    for output_gate in self.__product_to_gates[table_output_identity]:
+                        truth_row[table_output_identity] = self.__calculate_row_value(output_gate, truth_row)
 
         return truth_table
 
@@ -664,41 +808,44 @@ def main(args=None):
         for network_identity in network_identities:
             logic_circuit = LogicCircuit(target_doc.moduleDefinitions.get(network_identity), target_doc)
 
-            truth_table = logic_circuit.compute_truth_table()
+            if logic_circuit.is_complete():
+                truth_table = logic_circuit.compute_truth_table()
 
-            # print(logic_circuit.serialize())
+                # print(logic_circuit.serialize())
 
-            # for csv_row in logic_circuit.serialize_truth_table(truth_table):
-                # print(csv_row)
-        
-        if len(args.output_files) == 1 and os.path.isdir(args.output_files[0]):
-            (target_file_path, target_filename) = os.path.split(target_files[i])
-            (target_file_base, target_file_extension) = os.path.splitext(target_filename)
+                # for csv_row in logic_circuit.serialize_truth_table(truth_table):
+                    # print(csv_row)
+            
+                if len(args.output_files) == 1 and os.path.isdir(args.output_files[0]):
+                    (target_file_path, target_filename) = os.path.split(target_files[i])
+                    (target_file_base, target_file_extension) = os.path.splitext(target_filename)
 
-            if len(args.table_suffix) > 0:
-                output_file = os.path.join(args.output_files[0], '_'.join([target_file_base, args.table_suffix + '.csv']))
+                    if len(args.table_suffix) > 0:
+                        output_file = os.path.join(args.output_files[0], '_'.join([target_file_base, args.table_suffix + '.csv']))
+                    else:
+                        output_file = os.path.join(args.output_files[0], target_file_base + '.csv')
+
+                elif i < len(args.output_files):
+                    output_file = args.output_files[i]
+                else:
+                    (target_file_base, target_file_extension) = os.path.splitext(target_files[i])
+
+                    if len(args.table_suffix) > 0:
+                        output_file = '_'.join([target_file_base, args.table_suffix + '.csv'])
+                    else:
+                        output_file = target_file_base + '.csv'
+
+                logging.info('Writing %s', output_file)
+
+                with open(output_file, 'w', newline='\n') as csv_file:
+                    tt_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+
+                    for csv_row in logic_circuit.serialize_truth_table(truth_table):
+                        tt_writer.writerow(csv_row)
+
+                logging.info('Finished writing %s', output_file)
             else:
-                output_file = os.path.join(args.output_files[0], target_file_base + '.csv')
-
-        elif i < len(args.output_files):
-            output_file = args.output_files[i]
-        else:
-            (target_file_base, target_file_extension) = os.path.splitext(target_files[i])
-
-            if len(args.table_suffix) > 0:
-                output_file = '_'.join([target_file_base, args.table_suffix + '.csv'])
-            else:
-                output_file = target_file_base + '.csv'
-
-        logging.info('Writing %s', output_file)
-
-        with open(output_file, 'w', newline='\n') as csv_file:
-            tt_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-
-            for csv_row in logic_circuit.serialize_truth_table(truth_table):
-                tt_writer.writerow(csv_row)
-
-        logging.info('Finished writing %s', output_file)
+                logging.warning('Cannot generate truth table for %s since it lacks inputs and/or outputs.', network_identity)
 
     logging.info('Finished generating truth tables')
 
