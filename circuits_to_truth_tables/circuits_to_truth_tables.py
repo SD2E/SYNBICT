@@ -3,6 +3,7 @@ import argparse
 import os
 import sys
 import csv
+import json
 from itertools import product
 
 import sbol
@@ -126,20 +127,26 @@ class LogicGate():
         if len(input_identities) == len(self.__gate_inputs) and len(output_identity) > 0:
             if len(input_identities) == 1:
                 if self.__gate_type == self.YES:
-                    return output_identity + '=(' + input_identities[0] + ')'
+                    # return output_identity + '=(' + input_identities[0] + ')'
+                    return input_identities[0]
                 elif self.__gate_type == self.NOT:
-                    return output_identity + '=~(' + input_identities[0] + ')'
+                    # return output_identity + '=~(' + input_identities[0] + ')'
+                    return '~' + input_identities[0]
                 else:
                     return '-'
             elif len(input_identities) == 2:
                 if self.__gate_type == self.OR:
-                    return output_identity + '=(' + '|'.join([ii for ii in input_identities]) + ')'
+                    # return output_identity + '=(' + '|'.join([ii for ii in input_identities]) + ')'
+                    return '|'.join([ii for ii in input_identities])
                 elif self.__gate_type == self.NOR:
-                    return output_identity + '=~(' + '|'.join([ii for ii in input_identities]) + ')'
+                    # return output_identity + '=~(' + '|'.join([ii for ii in input_identities]) + ')'
+                    return '~(' + '|'.join([ii for ii in input_identities]) + ')'
                 elif self.__gate_type == self.AND:
-                    return output_identity + '=(' + '&'.join([ii for ii in input_identities]) + ')'
+                    # return output_identity + '=(' + '&'.join([ii for ii in input_identities]) + ')'
+                    return '&'.join([ii for ii in input_identities])
                 elif self.__gate_type == self.NAND:
-                    return output_identity + '=~(' + '&'.join([ii for ii in input_identities]) + ')'
+                    # return output_identity + '=~(' + '&'.join([ii for ii in input_identities]) + ')'
+                    return '~(' + '&'.join([ii for ii in input_identities])
                 else:
                     return '-'
         else:
@@ -282,63 +289,220 @@ class LogicCircuit():
 
         return circuit_intermediates
 
-    def serialize_truth_table(self, truth_table, is_canonical=True):
-        truth_csv = []
-
+    def serialize_truth_table_to_json(self, truth_table, is_canonical=True, verbose=False):
         if len(self.__circuit_input_intermediates) > 0:
-            table_inputs = [
-                            cii
-                            for cii in self.__circuit_input_intermediates
-                           ]
+            table_inputs = []
+
+            table_intermediates = [
+                                    cii
+                                    for cii in self.__circuit_input_intermediates
+                                  ]
         else:
             table_inputs = [
                             ci
                             for ci in self.__circuit_inputs
                            ]
 
-        table_intermediates = self.get_intermediates(is_canonical)
+            table_intermediates = []
+
+        table_intermediates.extend(self.get_intermediates(is_canonical))
 
         if len(self.__circuit_output_intermediates) > 0:
-            table_outputs = [
-                                cio
-                                for cio in self.__circuit_output_intermediates
-                            ]
+            table_outputs = []
+
+            table_intermediates.extend([
+                                         cio
+                                         for cio in self.__circuit_output_intermediates
+                                       ])
         else:
             table_outputs = [
-                                co
-                                for co in self.__circuit_outputs
+                             co
+                             for co in self.__circuit_outputs
                             ]
+
+        if verbose:                
+            truth_json = {
+                          'inputs': len(table_inputs),
+                          'outputs': len(table_outputs),
+                          'variable_map': {},
+                          'logic_map': {},
+                          'variable_display_map' : {},
+                          'logic_debug_map': {}
+                         }
+        else:
+            truth_json = {
+                          'inputs': len(table_inputs),
+                          'outputs': len(table_outputs),
+                          'variable_map': {}
+                         }
+
+        truth_json.update({
+                            'input_column_' + str(i) : []
+                            for i in range(0, len(table_inputs))
+                          })
+
+        truth_json['variable_map'].update({
+                                            table_inputs[i].get_identity(is_canonical) : 'input_column_' + str(i)
+                                            for i in range(0, len(table_inputs))
+                                          })
+
+        if verbose:
+            truth_json['variable_display_map'].update({
+                                                        'input_column_' + str(i) : table_inputs[i].get_identity(is_canonical).split('/')[-2]
+                                                        for i in range(0, len(table_inputs))
+                                                      })
+
+        if verbose:
+            truth_json.update({
+                                'intermediate_column_' + str(i) : []
+                                for i in range(0, len(table_intermediates))
+                              })
+
+            truth_json['variable_map'].update({
+                                                table_intermediates[i].get_identity(is_canonical) : 'intermediate_column_' + str(i)
+                                                for i in range(0, len(table_intermediates))
+                                              })
+
+            truth_json['variable_display_map'].update({
+                                                        'intermediate_column_' + str(i) : table_intermediates[i].get_identity(is_canonical).split('/')[-2]
+                                                        for i in range(0, len(table_intermediates))
+                                                      })
+
+        truth_json.update({
+                            'output_column_' + str(i) : []
+                            for i in range(0, len(table_outputs))
+                          })
+
+        truth_json['variable_map'].update({
+                                            table_outputs[i].get_identity(is_canonical) : 'output_column_' + str(i)
+                                            for i in range(0, len(table_outputs))
+                                          })
+
+        if verbose:
+            truth_json['variable_display_map'].update({
+                                                        'output_column_' + str(i) : table_outputs[i].get_identity(is_canonical).split('/')[-2]
+                                                        for i in range(0, len(table_outputs))
+                                                      })
+
+            for table_input in table_inputs:
+                input_identity = table_input.get_identity(is_canonical)
+
+                truth_json['logic_map'][input_identity] = input_identity
+
+                truth_json['logic_debug_map'][input_identity.split('/')[-2]] = input_identity.split('/')[-2]
+
+            for table_intermediate in table_intermediates:
+                intermediate_identity = table_intermediate.get_identity(is_canonical)
+
+                if intermediate_identity in self.__product_to_gates:
+                    truth_json['logic_map'][intermediate_identity] = '|'.join([
+                                                                                ga.serialize_logic()
+                                                                                for ga in self.__product_to_gates[intermediate_identity]
+                                                                              ])
+
+                    truth_json['logic_debug_map'][intermediate_identity.split('/')[-2]] = '|'.join([
+                                                                                                     ga.serialize_logic(True)
+                                                                                                     for ga in self.__product_to_gates[intermediate_identity]
+                                                                                                   ])
+
+            for table_output in table_outputs:
+                output_identity = table_output.get_identity(is_canonical)
+
+                if output_identity in self.__product_to_gates:
+                    truth_json['logic_map'][output_identity] = '|'.join([
+                                                                          ga.serialize_logic()
+                                                                          for ga in self.__product_to_gates[output_identity]
+                                                                        ])
+
+                    truth_json['logic_debug_map'][output_identity.split('/')[-2]] = '|'.join([
+                                                                                               ga.serialize_logic(True)
+                                                                                               for ga in self.__product_to_gates[output_identity]
+                                                                                             ])
+
+        for table_input in table_inputs:
+            input_identity = table_input.get_identity(is_canonical)
+
+            truth_json[truth_json['variable_map'][input_identity]] = [
+                                                                    truth_row[input_identity]
+                                                                    for truth_row in truth_table
+                                                                  ]
+
+        if verbose:
+            for table_intermediate in table_intermediates:
+                intermediate_identity = table_intermediate.get_identity(is_canonical)
+
+                truth_json[truth_json['variable_map'][intermediate_identity]] = [
+                                                                        truth_row[intermediate_identity]
+                                                                        for truth_row in truth_table
+                                                                      ]
+
+        for table_output in table_outputs:
+            output_identity = table_output.get_identity(is_canonical)
+
+            truth_json[truth_json['variable_map'][output_identity]] = [
+                                                                    truth_row[output_identity]
+                                                                    for truth_row in truth_table
+                                                                  ]
+
+        return truth_json
+
+    def serialize_truth_table_to_csv(self, truth_table, is_canonical=True, verbose=False):
+        truth_csv = []
 
         if len(self.__circuit_input_intermediates) > 0:
-            table_input_headers = [
-                                    'intermediate'
-                                    for i in range(0, len(self.__circuit_input_intermediates))
+            table_inputs = []
+
+            table_intermediates = [
+                                    cii
+                                    for cii in self.__circuit_input_intermediates
                                   ]
         else:
-            table_input_headers = [
-                                    'input'
-                                    for i in range(0, len(self.__circuit_inputs))
-                                  ]
+            table_inputs = [
+                            ci
+                            for ci in self.__circuit_inputs
+                           ]
+
+            table_intermediates = []
+
+        table_intermediates.extend(self.get_intermediates(is_canonical))
+
+        if len(self.__circuit_output_intermediates) > 0:
+            table_outputs = []
+
+            table_intermediates.extend([
+                                         cio
+                                         for cio in self.__circuit_output_intermediates
+                                       ])
+        else:
+            table_outputs = [
+                             co
+                             for co in self.__circuit_outputs
+                            ]
+
+        
+        table_input_headers = [
+                                'input_column_' + str(i)
+                                for i in range(0, len(table_inputs))
+                              ]
 
         table_intermediate_headers = [
-                                        'intermediate'
+                                        'intermediate_column_' + str(i)
                                         for i in range(0, len(table_intermediates))
                                      ]
 
-        if len(self.__circuit_output_intermediates) > 0:
-            table_output_headers = [
-                                    'intermediate'
-                                    for i in range(0, len(self.__circuit_output_intermediates))
-                                  ]
+        table_output_headers = [
+                                'output_column_' + str(i)
+                                for i in range(0, len(table_outputs))
+                               ]
+
+        if verbose:
+            truth_csv.append(table_input_headers + table_intermediate_headers + table_output_headers)
+        
+            circuit_species = table_inputs + table_intermediates + table_outputs
         else:
-            table_output_headers = [
-                                    'output'
-                                    for i in range(0, len(self.__circuit_outputs))
-                                  ]
+            truth_csv.append(table_input_headers + table_output_headers)
 
-        truth_csv.append(table_input_headers + table_intermediate_headers + table_output_headers)
-
-        circuit_species = table_inputs + table_intermediates + table_outputs
+            circuit_species = table_inputs + table_outputs
 
         species_identities = [
                                 cs.get_identity(is_canonical)
@@ -857,6 +1021,9 @@ def main(args=None):
     parser.add_argument('-s', '--table_suffix', nargs='?', default='')
     parser.add_argument('-io', '--infer_io', action='store_true')
     parser.add_argument('-m', '--open_math', nargs='?', default='')
+    parser.add_argument('-c', '--csv', action='store_true')
+    parser.add_argument('-j', '--json', action='store_true')
+    parser.add_argument('-b', '--verbose', action='store_true')
     
     args = parser.parse_args(args)
 
@@ -915,7 +1082,7 @@ def main(args=None):
 
                     # print(logic_circuit.serialize())
 
-                    # for csv_row in logic_circuit.serialize_truth_table(truth_table):
+                    # for csv_row in logic_circuit.serialize_truth_table_to_csv(truth_table):
                         # print(csv_row)
                 
                     if len(args.output_files) == 1 and os.path.isdir(args.output_files[0]):
@@ -923,9 +1090,9 @@ def main(args=None):
                         (target_file_base, target_file_extension) = os.path.splitext(target_filename)
 
                         if len(args.table_suffix) > 0:
-                            output_file = os.path.join(args.output_files[0], '_'.join([target_file_base, args.table_suffix + '.csv']))
+                            output_file = os.path.join(args.output_files[0], '_'.join([target_file_base, args.table_suffix]))
                         else:
-                            output_file = os.path.join(args.output_files[0], target_file_base + '.csv')
+                            output_file = os.path.join(args.output_files[0], target_file_base)
 
                     elif i < len(args.output_files):
                         output_file = args.output_files[i]
@@ -933,19 +1100,26 @@ def main(args=None):
                         (target_file_base, target_file_extension) = os.path.splitext(target_files[i])
 
                         if len(args.table_suffix) > 0:
-                            output_file = '_'.join([target_file_base, args.table_suffix + '.csv'])
+                            output_file = '_'.join([target_file_base, args.table_suffix])
                         else:
-                            output_file = target_file_base + '.csv'
+                            output_file = target_file_base
 
                     logging.info('Writing %s', output_file)
 
-                    with open(output_file, 'w', newline='\n') as csv_file:
-                        tt_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+                    if args.csv or not args.json:
+                        with open(output_file + '.csv', 'w', newline='\n') as csv_handle:
+                            tt_writer = csv.writer(csv_handle, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
-                        for csv_row in logic_circuit.serialize_truth_table(truth_table):
-                            tt_writer.writerow(csv_row)
+                            for csv_row in logic_circuit.serialize_truth_table_to_csv(truth_table, verbose=args.verbose):
+                                tt_writer.writerow(csv_row)
 
-                    logging.info('Finished writing %s', output_file)
+                            logging.info('Finished writing %s', output_file + '.csv')
+
+                    if args.json:
+                        with open(output_file + '.json', 'w', newline='\n') as json_handle:
+                            json.dump(logic_circuit.serialize_truth_table_to_json(truth_table, verbose=args.verbose), json_handle, indent=4)
+
+                        logging.info('Finished writing %s', output_file + '.json')
                 else:
                     logging.warning('Cannot generate truth table for %s since it lacks inputs and/or outputs.', network_identity)
 
