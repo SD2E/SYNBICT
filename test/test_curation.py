@@ -49,8 +49,6 @@ class CurationTests(unittest.TestCase):
 
         pruned_definition = target_doc.getComponentDefinition('/'.join([HOMESPACE, 'UnnamedPart', '1']))
 
-        target_doc.write('test_prune_out2.xml')
-
         self.assertEqual(len(target_doc.componentDefinitions), 2,
             "Cleaned document does not contain exactly two ComponentDefinitions. Should contain two for UnnamedPart and none for pBAD or L3S3P11.")
         self.assertEqual(len(target_doc.sequences), 1,
