@@ -7,7 +7,9 @@ from features_to_circuits import *
 
 class CurationTests(unittest.TestCase):
 
-    def test_pruning_annotating(self):
+    # Remove all overlapping features from copy of target construct
+    # Do not remove copy of target construct since it is not identical to original
+    def test_pruning_overlapping(self):
         __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
         HOMESPACE = 'http://synbict.org'
@@ -24,13 +26,15 @@ class CurationTests(unittest.TestCase):
         target_doc = load_sbol(os.path.join(__location__, 'simple_device.xml'))
         target_construct_library = FeatureLibrary([target_doc], True)
 
+        dummy_canonical_library = FeatureLibrary([], False)
+
         feature_annotater = FeatureAnnotater(feature_library, 40)
         annotated_identities = feature_annotater.annotate(target_construct_library, MIN_TARGET_LENGTH)
 
         added_features = target_construct_library.update()
 
         feature_pruner = FeaturePruner(feature_library)
-        feature_pruner.prune(target_construct_library, 14, MIN_TARGET_LENGTH, False, keep_flat=False)
+        feature_pruner.prune(target_construct_library, 14, MIN_TARGET_LENGTH, False, dummy_canonical_library, keep_flat=False)
 
         annotated_features = []
         annotating_features = []
@@ -45,6 +49,8 @@ class CurationTests(unittest.TestCase):
 
         pruned_definition = target_doc.getComponentDefinition('/'.join([HOMESPACE, 'UnnamedPart', '1']))
 
+        target_doc.write('test_prune_out2.xml')
+
         self.assertEqual(len(target_doc.componentDefinitions), 2,
             "Cleaned document does not contain exactly two ComponentDefinitions. Should contain two for UnnamedPart and none for pBAD or L3S3P11.")
         self.assertEqual(len(target_doc.sequences), 1,
@@ -54,6 +60,9 @@ class CurationTests(unittest.TestCase):
         self.assertEqual(len(pruned_definition.components), 0,
             "Pruned ComponentDefinition does not contain exactly zero Components. Should contain none for pBAD or L3S3P11.")
 
+    # Remove promoter and terminator features from copy of target construct
+    # Then remove copy of target construct since it is identical to original
+    # Also remove promoter and terminator since they are no longer sub-parts of any construct
     def test_pruning_annotated(self):
         __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
@@ -71,13 +80,15 @@ class CurationTests(unittest.TestCase):
         target_doc = load_sbol(os.path.join(__location__, 'simple_device.xml'))
         target_construct_library = FeatureLibrary([target_doc], True)
 
+        dummy_canonical_library = FeatureLibrary([], False)
+
         feature_annotater = FeatureAnnotater(feature_library, 40)
         annotated_identities = feature_annotater.annotate(target_construct_library, MIN_TARGET_LENGTH)
 
         added_features = target_construct_library.update()
 
         feature_pruner = FeaturePruner(feature_library)
-        feature_pruner.prune(target_construct_library, 14, MIN_TARGET_LENGTH, False)
+        feature_pruner.prune(target_construct_library, 14, MIN_TARGET_LENGTH, False, dummy_canonical_library)
 
         annotated_features = []
         annotating_features = []
