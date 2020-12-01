@@ -5,7 +5,6 @@ import sys
 
 from Bio.Seq import Seq
 from Bio import Align
-from Bio.Alphabet import generic_dna
 import sbol
 from flashtext import KeywordProcessor
 from sequences_to_features import Feature
@@ -360,7 +359,7 @@ class CircuitLibrary():
         circuit_doc.moduleDefinitions.remove(circuit_definition.identity)
 
         variant_seqs = FeatureLibrary.get_DNA_sequences(variant_definition, variant_doc)
-        variant_amino_acids = str(Seq(variant_seqs[0].elements, generic_dna).translate(to_stop=True)).upper()
+        variant_amino_acids = str(Seq(variant_seqs[0].elements).translate(to_stop=True)).upper()
 
         variant_index = 1
         unique_flag = False
