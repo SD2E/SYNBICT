@@ -1331,7 +1331,7 @@ def main(args=None):
             annotating_features = []
 
         if not args.no_pruning:
-            feature_pruner = FeaturePruner(feature_library, set(args.roles))
+            feature_pruner = FeaturePruner(feature_library, set(args.deletion_roles))
             feature_curator.prune_features(feature_pruner,
                                            int(args.cover_offset),
                                            int(args.min_target_length),
@@ -1368,7 +1368,7 @@ def main(args=None):
                                         target_files[i], args.min_target_length)
 
                 if not args.no_pruning:
-                    feature_pruner = FeaturePruner(feature_library, set(args.roles))
+                    feature_pruner = FeaturePruner(feature_library, set(args.deletion_roles))
                     feature_curator.prune_features(feature_pruner,
                                                    int(args.cover_offset),
                                                    int(args.min_target_length),
