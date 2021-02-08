@@ -1337,7 +1337,7 @@ def main(args=None):
                                            int(args.min_target_length),
                                            annotated_features,
                                            annotating_features,
-                                           args.delete_flat_annotations,
+                                           args.delete_flat,
                                            args.auto_swap,
                                            not args.non_interactive)
 
@@ -1374,7 +1374,7 @@ def main(args=None):
                                                    int(args.min_target_length),
                                                    annotated_features,
                                                    annotating_features,
-                                                   args.delete_flat_annotations,
+                                                   args.delete_flat,
                                                    args.auto_swap,
                                                    not args.non_interactive)
 
