@@ -10,32 +10,6 @@ from Bio import Align
 import sbol
 from flashtext import KeywordProcessor
 
-def write_output_file(target_file):
-    if len(args.output_files) == 1 and os.path.isdir(args.output_files[0]):
-        (target_file_path, target_filename) = os.path.split(target_files[i])
-        (target_file_base, target_file_extension) = os.path.splitext(target_filename)
-
-        if len(args.curation_suffix) > 0:
-            output_file = os.path.join(args.output_files[0], '_'.join([target_file_base, args.curation_suffix + '.xml']))
-        else:
-            output_file = os.path.join(args.output_files[0], target_file_base + '.xml')
-    elif i < len(args.output_files):
-        output_file = args.output_files[i]
-    else:
-        (target_file_base, target_file_extension) = os.path.splitext(target_files[i])
-
-        if len(args.curation_suffix) > 0:
-            output_file = '_'.join([target_file_base, args.curation_suffix + '.xml'])
-        else:
-            output_file = target_file_base + '.xml'
-
-    if sbol.Config.getOption('validate') == True:
-        logging.info('Validating and writing %s', output_file)
-    else:
-        logging.info('Writing %s', output_file)
-
-    target_docs[i].write(output_file)
-
 def load_target_file(target_file):
     if target_file.endswith('.xml') or target_file.endswith('.sbol'):
         return load_sbol(target_file)
@@ -1214,26 +1188,33 @@ def main(args=None):
         args = sys.argv[1:]
 
     parser = argparse.ArgumentParser()
+
+    # Common arguments
     parser.add_argument('-n', '--namespace')
-    parser.add_argument('-t', '--target_files', nargs='+')
-    parser.add_argument('-f', '--feature_files', nargs='*', default=[])
+    parser.add_argument('-t', '--target_files', nargs='*', default=[])
     parser.add_argument('-o', '--output_files', nargs='*', default=[])
+    parser.add_argument('-s', '--output_suffix', nargs='?', default='')
+    parser.add_argument('-p', '--in_place', action='store_true')
+    parser.add_argument('-ni', '--non_interactive', action='store_true')
     parser.add_argument('-l', '--log_file', nargs='?', default='')
-    parser.add_argument('-m', '--min_target_length', nargs='?', default=2000)
+    parser.add_argument('-v', '--validate', action='store_true')
+
+    # Sequence annotation arguments
+    parser.add_argument('-f', '--feature_files', nargs='*', default=[])
     parser.add_argument('-M', '--min_feature_length', nargs='?', default=40)
+    parser.add_argument('-m', '--min_target_length', nargs='?', default=2000)
+    parser.add_argument('-na', '--no_annotation', action='store_true')
+    parser.add_argument('-e', '--extend_features', action='store_true')
+    parser.add_argument('-xs', '--extension_suffix', nargs='?', default='')
+    parser.add_argument('-x', '--extension_threshold', nargs='?', default=0.05)
+
+    # Annotation pruning arguments
     parser.add_argument('-c', '--cover_offset', nargs='?', default=14)
     parser.add_argument('-r', '--deletion_roles', nargs='*', default=[])
-    parser.add_argument('-v', '--validate', action='store_true')
     parser.add_argument('-d', '--delete_flat', action='store_true')
-    parser.add_argument('-a', '--auto_swap', action='store_true')
-    parser.add_argument('-ni', '--non_interactive', action='store_true')
-    parser.add_argument('-na', '--no_annotation', action='store_true')
     parser.add_argument('-np', '--no_pruning', action='store_true')
-    parser.add_argument('-e', '--extend_features', action='store_true')
-    parser.add_argument('-x', '--extension_threshold', nargs='?', default=0.05)
-    parser.add_argument('-xs', '--extension_suffix', nargs='?', default='')
-    parser.add_argument('-s', '--curation_suffix', nargs='?', default='')
-    parser.add_argument('-p', '--in_place', action='store_true')
+    parser.add_argument('-a', '--auto_swap', action='store_true')
+    
     # parser.add_argument('-s', '--sbh_URL', nargs='?', default=None)
     # parser.add_argument('-u', '--username', nargs='?', default=None)
     # parser.add_argument('-p', '--password', nargs='?', default=None)
@@ -1267,7 +1248,15 @@ def main(args=None):
     for target_file in args.target_files:
         if os.path.isdir(target_file):
             target_files.extend([os.path.join(target_file, tf) for tf in os.listdir(target_file) if
-                                 os.path.isfile(os.path.join(target_file, tf)) and tf.endswith('.xml')])
+                                 os.path.isfile(os.path.join(target_file, tf)) and (tf.endswith('.xml') or
+                                                                                    tf.endswith('.sbol') or
+                                                                                    tf.endswith('.gb') or
+                                                                                    tf.endswith('.genbank') or
+                                                                                    tf.endswith('.fasta') or
+                                                                                    tf.endswith('.faa') or
+                                                                                    tf.endswith('.fa') or
+                                                                                    tf.endswith('.fas') or
+                                                                                    tf.endswith('.fsa'))])
         else:
             target_files.append(target_file)
 
@@ -1277,8 +1266,8 @@ def main(args=None):
             (target_file_path, target_filename) = os.path.split(target_files[i])
             (target_file_base, target_file_extension) = os.path.splitext(target_filename)
 
-            if len(args.curation_suffix) > 0:
-                output_files.append(os.path.join(args.output_files[0], '_'.join([target_file_base, args.curation_suffix + '.xml'])))
+            if len(args.output_suffix) > 0:
+                output_files.append(os.path.join(args.output_files[0], '_'.join([target_file_base, args.output_suffix + '.xml'])))
             else:
                 output_files.append(os.path.join(args.output_files[0], target_file_base + '.xml'))
         elif i < len(args.output_files):
@@ -1286,8 +1275,8 @@ def main(args=None):
         else:
             (target_file_base, target_file_extension) = os.path.splitext(target_files[i])
 
-            if len(args.curation_suffix) > 0:
-                output_files.append('_'.join([target_file_base, args.curation_suffix + '.xml']))
+            if len(args.output_suffix) > 0:
+                output_files.append('_'.join([target_file_base, args.output_suffix + '.xml']))
             else:
                 output_files.append(target_file_base + '.xml')
 
@@ -1318,12 +1307,12 @@ def main(args=None):
                                         float(args.extension_threshold))
 
         for extended_doc in feature_annotater.get_updated_documents():
-            (extended_file_base, extended_file_extension) = os.path.splitext(extended_doc.name)
-
             if len(args.extension_suffix) > 0:
+                (extended_file_base, extended_file_extension) = os.path.splitext(extended_doc.name)
+
                 extended_file = '_'.join([extended_file_base, args.extension_suffix]) + '.xml'
             else:
-                extended_file = extended_file_base + '_extended.xml'
+                extended_file = extended_doc.name
 
             logging.info('Writing %s', extended_file)
 

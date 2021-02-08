@@ -30,11 +30,17 @@ def load_sbol(sbol_file):
 
 class FeatureAnnotation():
 
-    def __init__(self, start, end, definition, roles):
+    def __init__(self, start, end, definition=None, roles=[], display_ID=None,
+                 name=None, comp_name=None, comp_ID=None, orientation=None):
         self.start = start
         self.end = end
         self.definition = definition
         self.roles = set(roles)
+        self.display_ID = display_ID
+        self.name = name
+        self.comp_ID = comp_ID
+        self.comp_name = comp_name
+        self.orientation = orientation
 
     def __lt__(self, other):
         return (self.start, self.end) < (other.start, other.end)
@@ -658,6 +664,129 @@ class CircuitBuilder():
         return species_fc
 
     @classmethod
+    def infer_devices(cls, target_doc, circuit_definition, constructs, circuit_feature_identities,
+                      flanking_length):
+        for construct in constructs:
+            construct_definition = target_doc.componentDefinitions.get(construct.identity)
+
+            annos = []
+
+            for seq_anno in construct_definition.sequenceAnnotations:
+                if (len(seq_anno.locations) == 1
+                        and seq_anno.locations[0].getTypeURI() == sbol.SBOL_RANGE):
+                    anno_range = seq_anno.locations.getRange()
+
+                    if seq_anno.component:
+                        sub_comp = construct_definition.components.get(seq_anno.component)
+
+                        feature_anno = FeatureAnnotation(anno_range.start,
+                                                         anno_range.end,
+                                                         sub_comp.definition,
+                                                         display_ID=seq_anno.displayId,
+                                                         name=seq_anno.name,
+                                                         comp_ID=sub_comp.displayId,
+                                                         comp_name=sub_comp.name,
+                                                         orientation=anno_range.orientation)
+                    else:
+                        feature_anno = FeatureAnnotation(anno_range.start,
+                                                         anno_range.end,
+                                                         display_ID=seq_anno.displayId,
+                                                         name=seq_anno.name,
+                                                         orientation=anno_range.orientation)
+
+                    annos.append(feature_anno)
+
+            annos.sort()
+
+            anno_group = []
+            anno_groups = []
+
+            device_end = -1
+
+            for j in range(0, len(annos)):
+                if device_end >= 0 and device_end + flanking_length <= annos[j].end:
+                    anno_groups.append(anno_group)
+                    anno_group = []
+                    device_end = -1
+
+                if annos[j].definition is not None and annos[j].definition in circuit_feature_identities:
+                    if device_end < 0:
+                        anno_group = [flanking_anno for flanking_anno in anno_group
+                                      if flanking_anno.start + flanking_length >= annos[j].start]
+
+                    device_end = annos[j].end
+
+                anno_group.append(annos[j])
+
+                if device_end >= 0 and j == len(annos) - 1:
+                    anno_groups.append(anno_group)
+
+            for i in range(0, len(anno_groups)):
+                device_definition = sbol.ComponentDefinition('_device_'.join([circuit_definition.displayId,
+                                                                              str(i + 1)]),
+                                                             sbol.BIOPAX_DNA, '1')
+
+                if circuit_definition.name:
+                    device_definition.name = ' Device '.join([circuit_definition.name, str(i + 1)])
+
+                inline_count = 0
+
+                for anno in anno_groups[i]:
+                    if anno.orientation == sbol.SBOL_ORIENTATION_INLINE:
+                        inline_count = inline_count + 1
+
+                if inline_count/len(anno_groups[i]) < 0.5:
+                    anno_groups[i].reverse()
+
+                    rc_flag = True
+                else:
+                    rc_flag = False
+
+                    for anno in anno_groups[i]:
+                        if anno.orientation == sbol.SBOL_ORIENTATION_INLINE:
+                            anno.orientation = sbol.SBOL_ORIENTATION_REVERSE_COMPLEMENT
+                        else:
+                            anno.orientation = sbol.SBOL_ORIENTATION_INLINE
+
+                if rc_flag:
+                    device_start = anno_groups[i][0].end
+                else:
+                    device_start = anno_groups[i][0].start
+
+                for anno in anno_groups[i]:
+                    device_anno = device_definition.sequenceAnnotations.create(anno.display_ID)
+
+                    device_anno.name = anno.name
+
+                    anno_loc = device_anno.locations.createRange(device_anno.displayId + '_loc')
+                    if rc_flag:
+                        if anno.orientation == sbol.SBOL_ORIENTATION_INLINE:
+                            anno_loc.orientation = sbol.SBOL_ORIENTATION_REVERSE_COMPLEMENT
+                        else:
+                            anno_loc.orientation = sbol.SBOL_ORIENTATION_INLINE
+                        anno_loc.start = -(anno.end - device_start - 1)
+                        anno_loc.end = -(anno.start - device_start - 1)
+                    else:
+                        anno_loc.start = anno.start - device_start + 1
+                        anno_loc.end = anno.end - device_start + 1
+                        anno_loc.orientation = anno.orientation
+
+                    if anno.comp_ID:
+                        device_comp = device_definition.components.create(anno.comp_ID)
+
+                        device_comp.name = anno.comp_name
+                        device_comp.definition = anno.definition
+
+                        device_anno.component = device_comp.identity
+
+                target_doc.addComponentDefinition(device_definition)
+
+                device_fc = circuit_definition.functionalComponents.create(device_definition.displayId)
+
+                device_fc.name = device_definition.name
+                device_fc.definition = device_definition.identity
+
+    @classmethod
     def infer_transcription(cls, target_doc, circuit_definition, constructs, tx_threshold, species_index=0,
             input_identities=set(), output_identities=set()):
         k = 0
@@ -789,7 +918,8 @@ class CircuitBuilder():
                         logging.debug('Inferred promoter-CDS stimulation %s', stimulation.identity)
 
     def build(self, circuit_id, target_doc, constructs, version='1', tx_threshold=0,
-            input_identities=set(), output_identities=set(), no_sensors=False):
+            input_identities=set(), output_identities=set(), infer_sensors=False,
+            infer_devices=False, flanking_length=0):
         circuit_definition = sbol.ModuleDefinition(circuit_id, version)
         circuit_definition.roles = [self.NCIT_BIOCHEMICAL_PATHWAY]
 
@@ -833,7 +963,11 @@ class CircuitBuilder():
                         covered_constructs.append(construct)
                     else:
                         logging.warning('No sub-circuits found for construct %s', construct.identity)
-            
+
+                # if infer_devices:
+                #     self.infer_devices(target_doc, circuit_definition, covered_constructs,
+                #                        circuit_feature_identities, flanking_length)
+
                 for i in range(0, len(covered_constructs)):
                     func_comp = circuit_definition.functionalComponents.create('construct_' + str(i + 1))
 
@@ -868,7 +1002,7 @@ class CircuitBuilder():
 
                     logging.debug('Added sub-circuit %s', sub_circuit_definition.identity)
 
-                if not no_sensors:
+                if infer_sensors:
                     k = self.add_sensors(target_doc, circuit_definition, covered_circuits, input_identities,
                         output_identities, len(covered_circuits), k)
 
@@ -894,24 +1028,33 @@ def main(args=None):
         args = sys.argv[1:]
 
     parser = argparse.ArgumentParser()
+
+    # Common arguments
     parser.add_argument('-n', '--namespace')
-    parser.add_argument('-t', '--target_files', nargs='*', default=[])
     parser.add_argument('-c', '--sub_circuit_files', nargs='+')
-    parser.add_argument('-i', '--circuit_IDs', nargs='*', default=[])
-    parser.add_argument('-o', '--output_files', nargs='*', default=[])
-    parser.add_argument('-m', '--min_target_length', nargs='?', default='2000')
-    parser.add_argument('-l', '--log_file', nargs='?', default='')
-    parser.add_argument('-cv', '--circuit_version', nargs='?', default='1')
-    parser.add_argument('-v', '--validate', action='store_true')
-    parser.add_argument('-s', '--circuit_suffix', nargs='?', default='')
-    parser.add_argument('-xs', '--extension_suffix', nargs='?', default='')
-    parser.add_argument('-e', '--extend_sub_circuits', action='store_true')
-    parser.add_argument('-x', '--extension_threshold', nargs='?', default='0.05')
-    parser.add_argument('-d', '--tx_threshold', nargs='?', default='200')
     parser.add_argument('-nb', '--no_build', action='store_true')
-    parser.add_argument('-ns', '--no_sensors', action='store_true')
+    parser.add_argument('-l', '--log_file', nargs='?', default='')
+    parser.add_argument('-v', '--validate', action='store_true')
+
+    # Circuit inference arguments
+    parser.add_argument('-t', '--target_files', nargs='*', default=[])
+    parser.add_argument('-i', '--circuit_IDs', nargs='*', default=[])
+    parser.add_argument('-s', '--circuit_suffix', nargs='?', default='')
+    parser.add_argument('-cv', '--circuit_version', nargs='?', default='1')
+    parser.add_argument('-o', '--output_files', nargs='*', default=[])
+    parser.add_argument('-os', '--output_suffix', nargs='?', default='')
     parser.add_argument('-ii', '--input_identities', nargs='*', default=[])
     parser.add_argument('-oi', '--output_identities', nargs='*', default=[])
+    parser.add_argument('-m', '--min_target_length', nargs='?', default='2000')
+    parser.add_argument('-is', '--infer_sensors', action='store_true')
+    parser.add_argument('-d', '--tx_threshold', nargs='?', default='200')
+    parser.add_argument('-f', '--flanking_length', nargs='?', default='200')
+    parser.add_argument('-iv', '--infer_devices', action='store_true')
+
+    # Sub-circuit library extension arguments
+    parser.add_argument('-e', '--extend_sub_circuits', action='store_true')
+    parser.add_argument('-xs', '--extension_suffix', nargs='?', default='')
+    parser.add_argument('-x', '--extension_threshold', nargs='?', default='0.05')
     
     args = parser.parse_args(args)
 
@@ -984,8 +1127,6 @@ def main(args=None):
 
                 if len(args.circuit_suffix) > 0:
                     circuit_ID = '_'.join([circuit_ID, args.circuit_suffix])
-                else:
-                    circuit_ID + '_circuit'
 
             unique_ID = circuit_ID
 
@@ -996,23 +1137,24 @@ def main(args=None):
             
             circuit_memo.add(unique_ID)
 
-            build_success = circuit_builder.build(
-                                                    circuit_ID,
-                                                    target_doc,
-                                                    target_library.get_features(int(args.min_target_length), True),
-                                                    args.circuit_version,
-                                                    int(args.tx_threshold),
-                                                    set(args.input_identities),
-                                                    set(args.output_identities),
-                                                    args.no_sensors)
+            build_success = circuit_builder.build(circuit_ID,
+                                                  target_doc,
+                                                  target_library.get_features(int(args.min_target_length), True),
+                                                  args.circuit_version,
+                                                  int(args.tx_threshold),
+                                                  set(args.input_identities),
+                                                  set(args.output_identities),
+                                                  args.infer_sensors,
+                                                  args.infer_devices,
+                                                  int(args.flanking_length))
 
             if build_success:
                 if len(args.output_files) == 1 and os.path.isdir(args.output_files[0]):
                     (target_file_path, target_filename) = os.path.split(target_files[i])
                     (target_file_base, target_file_extension) = os.path.splitext(target_filename)
 
-                    if len(args.circuit_suffix) > 0:
-                        output_file = os.path.join(args.output_files[0], '_'.join([target_file_base, args.circuit_suffix + target_file_extension]))
+                    if len(args.output_suffix) > 0:
+                        output_file = os.path.join(args.output_files[0], '_'.join([target_file_base, args.output_suffix + target_file_extension]))
                     else:
                         output_file = os.path.join(args.output_files[0], target_file_base + target_file_extension)
 
@@ -1021,8 +1163,8 @@ def main(args=None):
                 else:
                     (target_file_base, target_file_extension) = os.path.splitext(target_files[i])
 
-                    if len(args.circuit_suffix) > 0:
-                        output_file = '_'.join([target_file_base, args.circuit_suffix + target_file_extension])
+                    if len(args.output_suffix) > 0:
+                        output_file = '_'.join([target_file_base, args.output_suffix + target_file_extension])
                     else:
                         output_file = target_file_base + target_file_extension
 
