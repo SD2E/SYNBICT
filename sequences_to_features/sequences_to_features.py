@@ -7,7 +7,7 @@ import json
 
 from Bio.Seq import Seq
 from Bio import Align
-import sbol
+import sbol2
 from flashtext import KeywordProcessor
 
 def load_target_file(target_file):
@@ -26,10 +26,30 @@ def load_target_file(target_file):
 
         return None
 
+# Set up the not found error for catching
+try:
+    # SBOLError is in the native python module
+    NotFoundError = sbol2.SBOLError
+except NameError:
+    # The swig wrapper raises RuntimeError on not found
+    NotFoundError = RuntimeError
+
+# Set up the not unique error for catching
+try:
+    # SBOLError is in the native python module
+    NotUniqueError = sbol2.SBOLError
+except NameError:
+    # The swig wrapper raises RuntimeError on not unique
+    NotUniqueError = RuntimeError
+
+def is_sbol_not_found(exc):
+    return (exc.error_code() == sbol2.SBOLErrorCode.SBOL_ERROR_NOT_FOUND
+        or exc.error_code() == sbol2.SBOLErrorCode.NOT_FOUND_ERROR)
+
 def load_sbol(sbol_file):
     logging.info('Loading %s', sbol_file)
 
-    doc = sbol.Document()
+    doc = sbol2.Document()
     doc.read(sbol_file)
 
     doc.name = sbol_file
@@ -55,7 +75,7 @@ def load_non_sbol(non_sbol_file):
             'fail_on_first_error': False,
             'provide_detailed_stack_trace': False,
             'subset_uri': '',
-            'uri_prefix': sbol.getHomespace(),
+            'uri_prefix': sbol2.getHomespace(),
             'version': '1',
             'insert_type': False,
             'main_file_name': 'main file',
@@ -69,7 +89,7 @@ def load_non_sbol(non_sbol_file):
 
     response_dict = json.loads(conversion_response.content.decode('utf-8'))
 
-    doc = sbol.Document()
+    doc = sbol2.Document()
     doc.readString(response_dict['result'])
 
     (file_base, file_extension) = os.path.splitext(non_sbol_file)
@@ -190,7 +210,7 @@ class FeatureLibrary():
         loaded_features = []
 
         for comp_definition in doc.componentDefinitions:
-            if sbol.BIOPAX_DNA in comp_definition.types and comp_definition.identity not in self.__feature_map:
+            if sbol2.BIOPAX_DNA in comp_definition.types and comp_definition.identity not in self.__feature_map:
                 dna_seqs = self.get_DNA_sequences(comp_definition, doc)
 
                 sub_identities = []
@@ -279,7 +299,7 @@ class FeatureLibrary():
             return -1
 
     def get_definition(self, identity):
-        return self.get_document(identity).componentDefinitions.get(identity)
+        return self.get_document(identity).getComponentDefinition(identity)
 
     def get_definitions_by_name(self, name):
         name_keys = []
@@ -316,8 +336,13 @@ class FeatureLibrary():
                 seq = doc.getSequence(seq_URI)
             except RuntimeError:
                 seq = None
+            except NotFoundError as exc:
+                if is_sbol_not_found(exc):
+                    seq = None
+                else:
+                    raise
 
-            if seq and seq.encoding == sbol.SBOL_ENCODING_IUPAC:
+            if seq and seq.encoding == sbol2.SBOL_ENCODING_IUPAC:
                 dna_seqs.append(seq)
 
         return dna_seqs
@@ -331,6 +356,11 @@ class FeatureLibrary():
                 seq = doc.getSequence(seq_URI)
             except RuntimeError:
                 seq = None
+            except NotFoundError as exc:
+                if is_sbol_not_found(exc):
+                    seq = None
+                else:
+                    raise
 
             if seq:
                 seqs.append(seq)
@@ -342,7 +372,7 @@ class FeatureLibrary():
         if import_namespace:
             namespace = '/'.join(seq.identity.split('/')[:-2])
 
-            if namespace == sbol.getHomespace():
+            if namespace == sbol2.getHomespace():
                 try:
                     version = int(seq.version)
                 except (TypeError, ValueError):
@@ -350,31 +380,29 @@ class FeatureLibrary():
 
                 try:
                     seq_copy = seq.copy(sink_doc, namespace, str(version + 1))
+
                 except RuntimeError:
-                    return sink_doc.getSequence('/'.join([sbol.getHomespace(), seq.displayId,
+                    return sink_doc.getSequence('/'.join([sbol2.getHomespace(), seq.displayId,
                                                           str(version + 1)]))
+                except NotUniqueError as exc:
+                    if exc.error_code() == sbol2.SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE:
+                        return sink_doc.getSequence('/'.join([sbol2.getHomespace(), seq.displayId,
+                                                              str(version + 1)]))
+                    else:
+                        raise
+                    
             else:
                 try:
                     seq_copy = seq.copy(sink_doc, namespace, '1')
                 except RuntimeError:
-                    return sink_doc.getSequence('/'.join([sbol.getHomespace(), seq.displayId, '1']))
+                    return sink_doc.getSequence('/'.join([sbol2.getHomespace(), seq.displayId, '1']))
+                except NotUniqueError as exc:
+                    if exc.error_code() == sbol2.SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE:
+                        return sink_doc.getSequence('/'.join([sbol2.getHomespace(), seq.displayId, '1']))
+                    else:
+                        raise
 
-            try:
-                seq_copy.setPropertyValue('http://wiki.synbiohub.org/wiki/Terms/synbiohub#ownedBy', '')
-            except LookupError:
-                pass
-
-            try:
-                seq_copy.setPropertyValue('http://wiki.synbiohub.org/wiki/Terms/synbiohub#topLevel', '')
-            except LookupError:
-                pass
-
-            try:
-                seq_copy.setPropertyValue('http://purl.org/dc/terms/created', '')
-            except LookupError:
-                pass
-
-            seq_copy.wasGeneratedBy = []
+            cls.strip_non_copy_properties(seq_copy)
         else:
             try:
                 sink_doc.getSequence(seq.identity)
@@ -382,6 +410,11 @@ class FeatureLibrary():
                 return None
             except RuntimeError:
                 seq_copy = seq.copy(sink_doc)
+            except NotFoundError as exc:
+                if is_sbol_not_found(exc):
+                    seq_copy = seq.copy(sink_doc)
+                else:
+                    raise
 
         return seq_copy
 
@@ -419,6 +452,17 @@ class FeatureLibrary():
                 variant_index = variant_index + 1
 
                 unique_flag = False
+            except NotUniqueError as exc:
+                if exc.error_code() == sbol2.SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE:
+                    definition_copy.identity = original_identity
+                    definition_copy.displayId = original_ID
+                    definition_copy.persistentIdentity = original_p_identity
+
+                    variant_index = variant_index + 1
+
+                    unique_flag = False
+                else:
+                    raise
 
     @classmethod
     def make_variant_sequence(cls, doc, sequence_copy):
@@ -453,23 +497,32 @@ class FeatureLibrary():
                 variant_index = variant_index + 1
 
                 unique_flag = False
+            except NotUniqueError as exc:
+                if exc.error_code() == sbol2.SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE:
+                    sequence_copy.identity = original_identity
+                    sequence_copy.displayId = original_ID
+
+                    variant_index = variant_index + 1
+
+                    unique_flag = False
+                else:
+                    raise
 
     @classmethod
     def strip_non_copy_properties(cls, sbol_obj):
-        try:
-            sbol_obj.setPropertyValue('http://wiki.synbiohub.org/wiki/Terms/synbiohub#ownedBy', '')
-        except LookupError:
-            pass
+        sbol_obj.ownedBy = sbol2.URIProperty(sbol_obj, 'http://wiki.synbiohub.org/wiki/Terms/synbiohub#ownedBy', 0, 1,
+                                             [])
+        sbol_obj.ownedBy = None
 
-        try:
-            sbol_obj.setPropertyValue('http://wiki.synbiohub.org/wiki/Terms/synbiohub#topLevel', '')
-        except LookupError:
-            pass
+        sbol_obj.topLevel = sbol2.URIProperty(sbol_obj, 'http://wiki.synbiohub.org/wiki/Terms/synbiohub#topLevel', 0,
+                                              1, [])
+        sbol_obj.topLevel = None
 
-        try:
-            sbol_obj.setPropertyValue('http://purl.org/dc/terms/created', '')
-        except LookupError:
-            pass
+        sbol_obj.created = sbol2.DateTimeProperty(sbol_obj, 'http://purl.org/dc/terms/created', 0, 1, [])
+        sbol_obj.created = None
+
+        sbol_obj.created = sbol2.DateTimeProperty(sbol_obj, 'http://purl.org/dc/terms/modified', 0, 1, [])
+        sbol_obj.created = None
 
         sbol_obj.wasGeneratedBy = []
 
@@ -477,7 +530,7 @@ class FeatureLibrary():
     def copy_component_definition(cls, comp_definition, source_doc, sink_doc, import_namespace=False,
                                   min_seq_length=0, import_sequences=False, seq_elements=None,
                                   parent_definitions=[], parent_doc=None, make_variant=False):
-        if sbol.BIOPAX_DNA in comp_definition.types:
+        if sbol2.BIOPAX_DNA in comp_definition.types:
             seqs = cls.get_DNA_sequences(comp_definition, source_doc)
         else:
             seqs = cls.get_sequences(comp_definition, source_doc)
@@ -486,7 +539,7 @@ class FeatureLibrary():
             namespace = '/'.join(comp_definition.identity.split('/')[:-2])
 
             if import_namespace:
-                if namespace == sbol.getHomespace():
+                if namespace == sbol2.getHomespace():
                     try:
                         version = int(comp_definition.version)
                     except (TypeError, ValueError):
@@ -495,13 +548,29 @@ class FeatureLibrary():
                     try:
                         definition_copy = comp_definition.copy(sink_doc, namespace, str(version + 1))
                     except RuntimeError:
-                        return sink_doc.componentDefinitions.get('/'.join([sbol.getHomespace(), comp_definition.displayId,
+                        return sink_doc.getComponentDefinition('/'.join([sbol2.getHomespace(),
+                                                                         comp_definition.displayId,
                                                                          str(version + 1)]))
+                    except NotUniqueError as exc:
+                        if exc.error_code() == sbol2.SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE:
+                            return sink_doc.getComponentDefinition('/'.join([sbol2.getHomespace(),
+                                                                             comp_definition.displayId,
+                                                                             str(version + 1)]))
+                        else:
+                            raise
+                        
                 else:
                     try:
                         definition_copy = comp_definition.copy(sink_doc, namespace, '1')
                     except RuntimeError:
-                        return sink_doc.componentDefinitions.get('/'.join([sbol.getHomespace(), comp_definition.displayId, '1']))
+                        return sink_doc.getComponentDefinition('/'.join([sbol2.getHomespace(),
+                                                                         comp_definition.displayId, '1']))
+                    except NotUniqueError as exc:
+                        if exc.error_code() == sbol2.SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE:
+                            return sink_doc.getComponentDefinition('/'.join([sbol2.getHomespace(),
+                                                                             comp_definition.displayId, '1']))
+                        else:
+                            raise
 
                 cls.strip_non_copy_properties(definition_copy)
                 for sub_comp_copy in definition_copy.components:
@@ -516,11 +585,16 @@ class FeatureLibrary():
                     cls.make_variant_definition(sink_doc, definition_copy)
             else:
                 try:
-                    sink_doc.componentDefinitions.get(comp_definition.identity)
-                    
+                    sink_doc.getComponentDefinition(comp_definition.identity)
+
                     return None
                 except RuntimeError:
                     definition_copy = comp_definition.copy(sink_doc)
+                except NotFoundError as exc:
+                    if is_sbol_not_found(exc):
+                        definition_copy = comp_definition.copy(sink_doc)
+                    else:
+                        raise
 
             if import_sequences:
                 if len(seqs) > 0:
@@ -534,7 +608,7 @@ class FeatureLibrary():
 
                     if parent_doc:
                         for parent_definition in parent_definitions:
-                            if sbol.BIOPAX_DNA in parent_definition.types:
+                            if sbol2.BIOPAX_DNA in parent_definition.types:
                                 parent_seqs = cls.get_DNA_sequences(parent_definition, parent_doc)
 
                                 if len(parent_seqs) > 0:
@@ -564,9 +638,14 @@ class FeatureLibrary():
 
             for sub_comp in comp_definition.components:
                 try:
-                    sub_definition = source_doc.componentDefinitions.get(sub_comp.definition)
+                    sub_definition = source_doc.getComponentDefinition(sub_comp.definition)
                 except RuntimeError:
                     sub_definition = None
+                except NotFoundError as exc:
+                    if is_sbol_not_found(exc):
+                        sub_definition = None
+                    else:
+                        raise
 
                 if sub_definition:
                     sub_copy = definition_copy.components.get(sub_comp.displayId)
@@ -618,9 +697,16 @@ class FeatureAnnotater():
 
         while i > 0:
             try:
-                sub_comp = parent_definition.components.create('_'.join([child_definition.displayId, str(i)]))
+                sub_comp = parent_definition.components.create('_'.join([child_definition.displayId,
+                                                                         'comp',
+                                                                         str(i)]))
             except RuntimeError:
                 sub_comp = None
+            except NotUniqueError as exc:
+                if exc.error_code() == sbol2.SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE:
+                    sub_comp = None
+                else:
+                    raise
 
             if sub_comp is None:
                 i = i + 1
@@ -646,6 +732,11 @@ class FeatureAnnotater():
                                                                                   str(i)]))
             except RuntimeError:
                 seq_anno = None
+            except NotUniqueError as exc:
+                if exc.error_code() == sbol2.SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE:
+                    seq_anno = None
+                else:
+                    raise
 
             if seq_anno is None:
                 i = i + 1
@@ -658,7 +749,9 @@ class FeatureAnnotater():
                     seq_anno.roles = seq_anno.roles + child_definition.roles
                     seq_anno.wasDerivedFrom = seq_anno.wasDerivedFrom + [parent_URI]
                 
-                location = seq_anno.locations.createRange('loc_1')
+                location = seq_anno.locations.createRange('_'.join([child_definition.displayId,
+                                                                    'loc',
+                                                                    '1']))
 
                 location.orientation = orientation
                 location.start = start
@@ -715,11 +808,11 @@ class FeatureAnnotater():
             if self.__has_min_length(target, min_target_length):
                 target_doc = target_library.get_document(target.identity)
 
-                target_definition = target_doc.componentDefinitions.get(target.identity)
+                target_definition = target_doc.getComponentDefinition(target.identity)
 
                 for seq_anno in target_definition.sequenceAnnotations:
                     if (seq_anno.name and not seq_anno.component and len(seq_anno.locations) == 1
-                            and seq_anno.locations[0].getTypeURI() == sbol.SBOL_RANGE):
+                            and seq_anno.locations[0].getTypeURI() == sbol2.SBOL_RANGE):
                         anno_start = seq_anno.locations.getRange().start
                         anno_end = seq_anno.locations.getRange().end
 
@@ -797,7 +890,7 @@ class FeatureAnnotater():
                 if len(inline_matches) > 0 or len(rc_matches) > 0:
                     target_doc = target_library.get_document(target.identity)
 
-                    target_definition = target_doc.componentDefinitions.get(target.identity)
+                    target_definition = target_doc.getComponentDefinition(target.identity)
                     
                     if in_place:
                         definition_copy = target_definition
@@ -807,9 +900,9 @@ class FeatureAnnotater():
                     
                     if definition_copy:
                         self.__process_feature_matches(target_doc, definition_copy, inline_matches,
-                            sbol.SBOL_ORIENTATION_INLINE, len(target.nucleotides))
+                            sbol2.SBOL_ORIENTATION_INLINE, len(target.nucleotides))
                         self.__process_feature_matches(target_doc, definition_copy, rc_matches,
-                            sbol.SBOL_ORIENTATION_REVERSE_COMPLEMENT, len(target.nucleotides), len(target.nucleotides) + 1)
+                            sbol2.SBOL_ORIENTATION_REVERSE_COMPLEMENT, len(target.nucleotides), len(target.nucleotides) + 1)
 
                         annotated_identities.append(definition_copy.identity)
                     else:
@@ -823,9 +916,9 @@ class FeatureAnnotater():
 class FeaturePruner():
 
     COMMON_ROLE_DICT = {
-        sbol.SO_PROMOTER: 'promoter',
-        sbol.SO_CDS: 'CDS',
-        sbol.SO_TERMINATOR: 'terminator',
+        sbol2.SO_PROMOTER: 'promoter',
+        sbol2.SO_CDS: 'CDS',
+        sbol2.SO_TERMINATOR: 'terminator',
         'http://identifiers.org/so/SO:0001977': 'ribonuclease_site'
     }
 
@@ -936,7 +1029,7 @@ to be nearly identical.\nRemove second annotation and link first to sub-part? \
                 feature_identity = target_definition.components.get(annos[i][5]).definition
 
                 if ask_user:
-                    feature_definition = doc.componentDefinitions.get(feature_identity)
+                    feature_definition = doc.getComponentDefinition(feature_identity)
                     
                     if feature_definition.name is None:
                         feature_ID = feature_definition.displayId
@@ -1040,7 +1133,7 @@ remove if any (comma-separated list of indices, for example 0,2,5):\n'.format(fm
 
     #     for sub_comp in comp_definition.components:
     #         try:
-    #             sub_definition = doc.componentDefinitions.get(comp_definition.identity)
+    #             sub_definition = doc.getComponentDefinition(comp_definition.identity)
     #         except RuntimeError:
     #             sub_definition = None
 
@@ -1066,7 +1159,7 @@ remove if any (comma-separated list of indices, for example 0,2,5):\n'.format(fm
 
         for annotated_feature in annotated_features:
             annotated_doc = feature_library.get_document(annotated_feature.identity)
-            annotated_definition = annotated_doc.componentDefinitions.get(annotated_feature.identity)
+            annotated_definition = annotated_doc.getComponentDefinition(annotated_feature.identity)
 
             sub_IDs = set()
             temp_sub_definitions = set()
@@ -1083,7 +1176,7 @@ remove if any (comma-separated list of indices, for example 0,2,5):\n'.format(fm
                 parent_doc = feature_library.get_document(parent_identity)
 
                 if parent_doc:
-                    parent_definition = parent_doc.componentDefinitions.get(parent_identity)
+                    parent_definition = parent_doc.getComponentDefinition(parent_identity)
 
                     for comp in parent_definition.components:
                         parent_sub_IDs.add(comp.displayId)
@@ -1100,7 +1193,7 @@ remove if any (comma-separated list of indices, for example 0,2,5):\n'.format(fm
         for annotating_feature in annotating_features:
             if annotating_feature.identity not in sub_definitions:
                 annotating_doc = feature_library.get_document(annotating_feature.identity)
-                annotating_definition = annotating_doc.componentDefinitions.get(annotating_feature.identity)
+                annotating_definition = annotating_doc.getComponentDefinition(annotating_feature.identity)
 
                 annotating_doc.componentDefinitions.remove(annotating_feature.identity)
                 for seq_identity in annotating_definition.sequences:
@@ -1126,10 +1219,10 @@ remove if any (comma-separated list of indices, for example 0,2,5):\n'.format(fm
 
                 target_doc = target_library.get_document(target.identity)
 
-                target_definition = target_doc.componentDefinitions.get(target.identity)
+                target_definition = target_doc.getComponentDefinition(target.identity)
 
-                cut_annos = [(sa.locations.getCut().at, sa.locations.getCut().at, sa.identity, sa.displayId, sa.name, sa.component, set(sa.roles), sa.description) for sa in target_definition.sequenceAnnotations if len(sa.locations) == 1 and sa.locations[0].getTypeURI() == sbol.SBOL_CUT]
-                annos = [(sa.locations.getRange().start, sa.locations.getRange().end, sa.identity, sa.displayId, sa.name, sa.component, set(sa.roles), sa.description) for sa in target_definition.sequenceAnnotations if len(sa.locations) == 1 and sa.locations[0].getTypeURI() == sbol.SBOL_RANGE]
+                cut_annos = [(sa.locations.getCut().at, sa.locations.getCut().at, sa.identity, sa.displayId, sa.name, sa.component, set(sa.roles), sa.description) for sa in target_definition.sequenceAnnotations if len(sa.locations) == 1 and sa.locations[0].getTypeURI() == sbol2.SBOL_CUT]
+                annos = [(sa.locations.getRange().start, sa.locations.getRange().end, sa.identity, sa.displayId, sa.name, sa.component, set(sa.roles), sa.description) for sa in target_definition.sequenceAnnotations if len(sa.locations) == 1 and sa.locations[0].getTypeURI() == sbol2.SBOL_RANGE]
                 
                 annos.extend(cut_annos)
 
@@ -1240,9 +1333,9 @@ def main(args=None):
     
     logging.getLogger('').addHandler(console_handler)
 
-    sbol.setHomespace(args.namespace)
-    sbol.Config.setOption('validate', args.validate)
-    sbol.Config.setOption('sbol_typed_uris', False)
+    sbol2.setHomespace(args.namespace)
+    sbol2.Config.setOption('validate', args.validate)
+    sbol2.Config.setOption('sbol_typed_uris', False)
 
     target_files = []
     for target_file in args.target_files:
@@ -1343,7 +1436,7 @@ def main(args=None):
 
         if not args.no_annotation or not args.no_pruning:
             for i in range(0, len(target_docs)):
-                if sbol.Config.getOption('validate') == True:
+                if sbol2.Config.getOption('validate') == True:
                     logging.info('Validating and writing %s', output_files[i])
                 else:
                     logging.info('Writing %s', output_files[i])
@@ -1379,7 +1472,7 @@ def main(args=None):
                                                    not args.non_interactive)
 
                 if not args.no_annotation or not args.no_pruning:
-                    if sbol.Config.getOption('validate') == True:
+                    if sbol2.Config.getOption('validate') == True:
                         logging.info('Validating and writing %s', output_files[i])
                     else:
                         logging.info('Writing %s', output_files[i])

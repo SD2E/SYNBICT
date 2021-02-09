@@ -5,7 +5,7 @@ import sys
 
 from Bio.Seq import Seq
 from Bio import Align
-import sbol
+import sbol2
 from flashtext import KeywordProcessor
 from sequences_to_features import Feature
 from sequences_to_features import FeatureLibrary
@@ -13,7 +13,7 @@ from sequences_to_features import FeatureLibrary
 def load_sbol(sbol_file):
     logging.info('Loading %s', sbol_file)
 
-    doc = sbol.Document()
+    doc = sbol2.Document()
     doc.read(sbol_file)
 
     doc.name = sbol_file
@@ -27,6 +27,26 @@ def load_sbol(sbol_file):
     logging.info('Finished loading %s', sbol_file)
 
     return doc
+
+# Set up the not found error for catching
+try:
+    # SBOLError is in the native python module
+    NotFoundError = SBOLError
+except NameError:
+    # The swig wrapper raises RuntimeError on not found
+    NotFoundError = RuntimeError
+
+# Set up the not unique error for catching
+try:
+    # SBOLError is in the native python module
+    NotUniqueError = SBOLError
+except NameError:
+    # The swig wrapper raises RuntimeError on not unique
+    NotUniqueError = RuntimeError
+
+def is_sbol_not_found(exc):
+    return (exc.error_code() == SBOLErrorCode.SBOL_ERROR_NOT_FOUND
+        or exc.error_code() == SBOLErrorCode.NOT_FOUND_ERROR)
 
 class FeatureAnnotation():
 
@@ -105,14 +125,14 @@ class CircuitLibrary():
                     for intxn in mod_definition.interactions:
                         # intxn = mod_definition.interactions[0]
 
-                        if sbol.SBO_STIMULATION in intxn.types:
+                        if sbol2.SBO_STIMULATION in intxn.types:
                             stimulator = None
                             stimulated = None
 
                             for par in intxn.participations:
-                                if sbol.SBO_STIMULATOR in par.roles:
+                                if sbol2.SBO_STIMULATOR in par.roles:
                                     stimulator = mod_definition.functionalComponents.get(par.participant).definition
-                                elif sbol.SBO_STIMULATED in par.roles:
+                                elif sbol2.SBO_STIMULATED in par.roles:
                                     stimulated = mod_definition.functionalComponents.get(par.participant).definition
 
                             if stimulator and stimulated:
@@ -120,14 +140,14 @@ class CircuitLibrary():
                                     self.__activator_to_dna[stimulator] = []
 
                                 self.__activator_to_dna[stimulator].append(stimulated)
-                        elif sbol.SBO_INHIBITION in intxn.types:
+                        elif sbol2.SBO_INHIBITION in intxn.types:
                             inhibitor = None
                             inhibited = None
 
                             for par in intxn.participations:
-                                if sbol.SBO_INHIBITOR in par.roles:
+                                if sbol2.SBO_INHIBITOR in par.roles:
                                     inhibitor = mod_definition.functionalComponents.get(par.participant).definition
-                                elif sbol.SBO_INHIBITED in par.roles:
+                                elif sbol2.SBO_INHIBITED in par.roles:
                                     inhibited = mod_definition.functionalComponents.get(par.participant).definition
 
                             if inhibitor and inhibited:
@@ -135,12 +155,12 @@ class CircuitLibrary():
                                     self.__repressor_to_dna[inhibitor] = []
 
                                 self.__repressor_to_dna[inhibitor].append(inhibited)
-                        elif sbol.SBO_GENETIC_PRODUCTION in intxn.types:
+                        elif sbol2.SBO_GENETIC_PRODUCTION in intxn.types:
                             template = None
                             product = None
 
                             for par in intxn.participations:
-                                if sbol.SBO_PRODUCT in par.roles:
+                                if sbol2.SBO_PRODUCT in par.roles:
                                     product = mod_definition.functionalComponents.get(par.participant).definition
                                 elif self.SBO_TEMPLATE in par.roles:
                                     template = mod_definition.functionalComponents.get(par.participant).definition
@@ -167,14 +187,14 @@ class CircuitLibrary():
                     sensed_element = None
 
                     for par in intxn.participations:
-                        if sbol.SBO_REACTANT in par.roles:
+                        if sbol2.SBO_REACTANT in par.roles:
                             reactant = mod_definition.functionalComponents.get(par.participant).definition
 
                             reactant_definition = self.docs[i].componentDefinitions.get(reactant)
 
-                            if sbol.BIOPAX_PROTEIN in reactant_definition.types:
+                            if sbol2.BIOPAX_PROTEIN in reactant_definition.types:
                                 sensor_element = reactant_definition.identity
-                            elif sbol.BIOPAX_SMALL_MOLECULE in reactant_definition.types:
+                            elif sbol2.BIOPAX_SMALL_MOLECULE in reactant_definition.types:
                                 sensed_element = reactant_definition.identity
 
                     if sensor_element and sensed_element:
@@ -193,9 +213,9 @@ class CircuitLibrary():
         for sensor in self.sensors:
             if self.SBO_NON_COVALENT_BINDING in sensor.sensor_types:
                 if sensor.sensor_element in self.__activator_to_dna:
-                    sensor.add_sensor_type(sbol.SBO_STIMULATION)
+                    sensor.add_sensor_type(sbol2.SBO_STIMULATION)
                 elif sensor.sensor_element in self.__repressor_to_dna:
-                    sensor.add_sensor_type(sbol.SBO_INHIBITION)
+                    sensor.add_sensor_type(sbol2.SBO_INHIBITION)
 
     def __extract_features(self, doc, mod_definition):
         features = []
@@ -400,6 +420,18 @@ class CircuitLibrary():
                 variant_index = variant_index + 1
 
                 unique_flag = False
+            except NotUniqueError as exc:
+                if exc.error_code() == SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE:
+                    circuit_definition.identity = original_identity
+                    circuit_definition.displayId = original_ID
+                    circuit_definition.persistentIdentity = original_p_identity
+                    circuit_definition.version = original_version
+
+                    variant_index = variant_index + 1
+
+                    unique_flag = False
+                else:
+                    raise
 
         for sub_mod in circuit_definition.modules:
             cls.reidentify_SBOL(sub_mod, original_p_identity, circuit_definition.persistentIdentity)
@@ -416,9 +448,9 @@ class CircuitLibrary():
             for par in intxn.participations:
                 cls.reidentify_SBOL(par, original_p_identity, circuit_definition.persistentIdentity)
 
-            if sbol.SBO_GENETIC_PRODUCTION in intxn.types:
+            if sbol2.SBO_GENETIC_PRODUCTION in intxn.types:
                 for par in intxn.participations:
-                    if sbol.SBO_PRODUCT in par.roles:
+                    if sbol2.SBO_PRODUCT in par.roles:
                         product_fc = circuit_definition.functionalComponents.get(par.participant)
 
                         product_definition = circuit_doc.componentDefinitions.get(product_fc.definition)
@@ -437,20 +469,19 @@ class CircuitLibrary():
 
     @classmethod
     def strip_non_copy_properties(cls, sbol_obj):
-        try:
-            sbol_obj.setPropertyValue('http://wiki.synbiohub.org/wiki/Terms/synbiohub#ownedBy', '')
-        except LookupError:
-            pass
+        sbol_obj.ownedBy = sbol2.URIProperty(sbol_obj, 'http://wiki.synbiohub.org/wiki/Terms/synbiohub#ownedBy', 0, 1,
+                                             [])
+        sbol_obj.ownedBy = None
 
-        try:
-            sbol_obj.setPropertyValue('http://wiki.synbiohub.org/wiki/Terms/synbiohub#topLevel', '')
-        except LookupError:
-            pass
+        sbol_obj.topLevel = sbol2.URIProperty(sbol_obj, 'http://wiki.synbiohub.org/wiki/Terms/synbiohub#topLevel', 0,
+                                              1, [])
+        sbol_obj.topLevel = None
 
-        try:
-            sbol_obj.setPropertyValue('http://purl.org/dc/terms/created', '')
-        except LookupError:
-            pass
+        sbol_obj.created = sbol2.DateTimeProperty(sbol_obj, 'http://purl.org/dc/terms/created', 0, 1, [])
+        sbol_obj.created = None
+
+        sbol_obj.created = sbol2.DateTimeProperty(sbol_obj, 'http://purl.org/dc/terms/modified', 0, 1, [])
+        sbol_obj.created = None
 
         sbol_obj.wasGeneratedBy = []
 
@@ -470,6 +501,13 @@ class CircuitLibrary():
                     mod_definition_copy = None
 
                     copy_version = copy_version + 1
+                except NotUniqueError as exc:
+                    if exc.error_code() == SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE:
+                        mod_definition_copy = None
+
+                        copy_version = copy_version + 1
+                    else:
+                        raise
 
             mod_definition_copy.wasDerivedFrom = [mod_definition.identity]
         else:
@@ -477,6 +515,11 @@ class CircuitLibrary():
                 return sink_doc.moduleDefinitions.get(mod_definition.identity)
             except RuntimeError:
                 mod_definition_copy = mod_definition.copy(sink_doc)
+            except NotFoundError as exc:
+                if is_sbol_not_found(exc):
+                    mod_definition_copy = mod_definition.copy(sink_doc)
+                else:
+                    raise
 
         cls.strip_non_copy_properties(mod_definition_copy)
         for sub_mod_copy in mod_definition_copy.modules:
@@ -537,9 +580,9 @@ class CircuitBuilder():
             sub_circuit_definition = target_doc.moduleDefinitions.get(sub_circuit.identity)
 
             for intxn in sub_circuit_definition.interactions:
-                if sbol.SBO_GENETIC_PRODUCTION in intxn.types:
+                if sbol2.SBO_GENETIC_PRODUCTION in intxn.types:
                     for par in intxn.participations:
-                        if sbol.SBO_PRODUCT in par.roles:
+                        if sbol2.SBO_PRODUCT in par.roles:
                             fc = sub_circuit_definition.functionalComponents.get(par.participant)
 
                             product_identities.add(fc.definition)
@@ -585,9 +628,9 @@ class CircuitBuilder():
 
                     k = k + 1
                 
-                if abstraction_types[0] == sbol.SBO_STIMULATION:
+                if abstraction_types[0] == sbol2.SBO_STIMULATION:
                     sensor_intxn_ID = '_stimulates_'.join([sensed_fc.displayId, sensor_fc.displayId])
-                elif abstraction_types[0] == sbol.SBO_INHIBITION:
+                elif abstraction_types[0] == sbol2.SBO_INHIBITION:
                     sensor_intxn_ID = '_inhibits_'.join([sensed_fc.displayId, sensor_fc.displayId])
                 else:
                     sensor_intxn_ID = '_senses_'.join([sensor_fc.displayId, sensed_fc.displayId])
@@ -596,9 +639,9 @@ class CircuitBuilder():
                 sensor_intxn.types = abstraction_types
 
                 if sensed_fc.name and sensor_fc.name:
-                    if abstraction_types[0] == sbol.SBO_STIMULATION:
+                    if abstraction_types[0] == sbol2.SBO_STIMULATION:
                         sensor_intxn.name = ' stimulates '.join([sensed_fc.name, sensor_fc.name])
-                    elif abstraction_types[0] == sbol.SBO_INHIBITION:
+                    elif abstraction_types[0] == sbol2.SBO_INHIBITION:
                         sensor_intxn.name = ' inhibits '.join([sensed_fc.name, sensor_fc.name])
                     else:
                         sensor_intxn.name = ' senses '.join([sensor_fc.name, sensed_fc.name])
@@ -614,12 +657,12 @@ class CircuitBuilder():
                 sensor_par.participant = sensor_fc.identity
                 sensed_par.participant = sensed_fc.identity
 
-                if abstraction_types[0] == sbol.SBO_STIMULATION:
-                    sensor_par.roles = [sbol.SBO_STIMULATED]
-                    sensed_par.roles = [sbol.SBO_STIMULATOR]
-                elif abstraction_types[0] == sbol.SBO_INHIBITION:
-                    sensor_par.roles = [sbol.SBO_INHIBITED]
-                    sensed_par.roles = [sbol.SBO_INHIBITOR]
+                if abstraction_types[0] == sbol2.SBO_STIMULATION:
+                    sensor_par.roles = [sbol2.SBO_STIMULATED]
+                    sensed_par.roles = [sbol2.SBO_STIMULATOR]
+                elif abstraction_types[0] == sbol2.SBO_INHIBITION:
+                    sensor_par.roles = [sbol2.SBO_INHIBITED]
+                    sensed_par.roles = [sbol2.SBO_INHIBITOR]
 
                 sensor_intxn.wasDerivedFrom = [covered_sensors[i].identity]
             else:
@@ -650,16 +693,21 @@ class CircuitBuilder():
                 species_fc.name = species_definition.name
         except RuntimeError:
             pass
+        except NotFoundError as exc:
+            if is_sbol_not_found(exc):
+                pass
+            else:
+                raise
 
         species_fc.definition = species_identity
 
         if species_identity in input_identities:
             if species_identity in output_identities:
-                species_fc.direction = sbol.SBOL_DIRECTION_IN_OUT
+                species_fc.direction = sbol2.SBOL_DIRECTION_IN_OUT
             else:
-                species_fc.direction = sbol.SBOL_DIRECTION_IN
+                species_fc.direction = sbol2.SBOL_DIRECTION_IN
         elif species_identity in output_identities:
-            species_fc.direction = sbol.SBOL_DIRECTION_OUT
+            species_fc.direction = sbol2.SBOL_DIRECTION_OUT
 
         return species_fc
 
@@ -673,7 +721,7 @@ class CircuitBuilder():
 
             for seq_anno in construct_definition.sequenceAnnotations:
                 if (len(seq_anno.locations) == 1
-                        and seq_anno.locations[0].getTypeURI() == sbol.SBOL_RANGE):
+                        and seq_anno.locations[0].getTypeURI() == sbol2.SBOL_RANGE):
                     anno_range = seq_anno.locations.getRange()
 
                     if seq_anno.component:
@@ -722,9 +770,9 @@ class CircuitBuilder():
                     anno_groups.append(anno_group)
 
             for i in range(0, len(anno_groups)):
-                device_definition = sbol.ComponentDefinition('_device_'.join([circuit_definition.displayId,
+                device_definition = sbol2.ComponentDefinition('_device_'.join([circuit_definition.displayId,
                                                                               str(i + 1)]),
-                                                             sbol.BIOPAX_DNA, '1')
+                                                             sbol2.BIOPAX_DNA, '1')
 
                 if circuit_definition.name:
                     device_definition.name = ' Device '.join([circuit_definition.name, str(i + 1)])
@@ -732,7 +780,7 @@ class CircuitBuilder():
                 inline_count = 0
 
                 for anno in anno_groups[i]:
-                    if anno.orientation == sbol.SBOL_ORIENTATION_INLINE:
+                    if anno.orientation == sbol2.SBOL_ORIENTATION_INLINE:
                         inline_count = inline_count + 1
 
                 if inline_count/len(anno_groups[i]) < 0.5:
@@ -743,10 +791,10 @@ class CircuitBuilder():
                     rc_flag = False
 
                     for anno in anno_groups[i]:
-                        if anno.orientation == sbol.SBOL_ORIENTATION_INLINE:
-                            anno.orientation = sbol.SBOL_ORIENTATION_REVERSE_COMPLEMENT
+                        if anno.orientation == sbol2.SBOL_ORIENTATION_INLINE:
+                            anno.orientation = sbol2.SBOL_ORIENTATION_REVERSE_COMPLEMENT
                         else:
-                            anno.orientation = sbol.SBOL_ORIENTATION_INLINE
+                            anno.orientation = sbol2.SBOL_ORIENTATION_INLINE
 
                 if rc_flag:
                     device_start = anno_groups[i][0].end
@@ -760,10 +808,10 @@ class CircuitBuilder():
 
                     anno_loc = device_anno.locations.createRange(device_anno.displayId + '_loc')
                     if rc_flag:
-                        if anno.orientation == sbol.SBOL_ORIENTATION_INLINE:
-                            anno_loc.orientation = sbol.SBOL_ORIENTATION_REVERSE_COMPLEMENT
+                        if anno.orientation == sbol2.SBOL_ORIENTATION_INLINE:
+                            anno_loc.orientation = sbol2.SBOL_ORIENTATION_REVERSE_COMPLEMENT
                         else:
-                            anno_loc.orientation = sbol.SBOL_ORIENTATION_INLINE
+                            anno_loc.orientation = sbol2.SBOL_ORIENTATION_INLINE
                         anno_loc.start = -(anno.end - device_start - 1)
                         anno_loc.end = -(anno.start - device_start - 1)
                     else:
@@ -800,7 +848,7 @@ class CircuitBuilder():
             for seq_anno in construct_definition.sequenceAnnotations:
                 if (seq_anno.component
                         and len(seq_anno.locations) == 1
-                        and seq_anno.locations[0].getTypeURI() == sbol.SBOL_RANGE):
+                        and seq_anno.locations[0].getTypeURI() == sbol2.SBOL_RANGE):
                     anno_range = seq_anno.locations.getRange()
 
                     sub_comp = construct_definition.components.get(seq_anno.component)
@@ -811,9 +859,9 @@ class CircuitBuilder():
                                                      part_definition.identity,
                                                      part_definition.roles)
 
-                    if anno_range.orientation == sbol.SBOL_ORIENTATION_INLINE:
+                    if anno_range.orientation == sbol2.SBOL_ORIENTATION_INLINE:
                         inline_annos.append(feature_anno)
-                    elif anno_range.orientation == sbol.SBOL_ORIENTATION_REVERSE_COMPLEMENT:
+                    elif anno_range.orientation == sbol2.SBOL_ORIENTATION_REVERSE_COMPLEMENT:
                         rc_annos.append(feature_anno)
 
             inline_annos.sort()
@@ -826,8 +874,8 @@ class CircuitBuilder():
                     if tx_distance > tx_threshold:
                         j = len(inline_annos)
                     elif (tx_distance > 0 
-                            and sbol.SO_PROMOTER in inline_annos[i].roles
-                            and sbol.SO_CDS in inline_annos[j].roles):
+                            and sbol2.SO_PROMOTER in inline_annos[i].roles
+                            and sbol2.SO_CDS in inline_annos[j].roles):
                         fc1 = cls.get_circuit_species(inline_annos[i].definition, circuit_definition)
 
                         if not fc1:
@@ -853,17 +901,17 @@ class CircuitBuilder():
                             k = k + 1
 
                         stimulation = circuit_definition.interactions.create('_stimulates_'.join([fc1.displayId, fc2.displayId]))
-                        stimulation.types = [sbol.SBO_STIMULATION]
+                        stimulation.types = [sbol2.SBO_STIMULATION]
 
                         if fc1.name and fc2.name:
                             stimulation.name = ' stimulates '.join([fc1.name, fc2.name])
 
                         stimulator = stimulation.participations.create(fc1.displayId)
-                        stimulator.roles = [sbol.SBO_STIMULATOR]
+                        stimulator.roles = [sbol2.SBO_STIMULATOR]
                         stimulator.participant = fc1.identity
 
                         stimulated = stimulation.participations.create(fc2.displayId)
-                        stimulated.roles = [sbol.SBO_STIMULATED]
+                        stimulated.roles = [sbol2.SBO_STIMULATED]
                         stimulated.participant = fc2.identity
 
                         logging.debug('Inferred promoter-CDS stimulation %s', stimulation.identity)
@@ -875,8 +923,8 @@ class CircuitBuilder():
                     if tx_distance > tx_threshold:
                         j = len(rc_annos)
                     elif (tx_distance > 0
-                            and sbol.SO_CDS in rc_annos[i].roles
-                            and sbol.SO_PROMOTER in rc_annos[j].roles):
+                            and sbol2.SO_CDS in rc_annos[i].roles
+                            and sbol2.SO_PROMOTER in rc_annos[j].roles):
                         fc1 = cls.get_circuit_species(rc_annos[i].definition, circuit_definition)
 
                         if not fc1:
@@ -902,17 +950,17 @@ class CircuitBuilder():
                             k = k + 1
 
                         stimulation = circuit_definition.interactions.create('_stimulates_'.join([fc2.displayId, fc1.displayId]))
-                        stimulation.types = [sbol.SBO_STIMULATION]
+                        stimulation.types = [sbol2.SBO_STIMULATION]
 
                         if fc1.name and fc2.name:
                             stimulation.name = ' stimulates '.join([fc2.name, fc1.name])
 
                         stimulator = stimulation.participations.create(fc2.displayId)
-                        stimulator.roles = [sbol.SBO_STIMULATOR]
+                        stimulator.roles = [sbol2.SBO_STIMULATOR]
                         stimulator.participant = fc2.identity
 
                         stimulated = stimulation.participations.create(fc1.displayId)
-                        stimulated.roles = [sbol.SBO_STIMULATED]
+                        stimulated.roles = [sbol2.SBO_STIMULATED]
                         stimulated.participant = fc1.identity
                         
                         logging.debug('Inferred promoter-CDS stimulation %s', stimulation.identity)
@@ -920,7 +968,7 @@ class CircuitBuilder():
     def build(self, circuit_id, target_doc, constructs, version='1', tx_threshold=0,
             input_identities=set(), output_identities=set(), infer_sensors=False,
             infer_devices=False, flanking_length=0):
-        circuit_definition = sbol.ModuleDefinition(circuit_id, version)
+        circuit_definition = sbol2.ModuleDefinition(circuit_id, version)
         circuit_definition.roles = [self.NCIT_BIOCHEMICAL_PATHWAY]
 
         logging.info('Building %s', circuit_definition.identity)
@@ -1074,9 +1122,9 @@ def main(args=None):
     
     logging.getLogger('').addHandler(console_handler)
 
-    sbol.setHomespace(args.namespace)
-    sbol.Config.setOption('validate', args.validate)
-    sbol.Config.setOption('sbol_typed_uris', False)
+    sbol2.setHomespace(args.namespace)
+    sbol2.Config.setOption('validate', args.validate)
+    sbol2.Config.setOption('sbol_typed_uris', False)
 
     circuit_docs = []
     for circuit_file in args.sub_circuit_files:
@@ -1168,7 +1216,7 @@ def main(args=None):
                     else:
                         output_file = target_file_base + target_file_extension
 
-                if sbol.Config.getOption('validate') == True:
+                if sbol2.Config.getOption('validate') == True:
                     logging.info('Validating and writing %s', output_file)
                 else:
                     logging.info('Writing %s', output_file)

@@ -1,9 +1,12 @@
 import unittest
 import os
-from sbol import *
+import sbol2
 
-from sequences_to_features import *
-from features_to_circuits import *
+from sequences_to_features import FeatureLibrary
+from sequences_to_features import FeatureAnnotater
+from sequences_to_features import FeaturePruner
+from features_to_circuits import CircuitLibrary
+from features_to_circuits import CircuitBuilder
 
 class CurationTests(unittest.TestCase):
 
@@ -16,9 +19,9 @@ class CurationTests(unittest.TestCase):
 
         MIN_TARGET_LENGTH = 800
 
-        setHomespace(HOMESPACE)
-        Config.setOption('validate', False)
-        Config.setOption('sbol_typed_uris', False)
+        sbol2.setHomespace(HOMESPACE)
+        sbol2.Config.setOption('validate', False)
+        sbol2.Config.setOption('sbol_typed_uris', False)
 
         cello_doc = load_sbol(os.path.join(__location__, 'cello_library.xml'))
         feature_library = FeatureLibrary([cello_doc])
@@ -68,9 +71,9 @@ class CurationTests(unittest.TestCase):
 
         MIN_TARGET_LENGTH = 800
 
-        setHomespace(HOMESPACE)
-        Config.setOption('validate', False)
-        Config.setOption('sbol_typed_uris', False)
+        sbol2.setHomespace(HOMESPACE)
+        sbol2.Config.setOption('validate', False)
+        sbol2.Config.setOption('sbol_typed_uris', False)
 
         cello_doc = load_sbol(os.path.join(__location__, 'cello_library.xml'))
         feature_library = FeatureLibrary([cello_doc])
@@ -112,9 +115,9 @@ class CurationTests(unittest.TestCase):
 
         MIN_TARGET_LENGTH = 2000
 
-        setHomespace(HOMESPACE)
-        Config.setOption('validate', False)
-        Config.setOption('sbol_typed_uris', False)
+        sbol2.setHomespace(HOMESPACE)
+        sbol2.Config.setOption('validate', False)
+        sbol2.Config.setOption('sbol_typed_uris', False)
 
         cello_doc = load_sbol(os.path.join(__location__, 'cello_library.xml'))
         feature_library = FeatureLibrary([cello_doc])

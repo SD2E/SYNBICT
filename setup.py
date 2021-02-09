@@ -4,14 +4,15 @@ from setuptools import setup, find_packages
 
 install_requires = [
     'biopython>=1.78',
+    'dnaplotlib>=1.0',
     'flashtext>=2.7',
-    'pysbol>=2.3.1',
+    'sbol2>=1.3',
     'matplotlib>=1.5.0'
 ]
 
 setup(
     name='SYNBICT',
-    version='1.1',
+    version='1.4',
     packages=find_packages(),
     install_requires=install_requires,
     classifiers=[
