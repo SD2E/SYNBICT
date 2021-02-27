@@ -11,6 +11,8 @@ import sbol2
 from flashtext import KeywordProcessor
 
 def load_target_file(target_file):
+    logger = logging.getLogger('synbict')
+
     if target_file.endswith('.xml') or target_file.endswith('.sbol'):
         return load_sbol(target_file)
     elif (target_file.endswith('.gb')
@@ -22,7 +24,7 @@ def load_target_file(target_file):
             or target_file.endswith('.fsa')):
         return load_non_sbol(target_file)
     else:
-        logging.error('Extension of target file %s is unrecognized.', target_file)
+        logger.error('Extension of target file %s is unrecognized.', target_file)
 
         return None
 
@@ -47,7 +49,9 @@ def is_sbol_not_found(exc):
         or exc.error_code() == sbol2.SBOLErrorCode.NOT_FOUND_ERROR)
 
 def load_sbol(sbol_file):
-    logging.info('Loading %s', sbol_file)
+    logger = logging.getLogger('synbict')
+
+    logger.info('Loading %s', sbol_file)
 
     doc = sbol2.Document()
     doc.read(sbol_file)
@@ -63,7 +67,9 @@ def load_sbol(sbol_file):
     return doc
 
 def load_non_sbol(non_sbol_file):
-    logging.info('Loading %s', non_sbol_file)
+    logger = logging.getLogger('synbict')
+
+    logger.info('Loading %s', non_sbol_file)
 
     conversion_request = {
         'options': {
@@ -103,13 +109,20 @@ def load_non_sbol(non_sbol_file):
 
 class FeatureCurator():
 
-    def __init__(self, target_library):
+    def __init__(self, target_library, output_library=None):
         self.target_library = target_library
+        self.output_library = output_library
+
+        self.logger = logging.getLogger('synbict')
 
     def annotate_features(self, feature_annotater, min_target_length, in_place=False):
-        annotated_identities = feature_annotater.annotate(self.target_library, min_target_length, in_place)
+        annotated_identities = feature_annotater.annotate(self.target_library, min_target_length, in_place,
+                                                          self.output_library)
 
-        added_features = self.target_library.update()
+        if self.output_library and len(self.output_library.docs) > 0:
+            added_features = self.output_library.update(False)
+        else:
+            added_features = self.target_library.update()
 
         annotated_features = []
         annotating_features = []
@@ -124,11 +137,16 @@ class FeatureCurator():
 
     def prune_features(self, feature_pruner, cover_offset, min_target_length, target_features=[],
             target_sub_features=[], delete_flat=False, auto_swap=False, ask_user=True):
-        feature_pruner.prune(self.target_library, cover_offset, min_target_length,
-                             ask_user=ask_user, delete_flat=delete_flat, target_features=target_features,
-                             auto_swap=auto_swap)
+        if self.output_library and len(self.output_library.docs) > 0:
+            feature_pruner.prune(self.output_library, cover_offset, min_target_length,
+                                 ask_user=ask_user, delete_flat=delete_flat, target_features=target_features,
+                                 auto_swap=auto_swap, require_sequence=False)
+        else:
+            feature_pruner.prune(self.target_library, cover_offset, min_target_length,
+                                 ask_user=ask_user, delete_flat=delete_flat, target_features=target_features,
+                                 auto_swap=auto_swap)
 
-        feature_pruner.clean(self.target_library, target_features, target_sub_features)
+            feature_pruner.clean(self.target_library, target_features, target_sub_features)
 
     def extend_features(self, feature_annotater, min_target_length, extension_threshold):
         feature_annotater.extend_features_by_name(self.target_library,
@@ -152,6 +170,8 @@ class Feature():
         self.parent_identities = parent_identities
         self.roles = set(roles)
 
+        self.logger = logging.getLogger('synbict')
+
     def reverse_complement_nucleotides(self):
         return str(Seq(self.nucleotides).reverse_complement())
 
@@ -173,7 +193,9 @@ class FeatureLibrary():
         self.__feature_dict = {}
         self.__name_to_idents = {}
 
-        logging.info('Loading features')
+        self.logger = logging.getLogger('synbict')
+
+        self.logger.info('Loading features')
 
         for i in range(0, len(self.docs)):
             self.__load_features(self.docs[i], i, require_sequence)
@@ -209,53 +231,86 @@ class FeatureLibrary():
     def __load_features(self, doc, doc_index, require_sequence=True):
         loaded_features = []
 
+        comp_seq_identities = set()
+
         for comp_definition in doc.componentDefinitions:
-            if sbol2.BIOPAX_DNA in comp_definition.types and comp_definition.identity not in self.__feature_map:
+            if sbol2.BIOPAX_DNA in comp_definition.types:
                 dna_seqs = self.get_DNA_sequences(comp_definition, doc)
 
-                sub_identities = []
+                for dna_seq in dna_seqs:
+                    comp_seq_identities.add(dna_seq.identity)
 
-                for sub_comp in comp_definition.components:
-                    sub_identities.append(sub_comp.definition)
+                if comp_definition.identity not in self.__feature_map:
+                    sub_identities = []
 
-                if len(dna_seqs) > 0:
-                    feature = Feature(dna_seqs[0].elements,
-                                      comp_definition.identity,
-                                      comp_definition.roles,
-                                      sub_identities,
-                                      comp_definition.wasDerivedFrom)
+                    for sub_comp in comp_definition.components:
+                        sub_identities.append(sub_comp.definition)
+
+                    if len(dna_seqs) > 0:
+                        feature = Feature(dna_seqs[0].elements,
+                                          comp_definition.identity,
+                                          comp_definition.roles,
+                                          sub_identities,
+                                          comp_definition.wasDerivedFrom)
+
+                        loaded_features.append(feature)
+                        self.features.append(feature)
+
+                        self.__feature_map[comp_definition.identity] = doc_index
+                        self.__feature_dict[comp_definition.identity] = feature
+
+                        if comp_definition.name:
+                            if comp_definition.name not in self.__name_to_idents:
+                                self.__name_to_idents[comp_definition.name] = []
+
+                            self.__name_to_idents[comp_definition.name].append(comp_definition.identity)
+                    elif not require_sequence:
+                        feature = Feature('',
+                                          comp_definition.identity,
+                                          comp_definition.roles,
+                                          sub_identities,
+                                          comp_definition.wasDerivedFrom)
+
+                        loaded_features.append(feature)
+                        self.features.append(feature)
+
+                        self.__feature_map[comp_definition.identity] = doc_index
+                        self.__feature_dict[comp_definition.identity] = feature
+
+                        if comp_definition.name:
+                            if comp_definition.name not in self.__name_to_idents:
+                                self.__name_to_idents[comp_definition.name] = []
+
+                            self.__name_to_idents[comp_definition.name].append(comp_definition.identity)
+                    else:
+                        self.logger.warning('%s not loaded since its DNA sequence was not found', comp_definition.identity)
+
+        for seq in doc.sequences:
+            if seq.identity not in comp_seq_identities and seq.encoding == sbol2.SBOL_ENCODING_IUPAC:
+                seq_comp_definition = sbol2.ComponentDefinition(seq.displayId + '_comp', sbol2.BIOPAX_DNA, '1')
+                seq_comp_definition.sequences = [seq.identity]
+
+                try:
+                    doc.addComponentDefinition(seq_comp_definition)
+
+                    feature = Feature(seq.elements,
+                                      seq_comp_definition.identity,
+                                      [],
+                                      [],
+                                      [])
 
                     loaded_features.append(feature)
                     self.features.append(feature)
 
-                    self.__feature_map[comp_definition.identity] = doc_index
-                    self.__feature_dict[comp_definition.identity] = feature
-
-                    if comp_definition.name:
-                        if comp_definition.name not in self.__name_to_idents:
-                            self.__name_to_idents[comp_definition.name] = []
-
-                        self.__name_to_idents[comp_definition.name].append(comp_definition.identity)
-                elif not require_sequence:
-                    feature = Feature('',
-                                      comp_definition.identity,
-                                      comp_definition.roles,
-                                      sub_identities,
-                                      comp_definition.wasDerivedFrom)
-
-                    loaded_features.append(feature)
-                    self.features.append(feature)
-
-                    self.__feature_map[comp_definition.identity] = doc_index
-                    self.__feature_dict[comp_definition.identity] = feature
-
-                    if comp_definition.name:
-                        if comp_definition.name not in self.__name_to_idents:
-                            self.__name_to_idents[comp_definition.name] = []
-
-                        self.__name_to_idents[comp_definition.name].append(comp_definition.identity)
-                else:
-                    logging.warning('%s not loaded since its DNA sequence was not found', comp_definition.identity)
+                    self.__feature_map[seq_comp_definition.identity] = doc_index
+                    self.__feature_dict[seq_comp_definition.identity] = feature
+                except RuntimeError:
+                    self.logger.warning('Component could not be automatically generated for DNA sequence %s', seq.identity)
+                except NotUniqueError as exc:
+                    if exc.error_code() == sbol2.SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE:
+                        self.logger.warning('Component could not be automatically generated for DNA sequence %s', seq.identity)
+                    else:
+                        raise
 
         return loaded_features
 
@@ -402,7 +457,7 @@ class FeatureLibrary():
                     else:
                         raise
 
-            cls.strip_non_copy_properties(seq_copy)
+            cls.strip_extension_properties(seq_copy)
         else:
             try:
                 sink_doc.getSequence(seq.identity)
@@ -509,27 +564,27 @@ class FeatureLibrary():
                     raise
 
     @classmethod
-    def strip_non_copy_properties(cls, sbol_obj):
-        sbol_obj.ownedBy = sbol2.URIProperty(sbol_obj, 'http://wiki.synbiohub.org/wiki/Terms/synbiohub#ownedBy', 0, 1,
-                                             [])
-        sbol_obj.ownedBy = None
+    def strip_extension_properties(cls, sbol_obj):
+        origin_props = []
 
-        sbol_obj.topLevel = sbol2.URIProperty(sbol_obj, 'http://wiki.synbiohub.org/wiki/Terms/synbiohub#topLevel', 0,
-                                              1, [])
-        sbol_obj.topLevel = None
+        for prop in sbol_obj.properties:
+            if (prop.startswith('http://wiki.synbiohub.org/wiki/Terms/synbiohub#')
+                    or prop.startswith('http://purl.org/dc/terms/created')
+                    or prop.startswith('http://purl.org/dc/terms/modified')
+                    or prop.startswith('http://www.ncbi.nlm.nih.gov/genbank#')
+                    or prop.startswith('http://sbols.org/genBankConversion#')):
+                origin_props.append(prop)
 
-        sbol_obj.created = sbol2.DateTimeProperty(sbol_obj, 'http://purl.org/dc/terms/created', 0, 1, [])
-        sbol_obj.created = None
-
-        sbol_obj.created = sbol2.DateTimeProperty(sbol_obj, 'http://purl.org/dc/terms/modified', 0, 1, [])
-        sbol_obj.created = None
+        for origin_prop in origin_props:
+            del sbol_obj.properties[origin_prop]
 
         sbol_obj.wasGeneratedBy = []
 
     @classmethod
     def copy_component_definition(cls, comp_definition, source_doc, sink_doc, import_namespace=False,
                                   min_seq_length=0, import_sequences=False, seq_elements=None,
-                                  parent_definitions=[], parent_doc=None, make_variant=False):
+                                  parent_definitions=[], parent_doc=None, make_variant=False,
+                                  shallow_copy=False):
         if sbol2.BIOPAX_DNA in comp_definition.types:
             seqs = cls.get_DNA_sequences(comp_definition, source_doc)
         else:
@@ -572,14 +627,14 @@ class FeatureLibrary():
                         else:
                             raise
 
-                cls.strip_non_copy_properties(definition_copy)
+                cls.strip_extension_properties(definition_copy)
                 for sub_comp_copy in definition_copy.components:
-                    cls.strip_non_copy_properties(sub_comp_copy)
+                    cls.strip_extension_properties(sub_comp_copy)
                 for anno_copy in definition_copy.sequenceAnnotations:
-                    cls.strip_non_copy_properties(anno_copy)
+                    cls.strip_extension_properties(anno_copy)
 
                     for loc_copy in anno_copy.locations:
-                        cls.strip_non_copy_properties(loc_copy)
+                        cls.strip_extension_properties(loc_copy)
 
                 if make_variant:
                     cls.make_variant_definition(sink_doc, definition_copy)
@@ -596,7 +651,9 @@ class FeatureLibrary():
                     else:
                         raise
 
-            if import_sequences:
+            if shallow_copy:
+                definition_copy.sequences = list(comp_definition.sequences)
+            elif import_sequences:
                 if len(seqs) > 0:
                     seq_copy = cls.copy_sequence(seqs[0], source_doc, sink_doc, True)
 
@@ -627,35 +684,46 @@ class FeatureLibrary():
 
                 definition_copy.sequences = list(comp_definition.sequences)
 
-            for seq_anno in comp_definition.sequenceAnnotations:
-                if seq_anno.component:
-                    sub_comp = comp_definition.components.get(seq_anno.component)
+            if make_variant:
+                definition_copy.sequenceAnnotations = []
+                definition_copy.components = []
+            else:
+                for seq_anno in comp_definition.sequenceAnnotations:
+                    if seq_anno.component:
+                        sub_comp = comp_definition.components.get(seq_anno.component)
 
-                    sub_copy = definition_copy.components.get(sub_comp.displayId)
+                        sub_copy = definition_copy.components.get(sub_comp.displayId)
 
-                    anno_copy = definition_copy.sequenceAnnotations.get(seq_anno.displayId)
-                    anno_copy.component = sub_copy.identity
+                        anno_copy = definition_copy.sequenceAnnotations.get(seq_anno.displayId)
+                        anno_copy.component = sub_copy.identity
 
-            for sub_comp in comp_definition.components:
-                try:
-                    sub_definition = source_doc.getComponentDefinition(sub_comp.definition)
-                except RuntimeError:
-                    sub_definition = None
-                except NotFoundError as exc:
-                    if is_sbol_not_found(exc):
+                for sub_comp in comp_definition.components:
+                    try:
+                        sub_definition = source_doc.getComponentDefinition(sub_comp.definition)
+                    except RuntimeError:
                         sub_definition = None
-                    else:
-                        raise
+                    except NotFoundError as exc:
+                        if is_sbol_not_found(exc):
+                            sub_definition = None
+                        else:
+                            raise
 
-                if sub_definition:
-                    sub_copy = definition_copy.components.get(sub_comp.displayId)
+                    if sub_definition:
+                        sub_copy = definition_copy.components.get(sub_comp.displayId)
 
-                    sub_definition_copy = cls.copy_component_definition(sub_definition, source_doc, sink_doc,
-                        import_namespace, min_seq_length)
+                        if import_namespace or not shallow_copy:
+                            sub_definition_copy = cls.copy_component_definition(sub_definition, source_doc, sink_doc,
+                                                                                import_namespace, min_seq_length,
+                                                                                shallow_copy=shallow_copy)
 
-                    if sub_definition_copy:
-                        sub_copy.definition = sub_definition_copy.identity
+                            if sub_definition_copy:
+                                sub_copy.definition = sub_definition_copy.identity
+                            else:
+                                sub_copy.definition = sub_definition.identity
+                        else:
+                            sub_copy.definition = sub_definition.identity
 
+                            
             for parent_definition in parent_definitions:
                 definition_copy.wasDerivedFrom = definition_copy.wasDerivedFrom + [parent_definition.identity]
 
@@ -668,6 +736,8 @@ class FeatureAnnotater():
     def __init__(self, feature_library, min_feature_length):
         self.feature_library = feature_library
         self.feature_matcher = KeywordProcessor()
+
+        self.logger = logging.getLogger('synbict')
 
         for feature in feature_library.features:
             inline_elements = ' '.join(feature.nucleotides)
@@ -749,9 +819,8 @@ class FeatureAnnotater():
                     seq_anno.roles = seq_anno.roles + child_definition.roles
                     seq_anno.wasDerivedFrom = seq_anno.wasDerivedFrom + [parent_URI]
                 
-                location = seq_anno.locations.createRange('_'.join([child_definition.displayId,
-                                                                    'loc',
-                                                                    '1']))
+                location = seq_anno.locations.createRange('_'.join([seq_anno.displayId,
+                                                                    'loc']))
 
                 location.orientation = orientation
                 location.start = start
@@ -762,7 +831,7 @@ class FeatureAnnotater():
         return seq_anno
 
     def __process_feature_matches(self, target_doc, target_definition, feature_matches, orientation, target_length,
-                                  rc_factor=0):
+                                  rc_factor=0, copy_definitions=True):
         for feature_match in feature_matches:
             temp_start = feature_match[1]//2 + 1
             temp_end = (feature_match[2] + 1)//2
@@ -789,15 +858,16 @@ class FeatureAnnotater():
                     self.__create_sequence_annotation(target_definition, feature_definition, orientation, start, end,
                                                       sub_comp.identity)
 
-                    feature_doc = self.feature_library.get_document(feature.identity)
+                    if copy_definitions:
+                        feature_doc = self.feature_library.get_document(feature.identity)
 
-                    FeatureLibrary.copy_component_definition(feature_definition, feature_doc, target_doc)
+                        FeatureLibrary.copy_component_definition(feature_definition, feature_doc, target_doc)
 
-                    logging.debug('Annotated %s (%s, %s) at [%s, %s] in %s', feature_definition.identity, feature_ID,
-                        feature_role, start, end, target_definition.identity)
+                    self.logger.debug('Annotated %s (%s, %s) at [%s, %s] in %s', feature_definition.identity, feature_ID,
+                                      feature_role, start, end, target_definition.identity)
 
     def extend_features_by_name(self, target_library, min_target_length, mismatch_threshold):
-        logging.info('Extending feature library')
+        self.logger.info('Extending feature library')
 
         aligner = Align.PairwiseAligner()
         aligner.match_score = 1
@@ -868,18 +938,18 @@ class FeatureAnnotater():
 
                                                 self.feature_matcher.add_keyword(inline_elements, [feature])
 
-                                                logging.debug('Extended feature library with %s', variant_definition.identity)
+                                                self.logger.debug('Extended feature library with %s', variant_definition.identity)
 
         self.feature_library.update()
 
-        logging.info('Finished extending feature library')
+        self.logger.info('Finished extending feature library')
 
-    def annotate(self, target_library, min_target_length, in_place=False):
+    def annotate(self, target_library, min_target_length, in_place=False, output_library=None):
         annotated_identities = []
 
         for target in target_library.features:
             if self.__has_min_length(target, min_target_length):
-                logging.info('Annotating %s', target.identity)
+                self.logger.info('Annotating %s', target.identity)
 
                 inline_elements = ' '.join(target.nucleotides)
                 rc_elements = ' '.join(target.reverse_complement_nucleotides())
@@ -891,25 +961,45 @@ class FeatureAnnotater():
                     target_doc = target_library.get_document(target.identity)
 
                     target_definition = target_doc.getComponentDefinition(target.identity)
+
+                    doc_index = target_library.get_document_index(target.identity)
                     
-                    if in_place:
+                    if doc_index < len(output_library.docs):
+                        output_doc = output_library.docs[doc_index]
+
+                        if in_place:
+                            definition_copy = FeatureLibrary.copy_component_definition(target_definition,
+                                                                                       target_doc,
+                                                                                       output_doc,
+                                                                                       min_seq_length=min_target_length,
+                                                                                       shallow_copy=True)
+                        else:
+                            definition_copy = FeatureLibrary.copy_component_definition(target_definition,
+                                                                                       target_doc,
+                                                                                       output_doc, True,
+                                                                                       min_target_length,
+                                                                                       shallow_copy=True)
+                    elif in_place:
                         definition_copy = target_definition
                     else:
                         definition_copy = FeatureLibrary.copy_component_definition(target_definition, target_doc,
-                            target_doc, True, min_target_length)
-                    
+                                                                                   target_doc, True,
+                                                                                   min_target_length)
+
                     if definition_copy:
                         self.__process_feature_matches(target_doc, definition_copy, inline_matches,
-                            sbol2.SBOL_ORIENTATION_INLINE, len(target.nucleotides))
+                            sbol2.SBOL_ORIENTATION_INLINE, len(target.nucleotides),
+                            copy_definitions=(doc_index >= len(output_library.docs)))
                         self.__process_feature_matches(target_doc, definition_copy, rc_matches,
-                            sbol2.SBOL_ORIENTATION_REVERSE_COMPLEMENT, len(target.nucleotides), len(target.nucleotides) + 1)
+                            sbol2.SBOL_ORIENTATION_REVERSE_COMPLEMENT, len(target.nucleotides), len(target.nucleotides) + 1,
+                            (doc_index >= len(output_library.docs)))
 
                         annotated_identities.append(definition_copy.identity)
                     else:
-                        logging.warning('%s was not annotated because its version could not be incremented.',
+                        self.logger.warning('%s was not annotated because its version could not be incremented.',
                                         target.identity)
 
-                logging.info('Finished annotating %s', target.identity)
+                self.logger.info('Finished annotating %s', target.identity)
 
         return annotated_identities
 
@@ -926,6 +1016,8 @@ class FeaturePruner():
         self.feature_library = feature_library
         self.roles = roles
 
+        self.logger = logging.getLogger('synbict')
+
     @classmethod
     def __has_min_length(cls, feature, min_feature_length):
         return len(feature.nucleotides) >= min_feature_length
@@ -938,8 +1030,7 @@ class FeaturePruner():
 
         return True
 
-    @classmethod
-    def __remove_annotations(cls, indices, annos, target_definition):
+    def __remove_annotations(self, indices, annos, target_definition):
         for i in range(len(annos) - 1, -1, -1):
             if annos[i][5] is None:
                 feature_identity = annos[i][2]
@@ -952,7 +1043,7 @@ class FeaturePruner():
                 if annos[i][5]:
                     target_definition.components.remove(annos[i][5])
 
-                logging.debug('Removed %s at [%s, %s] in %s', feature_identity, annos[i][0], annos[i][1],
+                self.logger.debug('Removed %s at [%s, %s] in %s', feature_identity, annos[i][0], annos[i][1],
                               target_definition.identity)
 
                 del annos[i]
@@ -1094,7 +1185,7 @@ remove if any (comma-separated list of indices, for example 0,2,5):\n'.format(fm
                 if annos[i][5]:
                     target_definition.components.remove(annos[i][5])
 
-                logging.debug('Removed %s at [%s, %s] in %s', feature_identity, annos[i][0], annos[i][1],
+                self.logger.debug('Removed %s at [%s, %s] in %s', feature_identity, annos[i][0], annos[i][1],
                               target_definition.identity)
 
                 del annos[i]
@@ -1110,7 +1201,6 @@ remove if any (comma-separated list of indices, for example 0,2,5):\n'.format(fm
         else:
             return False
 
-    @classmethod
     def __swap_annotations(self, anno, sub_part_anno, target_definition):
         seq_anno = target_definition.sequenceAnnotations.get(anno[2])
 
@@ -1119,9 +1209,9 @@ remove if any (comma-separated list of indices, for example 0,2,5):\n'.format(fm
 
         target_definition.sequenceAnnotations.remove(sub_part_anno[2])
 
-        logging.debug('Removed %s at [%s, %s] in %s', sub_part_anno[2], sub_part_anno[0], sub_part_anno[1],
+        self.logger.debug('Removed %s at [%s, %s] in %s', sub_part_anno[2], sub_part_anno[0], sub_part_anno[1],
                       target_definition.identity)
-        logging.debug('Modified %s at [%s, %s] in %s to refer to %s', anno[2], anno[0], anno[1],
+        self.logger.debug('Modified %s at [%s, %s] in %s to refer to %s', anno[2], anno[0], anno[1],
                       target_definition.identity, sub_part_anno[5])
 
     # @classmethod
@@ -1143,7 +1233,7 @@ remove if any (comma-separated list of indices, for example 0,2,5):\n'.format(fm
     #     return annos
 
     @classmethod
-    def __get_flat_annotation_indices(self, anno_group):
+    def __get_flat_annotation_indices(cls, anno_group):
         flat_indices = []
 
         for i in range(0, len(anno_group)):
@@ -1153,7 +1243,7 @@ remove if any (comma-separated list of indices, for example 0,2,5):\n'.format(fm
         return flat_indices
 
     def clean(self, feature_library, annotated_features, annotating_features):
-        logging.info('Cleaning up')
+        self.logger.info('Cleaning up')
 
         sub_definitions = set()
 
@@ -1186,7 +1276,7 @@ remove if any (comma-separated list of indices, for example 0,2,5):\n'.format(fm
             if len(sub_IDs) == len(parent_sub_IDs) and len(sub_IDs) == len(sub_IDs.intersection(parent_sub_IDs)):
                 annotated_doc.componentDefinitions.remove(annotated_feature.identity)
 
-                logging.debug('Removed %s from %s', annotated_feature.identity, annotated_doc.name)
+                self.logger.debug('Removed %s from %s', annotated_feature.identity, annotated_doc.name)
             else:
                 sub_definitions.update(temp_sub_definitions)
 
@@ -1202,20 +1292,20 @@ remove if any (comma-separated list of indices, for example 0,2,5):\n'.format(fm
                     except ValueError:
                         pass
 
-                logging.debug('Removed %s from %s', annotating_feature.identity, annotating_doc.name)
+                self.logger.debug('Removed %s from %s', annotating_feature.identity, annotating_doc.name)
 
-        logging.info('Finished cleaning up')
+        self.logger.info('Finished cleaning up')
 
     def prune(self, target_library, cover_offset, min_target_length, ask_user=True, canonical_library=None,
-              delete_flat=False, keep_flat=True, target_features=[], auto_swap=False):
+              delete_flat=False, keep_flat=True, target_features=[], auto_swap=False, require_sequence=True):
         target_identities = set()
         for target_feature in target_features:
             target_identities.add(target_feature.identity)
 
         for target in target_library.features:
-            if (self.__has_min_length(target, min_target_length) and (len(target_identities) == 0
-                    or target.identity in target_identities)):
-                logging.info('Pruning %s', target.identity)
+            if ((not require_sequence or self.__has_min_length(target, min_target_length))
+                    and (len(target_identities) == 0 or target.identity in target_identities)):
+                self.logger.info('Pruning %s', target.identity)
 
                 target_doc = target_library.get_document(target.identity)
 
@@ -1272,9 +1362,9 @@ remove if any (comma-separated list of indices, for example 0,2,5):\n'.format(fm
                                 redundant_defs.append(target_definition.components.get(anno[5]).definition)
 
                         if len(redundant_defs) > 1:
-                            logging.debug('Detected redundant features: %s.', str(redundant_defs))
+                            self.logger.debug('Detected redundant features: %s.', str(redundant_defs))
 
-                logging.info('Finished pruning %s', target.identity)
+                self.logger.info('Finished pruning %s', target.identity)
 
 def main(args=None):
     if args is None:
@@ -1288,6 +1378,8 @@ def main(args=None):
     parser.add_argument('-o', '--output_files', nargs='*', default=[])
     parser.add_argument('-s', '--output_suffix', nargs='?', default='')
     parser.add_argument('-p', '--in_place', action='store_true')
+    parser.add_argument('-m', '--min_target_length', nargs='?', default=2000)
+    parser.add_argument('-mo', '--minimal_output', action='store_true')
     parser.add_argument('-ni', '--non_interactive', action='store_true')
     parser.add_argument('-l', '--log_file', nargs='?', default='')
     parser.add_argument('-v', '--validate', action='store_true')
@@ -1295,7 +1387,7 @@ def main(args=None):
     # Sequence annotation arguments
     parser.add_argument('-f', '--feature_files', nargs='*', default=[])
     parser.add_argument('-M', '--min_feature_length', nargs='?', default=40)
-    parser.add_argument('-m', '--min_target_length', nargs='?', default=2000)
+    
     parser.add_argument('-na', '--no_annotation', action='store_true')
     parser.add_argument('-e', '--extend_features', action='store_true')
     parser.add_argument('-xs', '--extension_suffix', nargs='?', default='')
@@ -1317,21 +1409,26 @@ def main(args=None):
     
     args = parser.parse_args(args)
 
-    if len(args.log_file) > 0:
-        logging.basicConfig(level=logging.DEBUG,
-                        format='%(asctime)s ; %(levelname)s ; %(message)s',
-                        datefmt='%m-%d-%y %H:%M',
-                        filename=args.log_file,
-                        filemode='w')
+    logger = logging.getLogger('synbict')
+    logger.setLevel(logging.DEBUG)
+    logger.propagate = False
 
     console_handler = logging.StreamHandler()
     console_handler.setLevel(logging.INFO)
 
-    console_formatter = logging.Formatter('%(levelname)s ; %(message)s')
-    
-    console_handler.setFormatter(console_formatter)
-    
-    logging.getLogger('').addHandler(console_handler)
+    formatter = logging.Formatter('%(asctime)s ; %(levelname)s ; %(message)s')
+
+    console_handler.setFormatter(formatter)
+
+    logger.addHandler(console_handler)
+
+    if len(args.log_file) > 0:
+        file_handler = logging.FileHandler(args.log_file, "w")
+        file_handler.setLevel(logging.DEBUG)
+
+        file_handler.setFormatter(formatter)
+
+        logger.addHandler(file_handler)
 
     sbol2.setHomespace(args.namespace)
     sbol2.Config.setOption('validate', args.validate)
@@ -1394,7 +1491,14 @@ def main(args=None):
 
         target_library = FeatureLibrary(target_docs)
 
-        feature_curator = FeatureCurator(target_library)
+        if args.minimal_output:
+            output_docs = [sbol2.Document() for i in range(0, len(target_library.docs))]
+        else:
+            output_docs = []
+
+        output_library = FeatureLibrary(output_docs, False)
+
+        feature_curator = FeatureCurator(target_library, output_library)
         feature_curator.extend_features(feature_annotater,
                                         int(args.min_target_length),
                                         float(args.extension_threshold))
@@ -1407,7 +1511,7 @@ def main(args=None):
             else:
                 extended_file = extended_doc.name
 
-            logging.info('Writing %s', extended_file)
+            logger.info('Writing %s', extended_file)
 
             extended_doc.write(extended_file)
 
@@ -1416,9 +1520,15 @@ def main(args=None):
                                                                                           int(args.min_target_length),
                                                                                           args.in_place)
 
-            for i in target_library.get_non_updated_indices():
-                logging.warning('Failed to annotate %s, possibly no constructs found with minimum length %s',
-                                target_files[i], args.min_target_length)
+            if args.minimal_output:
+                for i in range(0, len(output_library.docs)):
+                    if len(output_library.docs[i].componentDefinitions) == 0:
+                        logger.warning('Failed to annotate %s, possibly no constructs found with minimum length %s',
+                                        target_files[i], args.min_target_length)
+            else:
+                for i in target_library.get_non_updated_indices():
+                    logger.warning('Failed to annotate %s, possibly no constructs found with minimum length %s',
+                                    target_files[i], args.min_target_length)
         else:
             annotated_features = []
             annotating_features = []
@@ -1435,13 +1545,22 @@ def main(args=None):
                                            not args.non_interactive)
 
         if not args.no_annotation or not args.no_pruning:
-            for i in range(0, len(target_docs)):
-                if sbol2.Config.getOption('validate') == True:
-                    logging.info('Validating and writing %s', output_files[i])
-                else:
-                    logging.info('Writing %s', output_files[i])
+            if len(output_docs) > 0:
+                for i in range(0, len(output_docs)):
+                    if sbol2.Config.getOption('validate') == True:
+                        logger.info('Validating and writing %s', output_files[i])
+                    else:
+                        logger.info('Writing %s', output_files[i])
 
-                target_docs[i].write(output_files[i])
+                    output_docs[i].write(output_files[i])
+            else:
+                for i in range(0, len(target_docs)):
+                    if sbol2.Config.getOption('validate') == True:
+                        logger.info('Validating and writing %s', output_files[i])
+                    else:
+                        logger.info('Writing %s', output_files[i])
+
+                    target_docs[i].write(output_files[i])
     else:
         for i in range(0, len(target_files)):
             target_doc = load_target_file(target_files[i])
@@ -1449,16 +1568,28 @@ def main(args=None):
             if target_doc:
                 target_library = FeatureLibrary([target_doc])
 
-                feature_curator = FeatureCurator(target_library)
+                if args.minimal_output:
+                    output_docs = [sbol2.Document()]
+                else:
+                    output_docs = []
+
+                output_library = FeatureLibrary(output_docs, False)
+
+                feature_curator = FeatureCurator(target_library, output_library)
 
                 if not args.no_annotation:
                     (annotated_features, annotating_features) = feature_curator.annotate_features(feature_annotater,
                                                                                                   int(args.min_target_length),
                                                                                                   args.in_place)
 
-                    if len(target_library.get_non_updated_indices()) > 0:
-                        logging.warning('Failed to annotate %s, possibly no constructs found with minimum length %s',
+                    if args.minimal_output:
+                        if len(output_library.docs[i].componentDefinitions) == 0:
+                            logger.warning('Failed to annotate %s, possibly no constructs found with minimum length %s',
+                                            target_files[i], args.min_target_length)
+                    elif len(target_library.get_non_updated_indices()) > 0:
+                        logger.warning('Failed to annotate %s, possibly no constructs found with minimum length %s',
                                         target_files[i], args.min_target_length)
+
 
                 if not args.no_pruning:
                     feature_pruner = FeaturePruner(feature_library, set(args.deletion_roles))
@@ -1472,14 +1603,22 @@ def main(args=None):
                                                    not args.non_interactive)
 
                 if not args.no_annotation or not args.no_pruning:
-                    if sbol2.Config.getOption('validate') == True:
-                        logging.info('Validating and writing %s', output_files[i])
+                    if len(output_docs) == 1:
+                        if sbol2.Config.getOption('validate') == True:
+                            logger.info('Validating and writing %s', output_files[i])
+                        else:
+                            logger.info('Writing %s', output_files[i])
+
+                        output_docs[0].write(output_files[i])
                     else:
-                        logging.info('Writing %s', output_files[i])
+                        if sbol2.Config.getOption('validate') == True:
+                            logger.info('Validating and writing %s', output_files[i])
+                        else:
+                            logger.info('Writing %s', output_files[i])
 
-                    target_doc.write(output_files[i])
+                        target_doc.write(output_files[i])
 
-    logging.info('Finished curating')
+    logger.info('Finished curating')
 
 if __name__ == '__main__':
     main()
