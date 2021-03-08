@@ -944,6 +944,31 @@ class FeatureAnnotater():
 
         self.logger.info('Finished extending feature library')
 
+    def annotate_raw_sequences(self, raw_seqs, seq_IDs, min_target_length=0):
+        if not isinstance(raw_seqs, list):
+            raw_seqs = [raw_seqs]
+
+        if not isinstance(seq_IDs, list):
+            seq_IDs = [seq_IDs]
+
+        for i in range(0, len(raw_seqs)):
+            target_doc = sbol2.Document()
+
+            target_comp = sbol2.ComponentDefinition(seq_IDs[i] + '_comp', sbol2.BIOPAX_DNA, '1')
+
+            target_seq = sbol2.Sequence(seq_IDs[i], raw_seqs[i], sbol2.SBOL_ENCODING_IUPAC, '1')
+
+            target_comp.sequences = [target_seq.identity]
+
+            target_doc.addComponentDefinition(target_comp)
+            target_doc.addSequence(target_seq)
+
+            target_library = FeatureLibrary([target_doc])
+
+            self.annotate(target_library, min_target_length, True)
+
+        return target_doc
+
     def annotate(self, target_library, min_target_length, in_place=False, output_library=None):
         annotated_identities = []
 
@@ -964,7 +989,7 @@ class FeatureAnnotater():
 
                     doc_index = target_library.get_document_index(target.identity)
                     
-                    if doc_index < len(output_library.docs):
+                    if output_library and doc_index < len(output_library.docs):
                         output_doc = output_library.docs[doc_index]
 
                         if in_place:
@@ -989,10 +1014,10 @@ class FeatureAnnotater():
                     if definition_copy:
                         self.__process_feature_matches(target_doc, definition_copy, inline_matches,
                             sbol2.SBOL_ORIENTATION_INLINE, len(target.nucleotides),
-                            copy_definitions=(doc_index >= len(output_library.docs)))
+                            copy_definitions=(not output_library or doc_index >= len(output_library.docs)))
                         self.__process_feature_matches(target_doc, definition_copy, rc_matches,
                             sbol2.SBOL_ORIENTATION_REVERSE_COMPLEMENT, len(target.nucleotides), len(target.nucleotides) + 1,
-                            (doc_index >= len(output_library.docs)))
+                            (not output_library or doc_index >= len(output_library.docs)))
 
                         annotated_identities.append(definition_copy.identity)
                     else:
