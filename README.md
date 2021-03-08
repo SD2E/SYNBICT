@@ -37,6 +37,74 @@ The log file specified with the -l argument should report 26 annotations made wi
 
 Note the use of the optional arguments -d (for deleting flat annotations) and -ni (for non-interactivity). The -d argument is included to remove existing annotations with no sub-components that were copied by SYNBICT from the genome in this example's target SBOL file. This is done primarily to simplify SYNBICT's output for the purpose of this example. The -ni argument is included to indicate that no additional user input should be solicited during the pruning step. This can be useful when the target SBOL file is very large or when SYNBICT is being run by an automated process that may not be capable of providing additional input. If these arguments are not included, then the user may be prompted for input when SYNBICT analyzes the annotations in its output components and attempts to identify redundant or incorrect annotations.
 
+### Python annotation of sequence string
+
+```
+import sbol2
+import logging
+from sequences_to_features import FeatureLibrary
+from sequences_to_features import FeatureAnnotater
+
+# Set pySBOL configuration parameters
+
+sbol2.setHomespace('http://mynamespace.org')
+sbol2.Config.setOption('validate', True)
+sbol2.Config.setOption('sbol_typed_uris', False)
+
+# Set up log file - can be commented out
+
+logger = logging.getLogger('synbict')
+logger.setLevel(logging.DEBUG)
+logger.propagate = False
+
+formatter = logging.Formatter('%(asctime)s ; %(levelname)s ; %(message)s')
+
+file_handler = logging.FileHandler('SrpR_annotation_log.txt', "w")
+file_handler.setLevel(logging.DEBUG)
+file_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
+
+# Load Cello genetic circuit feature library
+
+feature_doc = sbol2.Document()
+feature_doc.read('../test/cello_library.xml')
+
+feature_library = FeatureLibrary([feature_doc])
+
+# Annotate raw target sequence
+
+min_feature_length = 40
+
+annotater = FeatureAnnotater(feature_library, min_feature_length)    
+
+target_seq = (
+    'CTGAAGCGCTCAACGGGTGTGCTTCCCGTTCTGATGAGTCCGTGAGGACGAAAGCGCCTCTA'
+    'CAAATAATTTTGTTTAAGAGTCTATGGACTATGTTTTCACAAAGGAAGTACCAGGATGGCAC'
+    'GTAAAACCGCAGCAGAAGCAGAAGAAACCCGTCAGCGTATTATTGATGCAGCACTGGAAGTT'
+    'TTTGTTGCACAGGGTGTTAGTGATGCAACCCTGGATCAGATTGCACGTAAAGCCGGTGTTAC'
+    'CCGTGGTGCAGTTTATTGGCATTTTAATGGTAAACTGGAAGTTCTGCAGGCAGTTCTGGCAA'
+    'GCCGTCAGCATCCGCTGGAACTGGATTTTACACCGGATCTGGGTATTGAACGTAGCTGGGAA'
+    'GCAGTTGTTGTTGCAATGCTGGATGCAGTTCATAGTCCGCAGAGCAAACAGTTTAGCGAAAT'
+    'TCTGATTTATCAGGGTCTGGATGAAAGCGGTCTGATTCATAATCGTATGGTTCAGGCAAGCG'
+    'ATCGTTTTCTGCAGTATATTCATCAGGTTCTGCGTCATGCAGTTACCCAGGGTGAACTGCCG'
+    'ATTAATCTGGATCTGCAGACCAGCATTGGTGTTTTTAAAGGTCTGATTACCGGTCTGCTGTA'
+    'TGAAGGTCTGCGTAGCAAAGATCAGCAGGCACAGATTATCAAAGTTGCACTGGGTAGCTTTT'
+    'GGGCACTGCTGCGTGAACCGCCTCGTTTTCTGCTGTGTGAAGAAGCACAGATTAAACAGGTG'
+    'AAATCCTTCGAATAATTCAGCCAAAAAACTTAAGACCGCCGGTCTTGTCCACTACCTTGCAG'
+    'TAATGCGGTGGACAGGATCGGCGGTTTTCTTTTCTCTTCTCAATCTATGATTGGTCCAGATT'
+    'CGTTACCAATTGACAGCTAGCTCAGTCCTAGGTATATACATACATGCTTGTTTGTTTGTAAAC'
+)
+
+min_target_length = 0
+
+target_doc = annotater.annotate_raw_sequences(target_seq, 'SrpR_RBS_S3_gate', min_target_length)
+
+target_doc.write('SrpR_RBS_S3_gate.xml')
+```
+
+This example assumes that your current working directory is the SYNBICT sub-directory named "example". In this case, the target DNA sequence to be annotated is hard-coded, but it could be loaded from a CSV file or text file. The min_feature_length parameter is set to 40 to prevent annotation with DNA features such as assembly scars that are short enough to occur by chance in a target sequence. The min_target_length parameter is set to 0 since there is a single target sequence and we know that we want to annotate it. You might increase this parameter when you are annotating a large number of target sequences that potentially include smaller sequences you do not wish to annotate.
+
 ## sequences\_to\_features.py
 
 sequences_to_features.py annotates sequences in target SBOL, GenBank, or FASTA files and can be used to prune existing annotations on these sequences as well.
