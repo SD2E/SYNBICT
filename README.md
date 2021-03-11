@@ -98,9 +98,14 @@ target_seq = (
 
 min_target_length = 0
 
-target_doc = annotater.annotate_raw_sequences(target_seq, 'SrpR_RBS_S3_gate', min_target_length)
+annotated_comp = annotater.annotate_raw_sequences(target_seq, 'SrpR_RBS_S3_gate', min_target_length)
 
-target_doc.write('SrpR_RBS_S3_gate.xml')
+# Write annotated sequence
+
+annotated_doc = sbol2.Document()
+annotated_doc.addComponentDefinition(annotated_comp)
+
+annotated_doc.write('SrpR_RBS_S3_gate.xml')
 ```
 
 This example assumes that your current working directory is the SYNBICT sub-directory named "example". In this case, the target DNA sequence to be annotated is hard-coded, but it could be loaded from a CSV file or text file. The min_feature_length parameter is set to 40 to prevent annotation with DNA features such as assembly scars that are short enough to occur by chance in a target sequence. The min_target_length parameter is set to 0 since there is a single target sequence and we know that we want to annotate it. You might increase this parameter when you are annotating a large number of target sequences that potentially include smaller sequences you do not wish to annotate.

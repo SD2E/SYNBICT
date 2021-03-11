@@ -944,30 +944,33 @@ class FeatureAnnotater():
 
         self.logger.info('Finished extending feature library')
 
-    def annotate_raw_sequences(self, raw_seqs, seq_IDs, min_target_length=0):
+    def annotate_raw_sequences(self, raw_seqs, comp_IDs, min_target_length=0):
+        annotated_comps = []
+
         if not isinstance(raw_seqs, list):
             raw_seqs = [raw_seqs]
 
-        if not isinstance(seq_IDs, list):
-            seq_IDs = [seq_IDs]
+        if not isinstance(comp_IDs, list):
+            comp_IDs = [comp_IDs]
 
         for i in range(0, len(raw_seqs)):
             target_doc = sbol2.Document()
 
-            target_comp = sbol2.ComponentDefinition(seq_IDs[i] + '_comp', sbol2.BIOPAX_DNA, '1')
+            target_comp = sbol2.ComponentDefinition(comp_IDs[i], sbol2.BIOPAX_DNA, '1')
+            target_comp.sequence = sbol2.Sequence(comp_IDs[i] + '_seq', raw_seqs[i], sbol2.SBOL_ENCODING_IUPAC, '1')
 
-            target_seq = sbol2.Sequence(seq_IDs[i], raw_seqs[i], sbol2.SBOL_ENCODING_IUPAC, '1')
-
-            target_comp.sequences = [target_seq.identity]
+            annotated_comps.append(target_comp)
 
             target_doc.addComponentDefinition(target_comp)
-            target_doc.addSequence(target_seq)
 
             target_library = FeatureLibrary([target_doc])
 
             self.annotate(target_library, min_target_length, True)
 
-        return target_doc
+        if len(annotated_comps) == 1:
+            return annotated_comps[0]
+        else:
+            return annotated_comps
 
     def annotate(self, target_library, min_target_length, in_place=False, output_library=None):
         annotated_identities = []
