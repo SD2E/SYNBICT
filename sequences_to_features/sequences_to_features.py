@@ -1498,6 +1498,10 @@ def main(args=None):
             else:
                 output_files.append(target_file_base + '.xml')
 
+    #pulls a  list of library files given as a command line or python arguement into a parsable list
+    if isinstance(args.feature_files[0], list):
+        args.feature_files = args.feature_files[0]
+                
     feature_docs = []
     for feature_file in args.feature_files:
         feature_docs.append(load_sbol(feature_file))
