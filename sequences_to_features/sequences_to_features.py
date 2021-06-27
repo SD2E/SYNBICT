@@ -10,6 +10,8 @@ from Bio import Align
 import sbol2
 from flashtext import KeywordProcessor
 
+import time
+
 def load_target_file(target_file):
     logger = logging.getLogger('synbict')
 
@@ -116,8 +118,12 @@ class FeatureCurator():
         self.logger = logging.getLogger('synbict')
 
     def annotate_features(self, feature_annotater, min_target_length, in_place=False):
+        start_time = time.clock()
+
         annotated_identities = feature_annotater.annotate(self.target_library, min_target_length, in_place,
                                                           self.output_library)
+
+        self.logger.info('Annotation Time: ' + str(time.clock() - start_time))
 
         if self.output_library and len(self.output_library.docs) > 0:
             added_features = self.output_library.update(False)
@@ -149,9 +155,13 @@ class FeatureCurator():
             feature_pruner.clean(self.target_library, target_features, target_sub_features)
 
     def extend_features(self, feature_annotater, min_target_length, extension_threshold):
+        start_time = time.clock()
+
         feature_annotater.extend_features_by_name(self.target_library,
                                                   min_target_length,
                                                   extension_threshold)
+
+        self.logger.info('Extension Time: ' + str(time.clock() - start_time))
 
 class Feature():
 
@@ -325,11 +335,11 @@ class FeatureLibrary():
                     parent_identities.add(parent_identity)
 
             for feature in self.features:
-                if len(feature.nucleotides) > min_feature_length and feature.identity not in parent_identities:
+                if (min_feature_length == 0 or len(feature.nucleotides) > min_feature_length) and feature.identity not in parent_identities:
                     features.append(feature)
         else:
             for feature in self.features:
-                if len(feature.nucleotides) > min_feature_length:
+                if min_feature_length == 0 or len(feature.nucleotides) > min_feature_length:
                     features.append(feature)
 
         return features
@@ -457,7 +467,7 @@ class FeatureLibrary():
                     else:
                         raise
 
-            cls.strip_extension_properties(seq_copy)
+            cls.strip_origin_properties(seq_copy)
         else:
             try:
                 sink_doc.getSequence(seq.identity)
@@ -564,7 +574,7 @@ class FeatureLibrary():
                     raise
 
     @classmethod
-    def strip_extension_properties(cls, sbol_obj):
+    def strip_origin_properties(cls, sbol_obj):
         origin_props = []
 
         for prop in sbol_obj.properties:
@@ -627,14 +637,14 @@ class FeatureLibrary():
                         else:
                             raise
 
-                cls.strip_extension_properties(definition_copy)
+                cls.strip_origin_properties(definition_copy)
                 for sub_comp_copy in definition_copy.components:
-                    cls.strip_extension_properties(sub_comp_copy)
+                    cls.strip_origin_properties(sub_comp_copy)
                 for anno_copy in definition_copy.sequenceAnnotations:
-                    cls.strip_extension_properties(anno_copy)
+                    cls.strip_origin_properties(anno_copy)
 
                     for loc_copy in anno_copy.locations:
-                        cls.strip_extension_properties(loc_copy)
+                        cls.strip_origin_properties(loc_copy)
 
                 if make_variant:
                     cls.make_variant_definition(sink_doc, definition_copy)
@@ -708,10 +718,12 @@ class FeatureLibrary():
                         else:
                             raise
 
-                    if sub_definition:
-                        sub_copy = definition_copy.components.get(sub_comp.displayId)
+                    sub_copy = definition_copy.components.get(sub_comp.displayId)
 
-                        if import_namespace or not shallow_copy:
+                    if sub_definition:
+                        if shallow_copy:
+                            sub_copy.definition = sub_definition.identity
+                        else:
                             sub_definition_copy = cls.copy_component_definition(sub_definition, source_doc, sink_doc,
                                                                                 import_namespace, min_seq_length,
                                                                                 shallow_copy=shallow_copy)
@@ -720,10 +732,9 @@ class FeatureLibrary():
                                 sub_copy.definition = sub_definition_copy.identity
                             else:
                                 sub_copy.definition = sub_definition.identity
-                        else:
-                            sub_copy.definition = sub_definition.identity
+                    else:
+                        sub_copy.definition = sub_comp.definition
 
-                            
             for parent_definition in parent_definitions:
                 definition_copy.wasDerivedFrom = definition_copy.wasDerivedFrom + [parent_definition.identity]
 
@@ -759,7 +770,7 @@ class FeatureAnnotater():
 
     @classmethod
     def __has_min_length(cls, feature, min_feature_length):
-        return len(feature.nucleotides) >= min_feature_length
+        return min_feature_length == 0 or len(feature.nucleotides) >= min_feature_length
 
     @classmethod
     def __create_sub_component(cls, parent_definition, child_definition):
@@ -944,7 +955,7 @@ class FeatureAnnotater():
 
         self.logger.info('Finished extending feature library')
 
-    def annotate_raw_sequences(self, raw_seqs, comp_IDs, min_target_length=0):
+    def annotate_raw_sequences(self, raw_seqs, comp_IDs=[], min_target_length=0):
         annotated_comps = []
 
         if not isinstance(raw_seqs, list):
@@ -956,8 +967,13 @@ class FeatureAnnotater():
         for i in range(0, len(raw_seqs)):
             target_doc = sbol2.Document()
 
-            target_comp = sbol2.ComponentDefinition(comp_IDs[i], sbol2.BIOPAX_DNA, '1')
-            target_comp.sequence = sbol2.Sequence(comp_IDs[i] + '_seq', raw_seqs[i], sbol2.SBOL_ENCODING_IUPAC, '1')
+            if i < len(comp_IDs):
+                comp_ID = comp_IDs[i]
+            else:
+                comp_ID = 'construct_' + str(i + 1)
+
+            target_comp = sbol2.ComponentDefinition(comp_ID, sbol2.BIOPAX_DNA, '1')
+            target_comp.sequence = sbol2.Sequence(comp_ID + '_seq', raw_seqs[i], sbol2.SBOL_ENCODING_IUPAC, '1')
 
             annotated_comps.append(target_comp)
 
@@ -1048,7 +1064,7 @@ class FeaturePruner():
 
     @classmethod
     def __has_min_length(cls, feature, min_feature_length):
-        return len(feature.nucleotides) >= min_feature_length
+        return min_feature_length == 0 or len(feature.nucleotides) >= min_feature_length
 
     @classmethod
     def __is_covered(cls, anno, cover_annos, cover_offset):
@@ -1372,8 +1388,8 @@ remove if any (comma-separated list of indices, for example 0,2,5):\n'.format(fm
 
                         self.__remove_annotations(selected_indices, anno_group, target_definition)
 
-                if ask_user or auto_swap:
-                    for anno_group in grouped_annos:
+                for anno_group in grouped_annos:
+                    if ask_user or auto_swap:
                         if len(anno_group) == 2:
                             if (self.__are_swappable(anno_group[0], anno_group[1], target_definition) and
                                     (auto_swap or
@@ -1384,13 +1400,19 @@ remove if any (comma-separated list of indices, for example 0,2,5):\n'.format(fm
                                     self.__ask_swap_annotations(anno_group[1], anno_group[0], target_definition))):
                                 self.__swap_annotations(anno_group[1], anno_group[0], target_definition)
 
-                        redundant_defs = []
+                for anno_group in grouped_annos:
+                    if len(anno_group) > 1:
+                        redundant_URIs = []
+
                         for anno in anno_group:
                             if anno[5]:
-                                redundant_defs.append(target_definition.components.get(anno[5]).definition)
+                                redundant_URIs.append(target_definition.components.get(anno[5]).definition)
+                            else:
+                                redundant_URIs.append(anno[2])
 
-                        if len(redundant_defs) > 1:
-                            self.logger.debug('Detected redundant features: %s.', str(redundant_defs))
+                        self.logger.debug('Detected potentially redundant sub-parts in %s: %s.',
+                                          target_definition.identity, 
+                                          str(redundant_URIs))
 
                 self.logger.info('Finished pruning %s', target.identity)
 
@@ -1517,7 +1539,7 @@ def main(args=None):
                 del target_files[i]
                 del output_files[i]
 
-        target_library = FeatureLibrary(target_docs)
+        target_library = FeatureLibrary(target_docs, False)
 
         if args.minimal_output:
             output_docs = [sbol2.Document() for i in range(0, len(target_library.docs))]
@@ -1594,7 +1616,7 @@ def main(args=None):
             target_doc = load_target_file(target_files[i])
 
             if target_doc:
-                target_library = FeatureLibrary([target_doc])
+                target_library = FeatureLibrary([target_doc], False)
 
                 if args.minimal_output:
                     output_docs = [sbol2.Document()]
@@ -1605,7 +1627,10 @@ def main(args=None):
 
                 feature_curator = FeatureCurator(target_library, output_library)
 
-                if not args.no_annotation:
+                if args.no_annotation:
+                    annotated_features = []
+                    annotating_features = []
+                else:
                     (annotated_features, annotating_features) = feature_curator.annotate_features(feature_annotater,
                                                                                                   int(args.min_target_length),
                                                                                                   args.in_place)
