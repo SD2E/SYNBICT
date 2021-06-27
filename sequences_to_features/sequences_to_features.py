@@ -10,7 +10,7 @@ from Bio import Align
 import sbol2
 from flashtext import KeywordProcessor
 
-import time
+# import time
 
 def load_target_file(target_file):
     logger = logging.getLogger('synbict')
@@ -118,12 +118,12 @@ class FeatureCurator():
         self.logger = logging.getLogger('synbict')
 
     def annotate_features(self, feature_annotater, min_target_length, in_place=False):
-        start_time = time.clock()
+        # start_time = time.clock()
 
         annotated_identities = feature_annotater.annotate(self.target_library, min_target_length, in_place,
                                                           self.output_library)
 
-        self.logger.info('Annotation Time: ' + str(time.clock() - start_time))
+        # self.logger.info('Annotation Time: ' + str(time.clock() - start_time))
 
         if self.output_library and len(self.output_library.docs) > 0:
             added_features = self.output_library.update(False)
@@ -155,13 +155,13 @@ class FeatureCurator():
             feature_pruner.clean(self.target_library, target_features, target_sub_features)
 
     def extend_features(self, feature_annotater, min_target_length, extension_threshold):
-        start_time = time.clock()
+        # start_time = time.clock()
 
         feature_annotater.extend_features_by_name(self.target_library,
                                                   min_target_length,
                                                   extension_threshold)
 
-        self.logger.info('Extension Time: ' + str(time.clock() - start_time))
+        # self.logger.info('Extension Time: ' + str(time.clock() - start_time))
 
 class Feature():
 
