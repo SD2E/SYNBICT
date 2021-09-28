@@ -133,7 +133,6 @@ Argument | Short Arg | Type | Description | Example
 
 Argument | Short Arg | Type | Description | Example
 ---- | --- | --- | --- | ---
-
 `--feature_files` | `-f` | `String` | **Optional**. List of paths to input files or directories containing features to create library for annotating components. Default is an empty list. Accepted file format is SBOL XML. | features1.xml feature_directory
 `--min_feature_length` | `-M` | `Integer` | **Optional**. Minimum length that feature must be to include in library for annotating components. Default is 40 bp. | 40
 `--no_annotation` | `-na` | `Boolean` | **Optional**. If included, do not annotate components. Default is to annotate components. | -na
