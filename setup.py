@@ -13,6 +13,11 @@ install_requires = [
 setup(
     name='SYNBICT',
     version='1.4',
+    description='Synthetic Biology Curation Tools',
+    author='Nicholas Roehner',
+    author_email='nicholasroehner@gmail.com',
+    url='https://github.com/SD2E/SYNBICT',
+    download_url='https://github.com/SD2E/SYNBICT/archive/refs/tags/v1.4.tar.gz',
     packages=find_packages(),
     install_requires=install_requires,
     classifiers=[
