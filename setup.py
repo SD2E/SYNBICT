@@ -13,7 +13,8 @@ install_requires = [
 setup(
     name='SYNBICT',
     version='1.4',
-    description='Synthetic Biology Curation Tools',
+    description='Synthetic Biology Curation Tools (SYNBICT)',
+    long_description='Synthetic Biology Curation Tools (SYNBICT) is a Python tool suite for automation-assisted annotation, curation, and functional inference for genetic designs.',
     author='Nicholas Roehner',
     author_email='nicholasroehner@gmail.com',
     url='https://github.com/SD2E/SYNBICT',
