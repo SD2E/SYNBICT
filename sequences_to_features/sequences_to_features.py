@@ -100,8 +100,7 @@ def load_non_sbol(non_sbol_file):
     doc = sbol2.Document()
     doc.readString(response_dict['result'])
 
-    (file_base, file_extension) = os.path.splitext(non_sbol_file)
-    doc.name = file_base + '.xml'
+    doc.name = non_sbol_file
 
     doc.addNamespace('http://purl.org/dc/elements/1.1/', 'dc')
     doc.addNamespace('http://wiki.synbiohub.org/wiki/Terms/igem#', 'igem')
@@ -897,8 +896,8 @@ class FeatureAnnotater():
                         anno_start = seq_anno.locations.getRange().start
                         anno_end = seq_anno.locations.getRange().end
 
-                        target_nucleotides = target.nucleotides[anno_start - 1:anno_end]
-                        rc_target_nucleotides = str(Seq(target_nucleotides).reverse_complement())
+                        target_nucleotides = target.nucleotides[anno_start - 1:anno_end].upper()
+                        rc_target_nucleotides = str(Seq(target_nucleotides).reverse_complement()).upper()
 
                         inline_elements = ' '.join(target_nucleotides)
                         rc_elements = ' '.join(rc_target_nucleotides)
@@ -913,10 +912,15 @@ class FeatureAnnotater():
                                     feature_seqs = FeatureLibrary.get_DNA_sequences(feature_definition, feature_doc)
                                     
                                     if len(feature_seqs) > 0:
-                                        feature_nucleotides = feature_seqs[0].elements
+                                        feature_nucleotides = feature_seqs[0].elements.upper()
 
                                         score = aligner.score(target_nucleotides, feature_nucleotides)
                                         rc_score = aligner.score(rc_target_nucleotides, feature_nucleotides)
+
+                                        self.logger.debug('%s score %s', seq_anno.name, str(score))
+                                        self.logger.debug('%s rc score %s', seq_anno.name, str(rc_score))
+                                        self.logger.debug('target nucleotides: %s', target_nucleotides)
+                                        self.logger.debug('feature nucleotides: %s', feature_nucleotides)
 
                                         if rc_score > score:
                                             best_score = rc_score
@@ -1416,6 +1420,79 @@ remove if any (comma-separated list of indices, for example 0,2,5):\n'.format(fm
 
                 self.logger.info('Finished pruning %s', target.identity)
 
+def curate(feature_library, target_library, output_library, output_files, extend_features, no_annotation,
+           min_feature_length, min_target_length, extension_threshold, extension_suffix, in_place, minimal_output,
+           no_pruning, deletion_roles, cover_offset, delete_flat, auto_swap, non_interactive, logger):
+    if extend_features or not no_annotation:
+        feature_annotater = FeatureAnnotater(feature_library, min_feature_length)
+    
+    feature_curator = FeatureCurator(target_library, output_library)
+
+    if extend_features:
+        feature_curator.extend_features(feature_annotater,
+                                        min_target_length,
+                                        extension_threshold)
+
+        for extended_doc in feature_annotater.get_updated_documents():
+            (extended_file_base, extended_file_extension) = os.path.splitext(extended_doc.name)
+
+            if len(extension_suffix) > 0:
+                extended_file = '_'.join([extended_file_base, extension_suffix]) + '.xml'
+            else:
+                extended_file = extended_file_base + '.xml'
+
+            logger.info('Writing %s', extended_file)
+
+            extended_doc.write(extended_file)
+
+    if no_annotation:
+        annotated_features = []
+        annotating_features = []
+    else:
+        (annotated_features, annotating_features) = feature_curator.annotate_features(feature_annotater,
+                                                                                      min_target_length,
+                                                                                      in_place)
+
+        if minimal_output:
+            for i in range(0, len(output_library.docs)):
+                if len(output_library.docs[i].componentDefinitions) == 0:
+                    logger.warning('Failed to annotate %s, possibly no constructs found with minimum length %s',
+                                   target_library.docs[i].name, min_target_length)
+        else:
+            for i in target_library.get_non_updated_indices():
+                logger.warning('Failed to annotate %s, possibly no constructs found with minimum length %s',
+                               target_library.docs[i].name, min_target_length)
+
+    if not no_pruning:
+        feature_pruner = FeaturePruner(feature_library, set(deletion_roles))
+
+        feature_curator.prune_features(feature_pruner,
+                                       cover_offset,
+                                       min_target_length,
+                                       annotated_features,
+                                       annotating_features,
+                                       delete_flat,
+                                       auto_swap,
+                                       not non_interactive)
+
+    if not no_annotation or not no_pruning:
+        if len(output_library.docs) > 0:
+            for i in range(0, len(output_library.docs)):
+                if sbol2.Config.getOption('validate') == True:
+                    logger.info('Validating and writing %s', output_files[i])
+                else:
+                    logger.info('Writing %s', output_files[i])
+
+                output_library.docs[i].write(output_files[i])
+        else:
+            for i in range(0, len(target_library.docs)):
+                if sbol2.Config.getOption('validate') == True:
+                    logger.info('Validating and writing %s', output_files[i])
+                else:
+                    logger.info('Writing %s', output_files[i])
+
+                target_library.docs[i].write(output_files[i])
+
 def main(args=None):
     if args is None:
         args = sys.argv[1:]
@@ -1450,12 +1527,11 @@ def main(args=None):
     parser.add_argument('-np', '--no_pruning', action='store_true')
     parser.add_argument('-a', '--auto_swap', action='store_true')
     
-    # parser.add_argument('-s', '--sbh_URL', nargs='?', default=None)
-    # parser.add_argument('-u', '--username', nargs='?', default=None)
-    # parser.add_argument('-p', '--password', nargs='?', default=None)
-    # parser.add_argument('-F', '--feature_URLs', nargs='*', default=[])
-    # parser.add_argument('-T', '--target_URLs', nargs='*', default=[])
-    # parser.add_argument('-o', '--sbh_output_file', nargs='?', default=None)
+    parser.add_argument('-U', '--sbh_URL', nargs='?', default=None)
+    parser.add_argument('-u', '--username', nargs='?', default=None)
+    parser.add_argument('-w', '--password', nargs='?', default=None)
+    parser.add_argument('-F', '--feature_URLs', nargs='*', default=[])
+    parser.add_argument('-T', '--target_URLs', nargs='*', default=[])
     
     args = parser.parse_args(args)
 
@@ -1484,7 +1560,41 @@ def main(args=None):
     sbol2.Config.setOption('validate', args.validate)
     sbol2.Config.setOption('sbol_typed_uris', False)
 
+    if args.sbh_URL and args.username and args.password:
+        synbiohub = sbol2.PartShop(args.sbh_URL)
+
+        try:
+            synbiohub.login(args.username, args.password)
+        except SBOLError as exc:
+            if exc.error_code() == sbol2.SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST:
+                logger.warning('Unable to log into SynBioHub instance with URL %s', args.sbh_URL)
+    else:
+        synbiohub = None
+
+        sbh_arg_types = []
+        missed_arg_types = []
+
+        if args.sbh_URL:
+            sbh_arg_types.append('instance URL')
+        else:
+            missed_arg_types.append('instance URL')
+
+        if args.username:
+            sbh_arg_types.append('username')
+        else:
+            missed_arg_types.append('username')
+
+        if args.password:
+            sbh_arg_types.append('password')
+        else:
+            missed_arg_types.append('password')
+
+        logger.warning('SynBioHub %s were provided but %s are missing.',
+                       ','.join(sbh_arg_types),
+                       ','.join(missed_arg_types))
+
     target_files = []
+
     for target_file in args.target_files:
         if os.path.isdir(target_file):
             target_files.extend([os.path.join(target_file, tf) for tf in os.listdir(target_file) if
@@ -1501,6 +1611,7 @@ def main(args=None):
             target_files.append(target_file)
 
     output_files = []
+
     for i in range(0, len(target_files)):
         if len(args.output_files) == 1 and os.path.isdir(args.output_files[0]):
             (target_file_path, target_filename) = os.path.split(target_files[i])
@@ -1520,24 +1631,58 @@ def main(args=None):
             else:
                 output_files.append(target_file_base + '.xml')
 
+    for i in range(0, len(args.target_URLs)):
+        if i + len(target_files) < len(args.output_files):
+            output_files.append(args.output_files[i])
+        else:
+            output_files.append('_'.join(['output', str(i + len(target_files))]) + '.xml')
+
     feature_docs = []
+
     for feature_file in args.feature_files:
         feature_docs.append(load_sbol(feature_file))
 
-    feature_library = FeatureLibrary(feature_docs)
+    if synbiohub:
+        for feature_URL in args.feature_URLs:
+            feature_doc = sbol2.Document()
 
-    if args.extend_features or not args.no_annotation:
-        feature_annotater = FeatureAnnotater(feature_library, int(args.min_feature_length))
+            try:
+                synbiohub.pull(feature_URL, feature_doc)
+
+                feature_docs.append(feature_doc)
+            except NotFoundError as exc:
+                if is_sbol_not_found(exc):
+                    logger.warning('Unable to find feature URL %s at %s', feature_URL, sbh_URL)
+                else:
+                    raise
+
+    feature_library = FeatureLibrary(feature_docs)
 
     if args.extend_features:
         target_docs = []
+
         for target_file in target_files:
             target_docs.append(load_target_file(target_file))
-        for i in range(len(target_files) - 1, -1, -1):
-            if not target_docs[i]:
-                del target_docs[i]
-                del target_files[i]
-                del output_files[i]
+
+        if synbiohub:
+            for target_URL in args.target_URLs:
+                target_doc = sbol2.Document()
+
+                try:
+                    synbiohub.pull(target_URL, target_doc)
+
+                    target_docs.append(target_doc)
+                except NotFoundError as exc:
+                    target_docs.append(None)
+
+                    if is_sbol_not_found(exc):
+                        logger.warning('Unable to find target URL %s at %s', target_URL, sbh_URL)
+                    else:
+                        raise
+
+        filtered_output_files = [output_files[i] for i in range(0, len(target_docs)) if target_docs[i]]
+
+        target_docs = [target_docs[i] for i in range(0, len(target_docs)) if target_docs[i]]
 
         target_library = FeatureLibrary(target_docs, False)
 
@@ -1548,69 +1693,11 @@ def main(args=None):
 
         output_library = FeatureLibrary(output_docs, False)
 
-        feature_curator = FeatureCurator(target_library, output_library)
-        feature_curator.extend_features(feature_annotater,
-                                        int(args.min_target_length),
-                                        float(args.extension_threshold))
-
-        for extended_doc in feature_annotater.get_updated_documents():
-            if len(args.extension_suffix) > 0:
-                (extended_file_base, extended_file_extension) = os.path.splitext(extended_doc.name)
-
-                extended_file = '_'.join([extended_file_base, args.extension_suffix]) + '.xml'
-            else:
-                extended_file = extended_doc.name
-
-            logger.info('Writing %s', extended_file)
-
-            extended_doc.write(extended_file)
-
-        if not args.no_annotation:
-            (annotated_features, annotating_features) = feature_curator.annotate_features(feature_annotater,
-                                                                                          int(args.min_target_length),
-                                                                                          args.in_place)
-
-            if args.minimal_output:
-                for i in range(0, len(output_library.docs)):
-                    if len(output_library.docs[i].componentDefinitions) == 0:
-                        logger.warning('Failed to annotate %s, possibly no constructs found with minimum length %s',
-                                        target_files[i], args.min_target_length)
-            else:
-                for i in target_library.get_non_updated_indices():
-                    logger.warning('Failed to annotate %s, possibly no constructs found with minimum length %s',
-                                    target_files[i], args.min_target_length)
-        else:
-            annotated_features = []
-            annotating_features = []
-
-        if not args.no_pruning:
-            feature_pruner = FeaturePruner(feature_library, set(args.deletion_roles))
-            feature_curator.prune_features(feature_pruner,
-                                           int(args.cover_offset),
-                                           int(args.min_target_length),
-                                           annotated_features,
-                                           annotating_features,
-                                           args.delete_flat,
-                                           args.auto_swap,
-                                           not args.non_interactive)
-
-        if not args.no_annotation or not args.no_pruning:
-            if len(output_docs) > 0:
-                for i in range(0, len(output_docs)):
-                    if sbol2.Config.getOption('validate') == True:
-                        logger.info('Validating and writing %s', output_files[i])
-                    else:
-                        logger.info('Writing %s', output_files[i])
-
-                    output_docs[i].write(output_files[i])
-            else:
-                for i in range(0, len(target_docs)):
-                    if sbol2.Config.getOption('validate') == True:
-                        logger.info('Validating and writing %s', output_files[i])
-                    else:
-                        logger.info('Writing %s', output_files[i])
-
-                    target_docs[i].write(output_files[i])
+        curate(feature_library, target_library, output_library, filtered_output_files, args.extend_features,
+               args.no_annotation, int(args.min_feature_length), int(args.min_target_length),
+               float(args.extension_threshold), args.extension_suffix, args.in_place, args.minimal_output,
+               args.no_pruning, args.deletion_roles, int(args.cover_offset), args.delete_flat, args.auto_swap,
+               args.non_interactive, logger)
     else:
         for i in range(0, len(target_files)):
             target_doc = load_target_file(target_files[i])
@@ -1625,51 +1712,41 @@ def main(args=None):
 
                 output_library = FeatureLibrary(output_docs, False)
 
-                feature_curator = FeatureCurator(target_library, output_library)
+                curate(feature_library, target_library, output_library, [output_files[i]], args.extend_features,
+                       args.no_annotation, int(args.min_feature_length), int(args.min_target_length),
+                       float(args.extension_threshold), args.extension_suffix, args.in_place, args.minimal_output,
+                       args.no_pruning, args.deletion_roles, int(args.cover_offset), args.delete_flat, args.auto_swap,
+                       args.non_interactive, logger)
 
-                if args.no_annotation:
-                    annotated_features = []
-                    annotating_features = []
-                else:
-                    (annotated_features, annotating_features) = feature_curator.annotate_features(feature_annotater,
-                                                                                                  int(args.min_target_length),
-                                                                                                  args.in_place)
+        if synbiohub:
+            for target_URL in args.target_URLs:
+                try:
+                    target_doc = sbol2.Document()
+
+                    synbiohub.pull(target_URL, target_doc)
+                except NotFoundError as exc:
+                    if is_sbol_not_found(exc):
+                        logger.warning('Unable to find target URL %s at %s', target_URL, sbh_URL)
+                    else:
+                        raise
+
+                    target_doc = None
+
+                if target_doc:
+                    target_library = FeatureLibrary([target_doc], False)
 
                     if args.minimal_output:
-                        if len(output_library.docs[i].componentDefinitions) == 0:
-                            logger.warning('Failed to annotate %s, possibly no constructs found with minimum length %s',
-                                            target_files[i], args.min_target_length)
-                    elif len(target_library.get_non_updated_indices()) > 0:
-                        logger.warning('Failed to annotate %s, possibly no constructs found with minimum length %s',
-                                        target_files[i], args.min_target_length)
-
-
-                if not args.no_pruning:
-                    feature_pruner = FeaturePruner(feature_library, set(args.deletion_roles))
-                    feature_curator.prune_features(feature_pruner,
-                                                   int(args.cover_offset),
-                                                   int(args.min_target_length),
-                                                   annotated_features,
-                                                   annotating_features,
-                                                   args.delete_flat,
-                                                   args.auto_swap,
-                                                   not args.non_interactive)
-
-                if not args.no_annotation or not args.no_pruning:
-                    if len(output_docs) == 1:
-                        if sbol2.Config.getOption('validate') == True:
-                            logger.info('Validating and writing %s', output_files[i])
-                        else:
-                            logger.info('Writing %s', output_files[i])
-
-                        output_docs[0].write(output_files[i])
+                        output_docs = [sbol2.Document()]
                     else:
-                        if sbol2.Config.getOption('validate') == True:
-                            logger.info('Validating and writing %s', output_files[i])
-                        else:
-                            logger.info('Writing %s', output_files[i])
+                        output_docs = []
 
-                        target_doc.write(output_files[i])
+                    output_library = FeatureLibrary(output_docs, False)
+
+                    curate(feature_library, target_library, output_library, [output_files[i]], args.extend_features,
+                           args.no_annotation, int(args.min_feature_length), int(args.min_target_length),
+                           float(args.extension_threshold), args.extension_suffix, args.in_place, args.minimal_output,
+                           args.no_pruning, args.deletion_roles, int(args.cover_offset), args.delete_flat, args.auto_swap,
+                           args.non_interactive, logger)
 
     logger.info('Finished curating')
 

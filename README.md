@@ -128,12 +128,18 @@ Argument | Short Arg | Type | Description | Example
 `--non_interactive` | `-ni` | `Boolean` | **Optional**. If included, do not ask user for additional input. Default is to ask user. | -ni
 `--log_file` | `-l` | `String` | **Optional**. Log file to populate with more verbose curation history. Default is to not generate a log file. | curation.log
 `--validate` | `-v` | `Boolean` | **Optional**. If included, output files will be checked against SBOL validation rules. Default is to not validate output files. | -v
+`--sbh_URL` | `-U` | `String` | **Optional**. If included, SYNBICT will attempt to log into the specified SynBioHub instance  | https://synbiohub.org
+`--username` | `-u` | `String` | **Optional**. If included, SYNBICT will use as the username to log into the specified SynBioHub instance. | igemer217
+`--password` | `-w` | `String` | **Optional**. If included, SYNBICT will use as the password to log into the specified SynBioHub instance. | w3j4d!d5adg6
+`--target_URLs` | `-T` | `String` | **Optional**. List of URLs for SBOL objects. If included, SYNBICT will download these objects from the specified SynBioHub instance and curate them. Can be used in combination with the target_files argument. | https://synbiohub.org/public/igem/BBa_K731020/1 https://synbiohub.org/public/iGEMDistributions/iGEM2019Distribution_collection/1
+
 
 ### Annotation arguments for sequences\_to\_features.py
 
 Argument | Short Arg | Type | Description | Example
 ---- | --- | --- | --- | ---
 `--feature_files` | `-f` | `String` | **Optional**. List of paths to input files or directories containing features to create library for annotating components. Default is an empty list. Accepted file format is SBOL XML. | features1.xml feature_directory
+`--feature_URLs` | `-F` | `String` | **Optional**. List of URLs for SBOL objects. If included, SYNBICT will download these objects from the specified SynBioHub instance and use them to create a library for annotating components. Can be used in combination with the feature_files argument. | https://synbiohub.programmingbiology.org/public/Cello_Parts/Cello_Parts_collection/1
 `--min_feature_length` | `-M` | `Integer` | **Optional**. Minimum length that feature must be to include in library for annotating components. Default is 40 bp. | 40
 `--no_annotation` | `-na` | `Boolean` | **Optional**. If included, do not annotate components. Default is to annotate components. | -na
 `--extend_features` | `-e` | `Boolean` | **Optional**. If included, attempt to extend feature library. Derives new features from previously existing annotations on components in target file if their names align to the names of library features and if the fraction mismatch between their aligned sequences is less than the extension threshold. Default is to not extend feature library. | -e
