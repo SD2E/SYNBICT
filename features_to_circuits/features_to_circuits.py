@@ -281,7 +281,7 @@ class CircuitLibrary():
         else:
             return set()
 
-    def extend_circuits_by_name(self, mismatch_threshold):
+    def extend_circuits_by_name(self, mismatch_threshold, strip_prefixes=[]):
         self.logger.info('Extending circuit library')
 
         aligner = Align.PairwiseAligner()
@@ -335,7 +335,8 @@ class CircuitLibrary():
                                 definition_copy = self.copy_module_definition(circuit_definition,
                                                                               circuit_doc,
                                                                               circuit_doc,
-                                                                              True)
+                                                                              True,
+                                                                              strip_prefixes=strip_prefixes)
 
                                 feature_doc = self.__feature_library.get_document(feature_definition.identity)
 
@@ -475,25 +476,26 @@ class CircuitLibrary():
 
                                 product_fc.definition = variant_product_definition.identity
 
+    # @classmethod
+    # def strip_origin_properties(cls, sbol_obj):
+    #     origin_props = []
+
+    #     for prop in sbol_obj.properties:
+    #         if (prop.startswith('http://wiki.synbiohub.org/wiki/Terms/synbiohub#')
+    #                 or prop.startswith('http://purl.org/dc/terms/created')
+    #                 or prop.startswith('http://purl.org/dc/terms/modified')
+    #                 or prop.startswith('http://www.ncbi.nlm.nih.gov/genbank#')
+    #                 or prop.startswith('http://sbols.org/genBankConversion#')):
+    #             origin_props.append(prop)
+
+    #     for origin_prop in origin_props:
+    #         del sbol_obj.properties[origin_prop]
+
+    #     sbol_obj.wasGeneratedBy = []
+
     @classmethod
-    def strip_origin_properties(cls, sbol_obj):
-        origin_props = []
-
-        for prop in sbol_obj.properties:
-            if (prop.startswith('http://wiki.synbiohub.org/wiki/Terms/synbiohub#')
-                    or prop.startswith('http://purl.org/dc/terms/created')
-                    or prop.startswith('http://purl.org/dc/terms/modified')
-                    or prop.startswith('http://www.ncbi.nlm.nih.gov/genbank#')
-                    or prop.startswith('http://sbols.org/genBankConversion#')):
-                origin_props.append(prop)
-
-        for origin_prop in origin_props:
-            del sbol_obj.properties[origin_prop]
-
-        sbol_obj.wasGeneratedBy = []
-
-    @classmethod
-    def copy_module_definition(cls, mod_definition, source_doc, sink_doc, import_namespace=False, deep_copy=False):
+    def copy_module_definition(cls, mod_definition, source_doc, sink_doc, import_namespace=False, deep_copy=False,
+                               strip_prefixes=[]):
         if import_namespace:
             mod_namespace = '/'.join(mod_definition.identity.split('/')[:-2])
 
@@ -528,22 +530,23 @@ class CircuitLibrary():
                 else:
                     raise
 
-        cls.strip_origin_properties(mod_definition_copy)
+        FeatureLibrary.strip_origin_properties(mod_definition_copy, strip_prefixes)
         for sub_mod_copy in mod_definition_copy.modules:
-            cls.strip_origin_properties(sub_mod_copy)
+            FeatureLibrary.strip_origin_properties(sub_mod_copy, strip_prefixes)
         for func_comp_copy in mod_definition_copy.functionalComponents:
-            cls.strip_origin_properties(func_comp_copy)
+            FeatureLibrary.strip_origin_properties(func_comp_copy, strip_prefixes)
         for intxn_copy in mod_definition_copy.interactions:
-            cls.strip_origin_properties(intxn_copy)
+            FeatureLibrary.strip_origin_properties(intxn_copy, strip_prefixes)
 
             for parti_copy in intxn_copy.participations:
-                cls.strip_origin_properties(parti_copy)
+                FeatureLibrary.strip_origin_properties(parti_copy, strip_prefixes)
 
         if deep_copy:
             for sub_mod in mod_definition.modules:
                 sub_mod_definition = source_doc.moduleDefinitions.get(sub_mod.definition)
 
-                sub_mod_definition_copy = cls.copy_module_definition(sub_mod_definition, source_doc, sink_doc, import_namespace, deep_copy)
+                sub_mod_definition_copy = cls.copy_module_definition(sub_mod_definition, source_doc, sink_doc,
+                                                                     import_namespace, deep_copy, strip_prefixes)
 
                 sub_mod_copy = mod_definition_copy.modules.get(sub_mod.displayId)
 
@@ -1210,6 +1213,7 @@ def main(args=None):
     parser.add_argument('-d', '--tx_threshold', nargs='?', default='200')
     parser.add_argument('-f', '--flanking_length', nargs='?', default='200')
     parser.add_argument('-iv', '--infer_devices', action='store_true')
+    parser.add_argument('-sp', '--strip_prefixes', nargs='*', default=[])
 
     # Sub-circuit library extension arguments
     parser.add_argument('-e', '--extend_sub_circuits', action='store_true')
@@ -1250,7 +1254,7 @@ def main(args=None):
     if args.extend_sub_circuits:
         circuit_library = CircuitLibrary(circuit_docs, True)
 
-        circuit_library.extend_circuits_by_name(float(args.extension_threshold))
+        circuit_library.extend_circuits_by_name(float(args.extension_threshold), args.strip_prefixes)
 
         for extended_doc in circuit_library.get_updated_documents():
             (extended_file_base, extended_file_extension) = os.path.splitext(extended_doc.name)

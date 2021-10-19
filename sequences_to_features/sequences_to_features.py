@@ -116,11 +116,12 @@ class FeatureCurator():
 
         self.logger = logging.getLogger('synbict')
 
-    def annotate_features(self, feature_annotater, min_target_length, in_place=False):
+    def annotate_features(self, feature_annotater, min_target_length, in_place=False, complete_matches=False,
+                          strip_prefixes=[]):
         # start_time = time.clock()
 
         annotated_identities = feature_annotater.annotate(self.target_library, min_target_length, in_place,
-                                                          self.output_library)
+                                                          self.output_library, complete_matches, strip_prefixes)
 
         # self.logger.info('Annotation Time: ' + str(time.clock() - start_time))
 
@@ -153,12 +154,13 @@ class FeatureCurator():
 
             feature_pruner.clean(self.target_library, target_features, target_sub_features)
 
-    def extend_features(self, feature_annotater, min_target_length, extension_threshold):
+    def extend_features(self, feature_annotater, min_target_length, extension_threshold, strip_prefixes=[]):
         # start_time = time.clock()
 
         feature_annotater.extend_features_by_name(self.target_library,
                                                   min_target_length,
-                                                  extension_threshold)
+                                                  extension_threshold,
+                                                  strip_prefixes)
 
         # self.logger.info('Extension Time: ' + str(time.clock() - start_time))
 
@@ -432,7 +434,7 @@ class FeatureLibrary():
         return seqs
 
     @classmethod
-    def copy_sequence(cls, seq, source_doc, sink_doc, import_namespace=False):
+    def copy_sequence(cls, seq, source_doc, sink_doc, import_namespace=False, strip_prefixes=[]):
         if import_namespace:
             namespace = '/'.join(seq.identity.split('/')[:-2])
 
@@ -466,7 +468,7 @@ class FeatureLibrary():
                     else:
                         raise
 
-            cls.strip_origin_properties(seq_copy)
+            cls.strip_origin_properties(seq_copy, strip_prefixes)
         else:
             try:
                 sink_doc.getSequence(seq.identity)
@@ -572,20 +574,25 @@ class FeatureLibrary():
                 else:
                     raise
 
+    # prop.startswith('http://wiki.synbiohub.org/wiki/Terms/synbiohub#')
+    # prop.startswith('http://www.ncbi.nlm.nih.gov/genbank#')
+    # prop.startswith('http://sbols.org/genBankConversion#')
+
     @classmethod
-    def strip_origin_properties(cls, sbol_obj):
-        origin_props = []
+    def strip_origin_properties(cls, sbol_obj, other_prefixes):
+        strip_props = []
+
+        origin_prefixes = ['http://purl.org/dc/terms/created',
+                           'http://purl.org/dc/terms/modified',
+                           'http://purl.org/dc/terms/creator']
+
+        strip_prefixes = tuple(origin_prefixes + other_prefixes)
 
         for prop in sbol_obj.properties:
-            if (prop.startswith('http://wiki.synbiohub.org/wiki/Terms/synbiohub#')
-                    or prop.startswith('http://purl.org/dc/terms/created')
-                    or prop.startswith('http://purl.org/dc/terms/modified')
-                    or prop.startswith('http://www.ncbi.nlm.nih.gov/genbank#')
-                    or prop.startswith('http://sbols.org/genBankConversion#')):
-                origin_props.append(prop)
-
-        for origin_prop in origin_props:
-            del sbol_obj.properties[origin_prop]
+            if prop.startswith(strip_prefixes):
+                strip_props.append(prop)
+        for strip_prop in strip_props:
+            del sbol_obj.properties[strip_prop]
 
         sbol_obj.wasGeneratedBy = []
 
@@ -593,7 +600,7 @@ class FeatureLibrary():
     def copy_component_definition(cls, comp_definition, source_doc, sink_doc, import_namespace=False,
                                   min_seq_length=0, import_sequences=False, seq_elements=None,
                                   parent_definitions=[], parent_doc=None, make_variant=False,
-                                  shallow_copy=False):
+                                  shallow_copy=False, strip_prefixes=[]):
         if sbol2.BIOPAX_DNA in comp_definition.types:
             seqs = cls.get_DNA_sequences(comp_definition, source_doc)
         else:
@@ -636,14 +643,14 @@ class FeatureLibrary():
                         else:
                             raise
 
-                cls.strip_origin_properties(definition_copy)
+                cls.strip_origin_properties(definition_copy, strip_prefixes)
                 for sub_comp_copy in definition_copy.components:
-                    cls.strip_origin_properties(sub_comp_copy)
+                    cls.strip_origin_properties(sub_comp_copy, strip_prefixes)
                 for anno_copy in definition_copy.sequenceAnnotations:
-                    cls.strip_origin_properties(anno_copy)
+                    cls.strip_origin_properties(anno_copy, strip_prefixes)
 
                     for loc_copy in anno_copy.locations:
-                        cls.strip_origin_properties(loc_copy)
+                        cls.strip_origin_properties(loc_copy, strip_prefixes)
 
                 if make_variant:
                     cls.make_variant_definition(sink_doc, definition_copy)
@@ -664,7 +671,7 @@ class FeatureLibrary():
                 definition_copy.sequences = list(comp_definition.sequences)
             elif import_sequences:
                 if len(seqs) > 0:
-                    seq_copy = cls.copy_sequence(seqs[0], source_doc, sink_doc, True)
+                    seq_copy = cls.copy_sequence(seqs[0], source_doc, sink_doc, True, strip_prefixes)
 
                     if make_variant:
                         cls.make_variant_sequence(sink_doc, seq_copy)
@@ -689,7 +696,7 @@ class FeatureLibrary():
                 for seq_URI in comp_definition.sequences:
                     seq = source_doc.getSequence(seq_URI)
 
-                    cls.copy_sequence(seq, source_doc, sink_doc)
+                    cls.copy_sequence(seq, source_doc, sink_doc, False, strip_prefixes)
 
                 definition_copy.sequences = list(comp_definition.sequences)
 
@@ -725,7 +732,8 @@ class FeatureLibrary():
                         else:
                             sub_definition_copy = cls.copy_component_definition(sub_definition, source_doc, sink_doc,
                                                                                 import_namespace, min_seq_length,
-                                                                                shallow_copy=shallow_copy)
+                                                                                shallow_copy=shallow_copy,
+                                                                                strip_prefixes=strip_prefixes)
 
                             if sub_definition_copy:
                                 sub_copy.definition = sub_definition_copy.identity
@@ -841,7 +849,7 @@ class FeatureAnnotater():
         return seq_anno
 
     def __process_feature_matches(self, target_doc, target_definition, feature_matches, orientation, target_length,
-                                  rc_factor=0, copy_definitions=True):
+                                  rc_factor=0, copy_definitions=True, complete_matches=False):
         for feature_match in feature_matches:
             temp_start = feature_match[1]//2 + 1
             temp_end = (feature_match[2] + 1)//2
@@ -854,7 +862,7 @@ class FeatureAnnotater():
                 end = temp_end
 
             for feature in feature_match[0]:
-                if len(feature.nucleotides) < target_length:
+                if len(feature.nucleotides) < target_length or complete_matches:
                     feature_definition = self.feature_library.get_definition(feature.identity)
 
                     if feature_definition.name is None:
@@ -876,7 +884,7 @@ class FeatureAnnotater():
                     self.logger.debug('Annotated %s (%s, %s) at [%s, %s] in %s', feature_definition.identity, feature_ID,
                                       feature_role, start, end, target_definition.identity)
 
-    def extend_features_by_name(self, target_library, min_target_length, mismatch_threshold):
+    def extend_features_by_name(self, target_library, min_target_length, mismatch_threshold, strip_prefixes=[]):
         self.logger.info('Extending feature library')
 
         aligner = Align.PairwiseAligner()
@@ -938,7 +946,7 @@ class FeatureAnnotater():
                                             variant_definition = FeatureLibrary.copy_component_definition(feature_definition,
                                                 feature_doc, feature_doc, import_namespace=True, import_sequences=True,
                                                 seq_elements=target_nucleotides, parent_definitions=[target_definition],
-                                                parent_doc=target_doc, make_variant=True)
+                                                parent_doc=target_doc, make_variant=True, strip_prefixes=strip_prefixes)
 
                                             if variant_definition:
                                                 sub_identities = []
@@ -959,7 +967,8 @@ class FeatureAnnotater():
 
         self.logger.info('Finished extending feature library')
 
-    def annotate_raw_sequences(self, raw_seqs, comp_IDs=[], min_target_length=0):
+    def annotate_raw_sequences(self, raw_seqs, comp_IDs=[], min_target_length=0, complete_matches=False,
+                               strip_prefixes=[]):
         annotated_comps = []
 
         if not isinstance(raw_seqs, list):
@@ -985,14 +994,16 @@ class FeatureAnnotater():
 
             target_library = FeatureLibrary([target_doc])
 
-            self.annotate(target_library, min_target_length, True)
+            self.annotate(target_library, min_target_length, True, complete_matches=complete_matches,
+                          strip_prefixes=strip_prefixes)
 
         if len(annotated_comps) == 1:
             return annotated_comps[0]
         else:
             return annotated_comps
 
-    def annotate(self, target_library, min_target_length, in_place=False, output_library=None):
+    def annotate(self, target_library, min_target_length, in_place=False, output_library=None, complete_matches=False,
+                 strip_prefixes=[]):
         annotated_identities = []
 
         for target in target_library.features:
@@ -1020,27 +1031,32 @@ class FeatureAnnotater():
                                                                                        target_doc,
                                                                                        output_doc,
                                                                                        min_seq_length=min_target_length,
-                                                                                       shallow_copy=True)
+                                                                                       shallow_copy=True,
+                                                                                       strip_prefixes=strip_prefixes)
                         else:
                             definition_copy = FeatureLibrary.copy_component_definition(target_definition,
                                                                                        target_doc,
                                                                                        output_doc, True,
                                                                                        min_target_length,
-                                                                                       shallow_copy=True)
+                                                                                       shallow_copy=True,
+                                                                                       strip_prefixes=strip_prefixes)
                     elif in_place:
                         definition_copy = target_definition
                     else:
                         definition_copy = FeatureLibrary.copy_component_definition(target_definition, target_doc,
                                                                                    target_doc, True,
-                                                                                   min_target_length)
+                                                                                   min_target_length,
+                                                                                   strip_prefixes=strip_prefixes)
 
                     if definition_copy:
                         self.__process_feature_matches(target_doc, definition_copy, inline_matches,
                             sbol2.SBOL_ORIENTATION_INLINE, len(target.nucleotides),
-                            copy_definitions=(not output_library or doc_index >= len(output_library.docs)))
+                            copy_definitions=(not output_library or doc_index >= len(output_library.docs)),
+                            complete_matches=complete_matches)
                         self.__process_feature_matches(target_doc, definition_copy, rc_matches,
                             sbol2.SBOL_ORIENTATION_REVERSE_COMPLEMENT, len(target.nucleotides), len(target.nucleotides) + 1,
-                            (not output_library or doc_index >= len(output_library.docs)))
+                            (not output_library or doc_index >= len(output_library.docs)),
+                            complete_matches=complete_matches)
 
                         annotated_identities.append(definition_copy.identity)
                     else:
@@ -1422,7 +1438,8 @@ remove if any (comma-separated list of indices, for example 0,2,5):\n'.format(fm
 
 def curate(feature_library, target_library, output_library, output_files, extend_features, no_annotation,
            min_feature_length, min_target_length, extension_threshold, extension_suffix, in_place, minimal_output,
-           no_pruning, deletion_roles, cover_offset, delete_flat, auto_swap, non_interactive, logger):
+           no_pruning, deletion_roles, cover_offset, delete_flat, auto_swap, non_interactive, logger,
+           complete_matches=False, strip_prefixes=[]):
     if extend_features or not no_annotation:
         feature_annotater = FeatureAnnotater(feature_library, min_feature_length)
     
@@ -1431,7 +1448,8 @@ def curate(feature_library, target_library, output_library, output_files, extend
     if extend_features:
         feature_curator.extend_features(feature_annotater,
                                         min_target_length,
-                                        extension_threshold)
+                                        extension_threshold,
+                                        strip_prefixes)
 
         for extended_doc in feature_annotater.get_updated_documents():
             (extended_file_base, extended_file_extension) = os.path.splitext(extended_doc.name)
@@ -1451,7 +1469,9 @@ def curate(feature_library, target_library, output_library, output_files, extend
     else:
         (annotated_features, annotating_features) = feature_curator.annotate_features(feature_annotater,
                                                                                       min_target_length,
-                                                                                      in_place)
+                                                                                      in_place,
+                                                                                      complete_matches,
+                                                                                      strip_prefixes)
 
         if minimal_output:
             for i in range(0, len(output_library.docs)):
@@ -1514,11 +1534,12 @@ def main(args=None):
     # Sequence annotation arguments
     parser.add_argument('-f', '--feature_files', nargs='*', default=[])
     parser.add_argument('-M', '--min_feature_length', nargs='?', default=40)
-    
     parser.add_argument('-na', '--no_annotation', action='store_true')
     parser.add_argument('-e', '--extend_features', action='store_true')
     parser.add_argument('-xs', '--extension_suffix', nargs='?', default='')
     parser.add_argument('-x', '--extension_threshold', nargs='?', default=0.05)
+    parser.add_argument('-cm', '--complete_matches', action='store_true')
+    parser.add_argument('-sp', '--strip_prefixes', nargs='*', default=[])
 
     # Annotation pruning arguments
     parser.add_argument('-c', '--cover_offset', nargs='?', default=14)
@@ -1560,38 +1581,34 @@ def main(args=None):
     sbol2.Config.setOption('validate', args.validate)
     sbol2.Config.setOption('sbol_typed_uris', False)
 
-    if args.sbh_URL and args.username and args.password:
+    sbh_arg_types = []
+
+    if args.username:
+        sbh_arg_types.append('username')
+
+    if args.password:
+        sbh_arg_types.append('password')
+
+    if args.sbh_URL:
         synbiohub = sbol2.PartShop(args.sbh_URL)
 
-        try:
-            synbiohub.login(args.username, args.password)
-        except SBOLError as exc:
-            if exc.error_code() == sbol2.SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST:
-                logger.warning('Unable to log into SynBioHub instance with URL %s', args.sbh_URL)
+        if len(sbh_arg_types) == 2:
+            try:
+                synbiohub.login(args.username, args.password)
+            except SBOLError as exc:
+                if exc.error_code() == sbol2.SBOLErrorCode.SBOL_ERROR_BAD_HTTP_REQUEST:
+                    logger.warning('Unable to log into SynBioHub instance with URL %s', args.sbh_URL)
+        elif len(sbh_arg_types) == 1:
+            logger.warning('SynBioHub %s was provided but %s is missing.',
+                           sbh_arg_types[0],
+                           {'username', 'password'}.difference(sbh_arg_types).pop())
+
     else:
         synbiohub = None
 
-        sbh_arg_types = []
-        missed_arg_types = []
-
-        if args.sbh_URL:
-            sbh_arg_types.append('instance URL')
-        else:
-            missed_arg_types.append('instance URL')
-
-        if args.username:
-            sbh_arg_types.append('username')
-        else:
-            missed_arg_types.append('username')
-
-        if args.password:
-            sbh_arg_types.append('password')
-        else:
-            missed_arg_types.append('password')
-
-        logger.warning('SynBioHub %s were provided but %s are missing.',
-                       ','.join(sbh_arg_types),
-                       ','.join(missed_arg_types))
+        if len(sbh_arg_types) > 0:
+            logger.warning('SynBioHub %s were provided but a SynBioHub instance URL is missing.',
+                           ', '.join(sbh_arg_types))
 
     target_files = []
 
@@ -1697,7 +1714,7 @@ def main(args=None):
                args.no_annotation, int(args.min_feature_length), int(args.min_target_length),
                float(args.extension_threshold), args.extension_suffix, args.in_place, args.minimal_output,
                args.no_pruning, args.deletion_roles, int(args.cover_offset), args.delete_flat, args.auto_swap,
-               args.non_interactive, logger)
+               args.non_interactive, logger, args.complete_matches, args.strip_prefixes)
     else:
         for i in range(0, len(target_files)):
             target_doc = load_target_file(target_files[i])
@@ -1716,7 +1733,7 @@ def main(args=None):
                        args.no_annotation, int(args.min_feature_length), int(args.min_target_length),
                        float(args.extension_threshold), args.extension_suffix, args.in_place, args.minimal_output,
                        args.no_pruning, args.deletion_roles, int(args.cover_offset), args.delete_flat, args.auto_swap,
-                       args.non_interactive, logger)
+                       args.non_interactive, logger, args.complete_matches, args.strip_prefixes)
 
         if synbiohub:
             for target_URL in args.target_URLs:
@@ -1746,7 +1763,7 @@ def main(args=None):
                            args.no_annotation, int(args.min_feature_length), int(args.min_target_length),
                            float(args.extension_threshold), args.extension_suffix, args.in_place, args.minimal_output,
                            args.no_pruning, args.deletion_roles, int(args.cover_offset), args.delete_flat, args.auto_swap,
-                           args.non_interactive, logger)
+                           args.non_interactive, logger, args.complete_matches, args.strip_prefixes)
 
     logger.info('Finished curating')
 
