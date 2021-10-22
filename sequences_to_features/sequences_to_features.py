@@ -198,8 +198,8 @@ class FeatureLibrary():
     def __init__(self, docs, require_sequence=True):
         self.features = []
         self.docs = docs
-        self.__updated_indices = set()
 
+        self.__updated_indices = set()
         self.__feature_map = {}
         self.__feature_dict = {}
         self.__name_to_idents = {}
@@ -1513,6 +1513,28 @@ def curate(feature_library, target_library, output_library, output_files, extend
 
                 target_library.docs[i].write(output_files[i])
 
+def download_sequences(doc, synbiohub):
+    for comp_definition in doc.componentDefinitions:
+        for seq_URI in comp_definition.sequences:
+            download_sequence = False
+
+            try:
+                doc.getSequence(seq_URI)
+            except RuntimeError:
+                download_sequence = True
+            except NotFoundError as exc:
+                if is_sbol_not_found(exc):
+                    download_sequence = True
+
+            if download_sequence:
+                try:
+                    synbiohub.pull(seq_URI, doc)
+                except NotFoundError as exc:
+                    if is_sbol_not_found(exc):
+                        logger.warning('Unable to download sequence %s, seq_URI)')
+                    else:
+                        raise
+
 def main(args=None):
     if args is None:
         args = sys.argv[1:]
@@ -1666,6 +1688,8 @@ def main(args=None):
             try:
                 synbiohub.pull(feature_URL, feature_doc)
 
+                download_sequences(feature_doc, synbiohub)
+
                 feature_docs.append(feature_doc)
             except NotFoundError as exc:
                 if is_sbol_not_found(exc):
@@ -1687,6 +1711,8 @@ def main(args=None):
 
                 try:
                     synbiohub.pull(target_URL, target_doc)
+
+                    download_sequences(target_doc, synbiohub)
 
                     target_docs.append(target_doc)
                 except NotFoundError as exc:
@@ -1741,6 +1767,8 @@ def main(args=None):
                     target_doc = sbol2.Document()
 
                     synbiohub.pull(target_URL, target_doc)
+
+                    download_sequences(target_doc, synbiohub)
                 except NotFoundError as exc:
                     if is_sbol_not_found(exc):
                         logger.warning('Unable to find target URL %s at %s', target_URL, sbh_URL)
