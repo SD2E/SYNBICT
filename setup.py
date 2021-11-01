@@ -19,7 +19,7 @@ setup(
     author_email='nicholasroehner@gmail.com',
     url='https://github.com/SD2E/SYNBICT',
     download_url='https://github.com/SD2E/SYNBICT/archive/refs/tags/v1.5.2.tar.gz',
-    packages=find_packages(),
+    packages=find_packages('circuit_visualization', 'circuits_to_truth_tables', 'features_to_circuits', 'sequences_to_features'),
     install_requires=install_requires,
     classifiers=[
         "Programming Language :: Python :: 3 :: Only"
