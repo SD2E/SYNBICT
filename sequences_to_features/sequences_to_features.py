@@ -1066,11 +1066,11 @@ class FeatureAnnotater():
                             complete_matches=complete_matches, feature_output=feature_output)
                        
                         if feature_output:
-                            feature_list_1 = self.__process_feature_matches(target_doc, definition_copy, inline_matches,
+                            feature_list = self.__process_feature_matches(target_doc, definition_copy, inline_matches,
                             sbol2.SBOL_ORIENTATION_INLINE, len(target.nucleotides),
                             copy_definitions=(not output_library or doc_index >= len(output_library.docs)),
                             complete_matches=complete_matches, feature_output=feature_output)
-                            feature_list_2 = self.__process_feature_matches(target_doc, definition_copy, rc_matches,
+                            feature_list_rc = self.__process_feature_matches(target_doc, definition_copy, rc_matches,
                             sbol2.SBOL_ORIENTATION_REVERSE_COMPLEMENT, len(target.nucleotides), len(target.nucleotides) + 1,
                             (not output_library or doc_index >= len(output_library.docs)),
                             complete_matches=complete_matches, feature_output=feature_output)
@@ -1082,7 +1082,7 @@ class FeatureAnnotater():
 
                 self.logger.info('Finished annotating %s', target.identity)
         if feature_output:
-            return annotated_identities, feature_list_1, feature_list_2
+            return annotated_identities, feature_list, feature_list_rc
         else:
             return annotated_identities
 
