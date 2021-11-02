@@ -885,7 +885,7 @@ class FeatureAnnotater():
                     if feature_output:
                         feature_list.append({'feature_id':feature_definition.identity, 'ID':feature_ID,
                                           'role':feature_role, 'start':start, 'end':end, 'target_id':target_definition.identity})
-                    else
+                    else:
                         self.logger.debug('Annotated %s (%s, %s) at [%s, %s] in %s', feature_definition.identity, feature_ID,
                                           feature_role, start, end, target_definition.identity)
         if feature_output:
@@ -1064,15 +1064,27 @@ class FeatureAnnotater():
                             sbol2.SBOL_ORIENTATION_REVERSE_COMPLEMENT, len(target.nucleotides), len(target.nucleotides) + 1,
                             (not output_library or doc_index >= len(output_library.docs)),
                             complete_matches=complete_matches, feature_output=feature_output)
-
+                       
+                        if feature_output:
+                            feature_list_1 = self.__process_feature_matches(target_doc, definition_copy, inline_matches,
+                            sbol2.SBOL_ORIENTATION_INLINE, len(target.nucleotides),
+                            copy_definitions=(not output_library or doc_index >= len(output_library.docs)),
+                            complete_matches=complete_matches, feature_output=feature_output)
+                            feature_list_2 = self.__process_feature_matches(target_doc, definition_copy, rc_matches,
+                            sbol2.SBOL_ORIENTATION_REVERSE_COMPLEMENT, len(target.nucleotides), len(target.nucleotides) + 1,
+                            (not output_library or doc_index >= len(output_library.docs)),
+                            complete_matches=complete_matches, feature_output=feature_output)
+                            
                         annotated_identities.append(definition_copy.identity)
                     else:
                         self.logger.warning('%s was not annotated because its version could not be incremented.',
                                         target.identity)
 
                 self.logger.info('Finished annotating %s', target.identity)
-
-        return annotated_identities
+        if feature_output:
+            return annotated_identities, feature_list_1, feature_list_2
+        else:
+            return annotated_identities
 
 class FeaturePruner():
 
