@@ -849,7 +849,9 @@ class FeatureAnnotater():
         return seq_anno
 
     def __process_feature_matches(self, target_doc, target_definition, feature_matches, orientation, target_length,
-                                  rc_factor=0, copy_definitions=True, complete_matches=False):
+                                  rc_factor=0, copy_definitions=True, complete_matches=False, output_matches=False):
+        output_match_list = []
+
         for feature_match in feature_matches:
             temp_start = feature_match[1]//2 + 1
             temp_end = (feature_match[2] + 1)//2
@@ -880,9 +882,25 @@ class FeatureAnnotater():
                         feature_doc = self.feature_library.get_document(feature.identity)
 
                         FeatureLibrary.copy_component_definition(feature_definition, feature_doc, target_doc)
+                    
+                    if output_matches:
+                        output_match_list.append({'feature_identity': feature_definition.identity,
+                                                  'feature_ID':feature_ID,
+                                                  'role': feature_role,
+                                                  'start': start,
+                                                  'end': end,
+                                                  'orientation': orientation,
+                                                  'target_identity': target_definition.identity})
 
-                    self.logger.debug('Annotated %s (%s, %s) at [%s, %s] in %s', feature_definition.identity, feature_ID,
-                                      feature_role, start, end, target_definition.identity)
+                    self.logger.debug('Annotated %s (%s, %s) at [%s, %s] in %s',
+                                      feature_definition.identity,
+                                      feature_ID,
+                                      feature_role,
+                                      start,
+                                      end,
+                                      target_definition.identity)
+
+        return output_match_list
 
     def extend_features_by_name(self, target_library, min_target_length, mismatch_threshold, strip_prefixes=[]):
         self.logger.info('Extending feature library')
@@ -1003,8 +1021,9 @@ class FeatureAnnotater():
             return annotated_comps
 
     def annotate(self, target_library, min_target_length, in_place=False, output_library=None, complete_matches=False,
-                 strip_prefixes=[]):
+                 strip_prefixes=[], output_matches=False):
         annotated_identities = []
+        output_match_lists = []
 
         for target in target_library.features:
             if self.__has_min_length(target, min_target_length):
@@ -1049,14 +1068,26 @@ class FeatureAnnotater():
                                                                                    strip_prefixes=strip_prefixes)
 
                     if definition_copy:
-                        self.__process_feature_matches(target_doc, definition_copy, inline_matches,
-                            sbol2.SBOL_ORIENTATION_INLINE, len(target.nucleotides),
-                            copy_definitions=(not output_library or doc_index >= len(output_library.docs)),
-                            complete_matches=complete_matches)
-                        self.__process_feature_matches(target_doc, definition_copy, rc_matches,
-                            sbol2.SBOL_ORIENTATION_REVERSE_COMPLEMENT, len(target.nucleotides), len(target.nucleotides) + 1,
-                            (not output_library or doc_index >= len(output_library.docs)),
-                            complete_matches=complete_matches)
+                        copy_definitions = (not output_library or doc_index >= len(output_library.docs))
+
+                        output_match_list = self.__process_feature_matches(target_doc,
+                                                                           definition_copy,
+                                                                           inline_matches,
+                                                                           sbol2.SBOL_ORIENTATION_INLINE,
+                                                                           len(target.nucleotides),
+                                                                           copy_definitions=copy_definitions,
+                                                                           complete_matches=complete_matches,
+                                                                           output_matches=output_matches)
+                        output_match_list.extend(self.__process_feature_matches(target_doc,
+                                                                                definition_copy,
+                                                                                rc_matches,
+                                                                                sbol2.SBOL_ORIENTATION_REVERSE_COMPLEMENT,
+                                                                                len(target.nucleotides),
+                                                                                len(target.nucleotides) + 1,
+                                                                                copy_definitions,
+                                                                                complete_matches=complete_matches,
+                                                                                output_matches=output_matches))
+                        output_match_lists.append(output_match_list)
 
                         annotated_identities.append(definition_copy.identity)
                     else:
@@ -1064,8 +1095,10 @@ class FeatureAnnotater():
                                         target.identity)
 
                 self.logger.info('Finished annotating %s', target.identity)
-
-        return annotated_identities
+        if output_matches:
+            return annotated_identities, output_match_lists
+        else:
+            return annotated_identities
 
 class FeaturePruner():
 
