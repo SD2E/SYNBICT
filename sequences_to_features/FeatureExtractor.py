@@ -2,40 +2,13 @@ import sbol2
 import subprocess
 import uuid
 import json
+import logging
 
-class Feature_No_Sequence():
 
-    SO_REGION = 'http://identifiers.org/so/SO:0000001'
-    SO_SEQUENCE_FEATURE = 'http://identifiers.org/so/SO:0000110'
-
-    GENERIC_ROLES = {
-        SO_REGION,
-        SO_SEQUENCE_FEATURE
-    }
-
-    def __init__(self, identity, roles, displayID, name, sub_identities=[], parent_identities=[]):
-        #self.nucleotides = nucleotides, sequence is removed in 2.0
-        self.identity = identity
-        self.sub_identities = sub_identities
-        self.parent_identities = parent_identities
-        self.roles = set(roles)
-        self.name = name
-        self.displayID = displayID
-
-    #def reverse_complement_nucleotides(self):
-    #    return str(Seq(self.nucleotides).reverse_complement())
-    # in 2.0, we don't need reverse the sequence.
-
-    @classmethod
-    def has_non_generic_role(cls, roles):
-        return len(roles.difference(cls.GENERIC_ROLES)) > 0
-
-    def is_non_generic(self):
-        return self.has_non_generic_role(self.roles)
 # SBOL ➜ FASTA + metadata + indexing (one-time) 
 class FeatureExtractor():
     def __init__(self, docs, require_sequence=True):
-        self.metadata_dict = {}
+        #self.metadata_dict = {}
         self.fasta_records = []
         self.__extract_features(docs, require_sequence)
 
@@ -50,20 +23,21 @@ class FeatureExtractor():
                     continue
 
                 seq = dna_seqs[0].elements if dna_seqs else ''
-                new_id = str(uuid.uuid4())
+                #new_id = str(uuid.uuid4())
+                new_id = comp_def.identity
 
                 # Store plain (ID, sequence) tuple instead of SeqRecord
                 self.fasta_records.append((new_id, seq))
 
                 # Store metadata separately
-                self.metadata_dict[new_id] = {
-                    'original_identity': comp_def.identity,
-                    'name': comp_def.name,
-                    'displayId': comp_def.displayId,
-                    'roles': comp_def.roles,
-                    'wasDerivedFrom': comp_def.wasDerivedFrom,
-                    'doc_index': doc_index
-                }
+                # self.metadata_dict[new_id] = {
+                #     'original_identity': comp_def.identity,
+                #     'name': comp_def.name,
+                #     'displayId': comp_def.displayId,
+                #     'roles': comp_def.roles,
+                #     'wasDerivedFrom': comp_def.wasDerivedFrom,
+                #     'doc_index': doc_index
+                # }
 
     def write_fasta(self, fasta_path):
         with open(fasta_path, "w") as fasta_file:
