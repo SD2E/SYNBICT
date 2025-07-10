@@ -17,7 +17,7 @@ class SAMFeatureMapper:
 
     def parse_cigar_for_query_coords(self, read):
         cigar_tuples = read.cigartuples
-        print("cigar_tuples: ", cigar_tuples)
+        #print("cigar_tuples: ", cigar_tuples)
         query_len = 0
         query_consuming_ops = {0, 1, 7, 8}  # M, I, =, X
 

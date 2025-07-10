@@ -87,25 +87,25 @@ class FeatureAnnotatorSimple:
 
     def __process_feature_matches(self, target_doc, target_definition, feature_matches, orientation, target_length,
                                   copy_definitions=True, complete_matches=False, output_matches=False):
-        print("target_definition: ", target_definition)
-        print("feature_matches: ", feature_matches)
-        print("orientation: ", orientation)
-        print("target_length: ", target_length)
-        print("copy_definitions: ", copy_definitions)
-        print("complete_matches: ", complete_matches)
-        print("output_matches: ", output_matches)
+        #print("target_definition: ", target_definition)
+        #print("feature_matches: ", feature_matches)
+        #print("orientation: ", orientation)
+        #print("target_length: ", target_length)
+        #print("copy_definitions: ", copy_definitions)
+        #print("complete_matches: ", complete_matches)
+        #print("output_matches: ", output_matches)
               
         output_match_list = []
         for feature_match in feature_matches:
             start = feature_match[1]
             end = feature_match[2]
-            print("feature_match: ", feature_match, feature_match[0])
+            #print("feature_match: ", feature_match, feature_match[0])
             for feature in feature_match[0]: 
                 if end - start < target_length or complete_matches:
-                    print("feature: ", feature, feature.identity)
+                    #print("feature: ", feature, feature.identity)
                     # optimized version of feature_definition = feature_matches[0][0], it should include name
                     feature_definition = self.feature_library.get_definition(feature.identity) # this can be optimized to includes only the attributes needed, add name to Feature
-                    print("feature_definition: ", feature_definition)
+                    #print("feature_definition: ", feature_definition)
                     if feature_definition.name is None:
                         feature_ID = feature_definition.displayId
                     else:
@@ -118,7 +118,7 @@ class FeatureAnnotatorSimple:
                                                       sub_comp.identity)
 
                     if copy_definitions:
-                        print("is this called?")
+                        #print("is this called?")
                         # optimized version is replace here by a dictionary
                         feature_doc = self.feature_library.get_document(feature.identity)
 
@@ -151,11 +151,11 @@ class FeatureAnnotatorSimple:
 
         for target in target_library.features:
             if self.__has_min_length(target, min_target_length):
-                print("Logic 1")
+                #print("Logic 1")
                 self.logger.info('Annotating %s', target.identity)
 
                 if len(inline_matches) > 0 or len(rc_matches) > 0:
-                    print("Logic 1.1")
+                    #print("Logic 1.1")
                     target_doc = target_library.get_document(target.identity)
 
                     target_definition = target_doc.getComponentDefinition(target.identity)
@@ -163,11 +163,11 @@ class FeatureAnnotatorSimple:
                     doc_index = target_library.get_document_index(target.identity)
                     
                     if output_library and doc_index < len(output_library.docs):
-                        print("logic 1.1.1")
+                        #print("logic 1.1.1")
                         output_doc = output_library.docs[doc_index]
 
                         if in_place:
-                            print("logic 1.1.1.1")
+                            #print("logic 1.1.1.1")
                             definition_copy = FeatureLibrary.copy_component_definition(target_definition,
                                                                                        target_doc,
                                                                                        output_doc,
@@ -175,7 +175,7 @@ class FeatureAnnotatorSimple:
                                                                                        shallow_copy=True,
                                                                                        strip_prefixes=strip_prefixes)
                         else:
-                            print("logic 1.1.1.2")
+                            #print("logic 1.1.1.2")
                             definition_copy = FeatureLibrary.copy_component_definition(target_definition,
                                                                                        target_doc,
                                                                                        output_doc, True,
@@ -183,17 +183,17 @@ class FeatureAnnotatorSimple:
                                                                                        shallow_copy=True,
                                                                                        strip_prefixes=strip_prefixes)
                     elif in_place:
-                        print("logic 1.1.2")
+                        #print("logic 1.1.2")
                         definition_copy = target_definition
                     else:
-                        print("logic 1.1.3")
+                        #print("logic 1.1.3")
                         definition_copy = FeatureLibrary.copy_component_definition(target_definition, target_doc,
                                                                                    target_doc, True,
                                                                                    min_target_length,
                                                                                    strip_prefixes=strip_prefixes)
 
                     if definition_copy:
-                        print("logic 2")
+                        #print("logic 2")
                         copy_definitions = (not output_library or doc_index >= len(output_library.docs))
 
                         output_match_list = self.__process_feature_matches(target_doc,
@@ -204,7 +204,7 @@ class FeatureAnnotatorSimple:
                                                                            copy_definitions=copy_definitions,
                                                                            complete_matches=complete_matches,
                                                                            output_matches=output_matches)
-                        print("rc_matches: ", rc_matches)
+                        #print("rc_matches: ", rc_matches)
                         if(len(rc_matches) > 0):
                             output_match_list.extend(self.__process_feature_matches(target_doc,
                                                                                     definition_copy,
@@ -218,14 +218,14 @@ class FeatureAnnotatorSimple:
 
                         annotated_identities.append(definition_copy.identity)
                     else:
-                        print("logic 2.1")
+                        #print("logic 2.1")
                         self.logger.warning('%s was not annotated because its version could not be incremented.',
                                         target.identity)
 
                 self.logger.info('Finished annotating %s', target.identity)
         if output_matches:
-            print("logic 3")
+            #print("logic 3")
             return annotated_identities, output_match_lists
         else:
-            print("logic 3.1")
+            #print("logic 3.1")
             return annotated_identities

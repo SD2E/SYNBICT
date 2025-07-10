@@ -15,7 +15,7 @@ class BwaAligner(Aligner):
             fasta_file.write(f">query_sequence\n{seq}\n")
         with open(output_sam_path, 'w') as out_sam, open(output_sam_path + '.log', 'w') as err_log:
             subprocess.run(
-                ['bwa', 'mem', self.index_prefix, fasta_path],
+                ['bwa', 'mem', '-B', '100', '-O', '100', '-E', '100', self.index_prefix, fasta_path],
                 stdout=out_sam,
                 stderr=err_log,
                 check=True
