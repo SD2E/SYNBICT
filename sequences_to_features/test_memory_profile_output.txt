@@ -1,0 +1,30 @@
+python -m memory_profiler test_memory_profile.py 
+
+WARNING:synbict:https://synbiohub.programmingbiology.org/public/Cello_Parts/YFP_reporter/1 not loaded since its DNA sequence was not found
+Filename: test_memory_profile.py
+
+Line #    Mem usage    Increment  Occurrences   Line Contents
+=============================================================
+    11     77.9 MiB     77.9 MiB           1   @profile
+    12                                         def get_feature_libraries():
+    13     77.9 MiB      0.0 MiB           1       feature_libraries_dir = "/home/sophia/git_repo/SYNBICT/example/jet_libs"
+    14     77.9 MiB      0.0 MiB           1       feature_libraries_paths = get_feature_libraries_paths(feature_libraries_dir)
+    15     77.9 MiB      0.0 MiB           1       feature_docs = []
+    16    674.3 MiB      0.0 MiB          11       for feature_file in feature_libraries_paths:
+    17    674.3 MiB    596.4 MiB          10           feature_docs.append(load_sbol(feature_file))
+    18    682.6 MiB      8.2 MiB           1       feature_library = FeatureLibrary(feature_docs) # load feature_docs to feature_library
+    19    682.6 MiB      0.0 MiB           1       return feature_library
+
+
+Filename: test_memory_profile.py
+
+Line #    Mem usage    Increment  Occurrences   Line Contents
+=============================================================
+    21    682.6 MiB    682.6 MiB           1   @profile
+    22                                         def test_annotate(feature_library, doc):
+    23    682.6 MiB      0.0 MiB           1       output_docs = []
+    24    682.6 MiB      0.0 MiB           1       output_library = FeatureLibrary(output_docs, False)
+    25                                             # doc is target_doc
+    26    682.6 MiB      0.0 MiB           1       target_library = FeatureLibrary([doc], False)
+    27   1534.1 MiB    851.5 MiB           1       feature_annotater = FeatureAnnotater(feature_library, min_feature_length=40)
+    28   1534.2 MiB      0.1 MiB           1       feature_annotater.annotate(target_library, min_target_length=40, in_place=True, output_library=output_library, complete_matches=False, strip_prefixes=[])
