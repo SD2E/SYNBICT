@@ -1,0 +1,63 @@
+python -m memory_profiler test_memory_profile_alternative.py 
+WARNING:synbict:https://synbiohub.programmingbiology.org/public/Cello_Parts/YFP_reporter/1 not loaded since its DNA sequence was not found
+[bwa_index] Pack FASTA... 0.03 sec
+[bwa_index] Construct BWT for the packed sequence...
+[bwa_index] 0.69 seconds elapse.
+[bwa_index] Update BWT... 0.02 sec
+[bwa_index] Pack forward-only FASTA... 0.02 sec
+[bwa_index] Construct SA from BWT and Occ... 0.25 sec
+[main] Version: 0.7.19-r1273
+[main] CMD: bwa index -p test test.fasta
+[main] Real time: 1.046 sec; CPU: 1.005 sec
+Filename: test_memory_profile_alternative.py
+
+Line #    Mem usage    Increment  Occurrences   Line Contents
+=============================================================
+    24    682.4 MiB    682.4 MiB           1   @profile
+    25                                         def test_annotate(feature_docs, feature_library, doc):
+    26    685.4 MiB      3.0 MiB           1       tmp = FeatureExtractor(feature_docs)
+    27    685.4 MiB      0.0 MiB           1       fasta_path = 'test.fasta' #'/home/sophia/git_repo/SYNBICT/example/test.fasta'
+    28    685.4 MiB      0.0 MiB           1       index_prefix = 'test'
+    29    685.5 MiB      0.1 MiB           1       tmp.write_fasta(fasta_path)
+    30                                             #tmp.write_metadata('test_metadata.json') # '/home/sophia/git_repo/SYNBICT/example/test_metadata.json'
+    31    685.5 MiB      0.0 MiB           1       tmp.build_index(fasta_path, index_prefix)
+    32                                         
+    33                                             
+    34    685.5 MiB      0.0 MiB           1       index_prefix = 'test'
+    35    685.5 MiB      0.0 MiB           1       bwa = BwaAligner(index_prefix)
+    36    685.5 MiB      0.0 MiB           1       output_sam_path = 'aligned.sam'
+    37    685.5 MiB      0.0 MiB           1       bwa.align(doc, output_sam_path, exact_match=False)
+    38                                         
+    39    685.5 MiB      0.0 MiB           1       mapper = SAMFeatureMapper('aligned.sam')
+    40    697.1 MiB     11.6 MiB           1       inline_matches, rc_matches = mapper.extract_matches()
+    41    697.1 MiB      0.0 MiB           1       simple = FeatureAnnotatorSimple(feature_library, inline_matches, rc_matches)
+    42                                         
+    43                                             #doc = load_sbol("/home/sophia/git_repo/SYNBICT/example/add_gene/100005_addgene_out.xml")
+    44                                             # doc is target_doc
+    45    697.1 MiB      0.0 MiB           1       target_library = FeatureLibrary([doc], False)
+    46    697.1 MiB      0.0 MiB           1       output_docs = []
+    47    697.1 MiB      0.0 MiB           1       output_library = FeatureLibrary(output_docs, False) # 
+    48    697.2 MiB      0.1 MiB           1       simple.annotate(inline_matches, rc_matches, target_library, 40, in_place=True, output_library=output_library, output_matches=False)
+
+
+Design........................0
+Build.........................0
+Test..........................0
+Analysis......................0
+ComponentDefinition...........6
+ModuleDefinition..............0
+Model.........................0
+Sequence......................6
+Collection....................0
+Activity......................0
+Plan..........................0
+Agent.........................0
+Attachment....................0
+CombinatorialDerivation.......0
+Implementation................0
+SampleRoster..................0
+Experiment....................0
+ExperimentalData..............0
+Annotation Objects............2
+---
+Total: .........................14
