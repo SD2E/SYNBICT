@@ -1,0 +1,875 @@
+{
+  "127789_addgene_out.xml": {
+  "time": 14085.57,
+  "peak_memory": 811.48,
+  "new_elements": [],
+  "number": 0
+},
+  "19939_addgene_out.xml": {
+  "time": 11618.59,
+  "peak_memory": 810.97,
+  "new_elements": [],
+  "number": 0
+},
+  "75176_addgene_out.xml": {
+  "time": 9842.58,
+  "peak_memory": 811.64,
+  "new_elements": [],
+  "number": 0
+},
+  "102356_addgene_out.xml": {
+  "time": 13825.41,
+  "peak_memory": 812.33,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR terminator",
+    "ColE1",
+    "R0010"
+  ],
+  "number": 4
+},
+  "12641_addgene_out.xml": {
+  "time": 11505.5,
+  "peak_memory": 810.81,
+  "new_elements": [],
+  "number": 0
+},
+  "62228_addgene_out.xml": {
+  "time": 12662.78,
+  "peak_memory": 811.93,
+  "new_elements": [
+    "AmpR promoter",
+    "URA3 terminator",
+    "AmpR terminator"
+  ],
+  "number": 3
+},
+  "105368_addgene_out.xml": {
+  "time": 12038.36,
+  "peak_memory": 811.27,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR terminator"
+  ],
+  "number": 2
+},
+  "153353_addgene_out.xml": {
+  "time": 12109.38,
+  "peak_memory": 811.7,
+  "new_elements": [
+    "BBa_B0062-R",
+    "BBa_B0057",
+    "CamR Promoter",
+    "CamR Promoter",
+    "CamR Terminator"
+  ],
+  "number": 5
+},
+  "136905_addgene_out.xml": {
+  "time": 10602.49,
+  "peak_memory": 812.92,
+  "new_elements": [
+    "AmpR promoter",
+    "ColE1",
+    "R0010"
+  ],
+  "number": 3
+},
+  "166117_addgene_out.xml": {
+  "time": 14105.54,
+  "peak_memory": 812.24,
+  "new_elements": [
+    "AmpR terminator",
+    "ColE1"
+  ],
+  "number": 2
+},
+  "10736_addgene_out.xml": {
+  "time": 12240.36,
+  "peak_memory": 812.3,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR terminator",
+    "ColE1"
+  ],
+  "number": 3
+},
+  "157212_addgene_out.xml": {
+  "time": 12204.28,
+  "peak_memory": 812.37,
+  "new_elements": [],
+  "number": 0
+},
+  "61372_addgene_out.xml": {
+  "time": 13906.65,
+  "peak_memory": 811.64,
+  "new_elements": [],
+  "number": 0
+},
+  "61493_addgene_out.xml": {
+  "time": 11767.27,
+  "peak_memory": 810.81,
+  "new_elements": [],
+  "number": 0
+},
+  "114666_addgene_out.xml": {
+  "time": 14321.5,
+  "peak_memory": 812.13,
+  "new_elements": [
+    "AmpR promoter",
+    "URA3 terminator",
+    "AmpR terminator",
+    "ColE1",
+    "R0010"
+  ],
+  "number": 5
+},
+  "91583_addgene_out.xml": {
+  "time": 10638.68,
+  "peak_memory": 812.13,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR terminator",
+    "ColE1",
+    "R0010"
+  ],
+  "number": 4
+},
+  "104748_addgene_out.xml": {
+  "time": 14165.83,
+  "peak_memory": 811.39,
+  "new_elements": [],
+  "number": 0
+},
+  "62145_addgene_out.xml": {
+  "time": 12497.94,
+  "peak_memory": 812.03,
+  "new_elements": [],
+  "number": 0
+},
+  "159682_addgene_out.xml": {
+  "time": 12736.06,
+  "peak_memory": 812.25,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR terminator",
+    "ColE1",
+    "R0010"
+  ],
+  "number": 4
+},
+  "136143_addgene_out.xml": {
+  "time": 10561.12,
+  "peak_memory": 811.7,
+  "new_elements": [],
+  "number": 0
+},
+  "154908_addgene_out.xml": {
+  "time": 14160.57,
+  "peak_memory": 811.88,
+  "new_elements": [
+    "AmpR promoter",
+    "ColE1"
+  ],
+  "number": 2
+},
+  "127277_addgene_out.xml": {
+  "time": 12600.42,
+  "peak_memory": 812.01,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR terminator",
+    "ColE1",
+    "R0010"
+  ],
+  "number": 4
+},
+  "154115_addgene_out.xml": {
+  "time": 14637.25,
+  "peak_memory": 812.24,
+  "new_elements": [
+    "AmpR promoter",
+    "R0010"
+  ],
+  "number": 2
+},
+  "147521_addgene_out.xml": {
+  "time": 10673.93,
+  "peak_memory": 812.27,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR terminator",
+    "R0010"
+  ],
+  "number": 3
+},
+  "159629_addgene_out.xml": {
+  "time": 14417.24,
+  "peak_memory": 812.49,
+  "new_elements": [
+    "AmpR promoter",
+    "ColE1"
+  ],
+  "number": 2
+},
+  "157080_addgene_out.xml": {
+  "time": 14736.3,
+  "peak_memory": 812.37,
+  "new_elements": [],
+  "number": 0
+},
+  "32993_addgene_out.xml": {
+  "time": 10369.46,
+  "peak_memory": 810.68,
+  "new_elements": [],
+  "number": 0
+},
+  "87620_addgene_out.xml": {
+  "time": 14142.27,
+  "peak_memory": 812.21,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR terminator",
+    "ColE1",
+    "R0010"
+  ],
+  "number": 4
+},
+  "68783_addgene_out.xml": {
+  "time": 14431.61,
+  "peak_memory": 811.9,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR terminator"
+  ],
+  "number": 2
+},
+  "31671_addgene_out.xml": {
+  "time": 10338.63,
+  "peak_memory": 810.81,
+  "new_elements": [],
+  "number": 0
+},
+  "63465_addgene_out.xml": {
+  "time": 13941.49,
+  "peak_memory": 811.03,
+  "new_elements": [],
+  "number": 0
+},
+  "168436_addgene_out.xml": {
+  "time": 12571.37,
+  "peak_memory": 812.52,
+  "new_elements": [
+    "AmpR terminator",
+    "ColE1",
+    "R0010"
+  ],
+  "number": 3
+},
+  "115218_addgene_out.xml": {
+  "time": 12549.76,
+  "peak_memory": 811.56,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR terminator"
+  ],
+  "number": 2
+},
+  "89572_addgene_out.xml": {
+  "time": 14296.53,
+  "peak_memory": 811.93,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR terminator",
+    "R0010"
+  ],
+  "number": 3
+},
+  "102622_addgene_out.xml": {
+  "time": 12680.04,
+  "peak_memory": 812.1,
+  "new_elements": [],
+  "number": 0
+},
+  "41036_addgene_out.xml": {
+  "time": 12854.09,
+  "peak_memory": 812.65,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR terminator",
+    "R0010"
+  ],
+  "number": 3
+},
+  "117273_addgene_out.xml": {
+  "time": 14567.89,
+  "peak_memory": 812.41,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR terminator",
+    "ColE1",
+    "R0010"
+  ],
+  "number": 4
+},
+  "110114_addgene_out.xml": {
+  "time": 12543.97,
+  "peak_memory": 811.54,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR terminator"
+  ],
+  "number": 2
+},
+  "153942_addgene_out.xml": {
+  "time": 12615.97,
+  "peak_memory": 812.28,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR terminator"
+  ],
+  "number": 2
+},
+  "162453_addgene_out.xml": {
+  "time": 14535.57,
+  "peak_memory": 812.2,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR terminator",
+    "R0010"
+  ],
+  "number": 3
+},
+  "162427_addgene_out.xml": {
+  "time": 12840.81,
+  "peak_memory": 811.78,
+  "new_elements": [
+    "AmpR terminator"
+  ],
+  "number": 1
+},
+  "12382_addgene_out.xml": {
+  "time": 10693.44,
+  "peak_memory": 811.93,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR terminator"
+  ],
+  "number": 2
+},
+  "115466_addgene_out.xml": {
+  "time": 14435.32,
+  "peak_memory": 812.97,
+  "new_elements": [
+    "AmpR promoter",
+    "ColE1",
+    "R0010"
+  ],
+  "number": 3
+},
+  "19743_addgene_out.xml": {
+  "time": 11985.91,
+  "peak_memory": 810.84,
+  "new_elements": [],
+  "number": 0
+},
+  "87597_addgene_out.xml": {
+  "time": 14702.15,
+  "peak_memory": 812.57,
+  "new_elements": [
+    "AmpR terminator",
+    "ColE1",
+    "R0010"
+  ],
+  "number": 3
+},
+  "140869_addgene_out.xml": {
+  "time": 12840.85,
+  "peak_memory": 811.9,
+  "new_elements": [],
+  "number": 0
+},
+  "169321_addgene_out.xml": {
+  "time": 14800.59,
+  "peak_memory": 811.33,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR terminator"
+  ],
+  "number": 2
+},
+  "72974_addgene_out.xml": {
+  "time": 12410.33,
+  "peak_memory": 811.11,
+  "new_elements": [
+    "BBa_B0062-R",
+    "BBa_B0057"
+  ],
+  "number": 2
+},
+  "107656_addgene_out.xml": {
+  "time": 12441.24,
+  "peak_memory": 811.71,
+  "new_elements": [],
+  "number": 0
+},
+  "164481_addgene_out.xml": {
+  "time": 14667.93,
+  "peak_memory": 812.38,
+  "new_elements": [
+    "AmpR promoter",
+    "ColE1"
+  ],
+  "number": 2
+},
+  "109140_addgene_out.xml": {
+  "time": 11106.69,
+  "peak_memory": 812.86,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR terminator",
+    "ColE1",
+    "R0010"
+  ],
+  "number": 4
+},
+  "125463_addgene_out.xml": {
+  "time": 14738.45,
+  "peak_memory": 813.49,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR terminator",
+    "ColE1",
+    "R0010"
+  ],
+  "number": 4
+},
+  "83932_addgene_out.xml": {
+  "time": 13014.46,
+  "peak_memory": 813.02,
+  "new_elements": [
+    "AmpR promoter",
+    "ColE1",
+    "R0010"
+  ],
+  "number": 3
+},
+  "163920_addgene_out.xml": {
+  "time": 14409.25,
+  "peak_memory": 812.34,
+  "new_elements": [
+    "AmpR promoter",
+    "ColE1",
+    "R0010"
+  ],
+  "number": 3
+},
+  "71854_addgene_out.xml": {
+  "time": 12407.19,
+  "peak_memory": 810.84,
+  "new_elements": [],
+  "number": 0
+},
+  "102254_addgene_out.xml": {
+  "time": 14469.26,
+  "peak_memory": 812.24,
+  "new_elements": [
+    "AmpR terminator",
+    "ColE1"
+  ],
+  "number": 2
+},
+  "104764_addgene_out.xml": {
+  "time": 12843.27,
+  "peak_memory": 811.4,
+  "new_elements": [],
+  "number": 0
+},
+  "84328_addgene_out.xml": {
+  "time": 14545.14,
+  "peak_memory": 812.06,
+  "new_elements": [
+    "AmpR terminator"
+  ],
+  "number": 1
+},
+  "176697_addgene_out.xml": {
+  "time": 12693.59,
+  "peak_memory": 811.48,
+  "new_elements": [
+    "AmpR promoter"
+  ],
+  "number": 1
+},
+  "146469_addgene_out.xml": {
+  "time": 12715.36,
+  "peak_memory": 811.19,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR terminator"
+  ],
+  "number": 2
+},
+  "61616_addgene_out.xml": {
+  "time": 14725.82,
+  "peak_memory": 811.86,
+  "new_elements": [
+    "AmpR promoter",
+    "ColE1"
+  ],
+  "number": 2
+},
+  "170211_addgene_out.xml": {
+  "time": 13213.93,
+  "peak_memory": 813.14,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR terminator",
+    "ColE1",
+    "R0010"
+  ],
+  "number": 4
+},
+  "134577_addgene_out.xml": {
+  "time": 12680.0,
+  "peak_memory": 812.06,
+  "new_elements": [],
+  "number": 0
+},
+  "149467_addgene_out.xml": {
+  "time": 14617.97,
+  "peak_memory": 811.74,
+  "new_elements": [
+    "AmpR promoter",
+    "L3S3P21"
+  ],
+  "number": 2
+},
+  "58788_addgene_out.xml": {
+  "time": 13062.37,
+  "peak_memory": 812.2,
+  "new_elements": [
+    "AmpR promoter",
+    "R0010",
+    "AmpR terminator",
+    "ColE1"
+  ],
+  "number": 4
+},
+  "84797_addgene_out.xml": {
+  "time": 12488.85,
+  "peak_memory": 811.09,
+  "new_elements": [],
+  "number": 0
+},
+  "92174_addgene_out.xml": {
+  "time": 10990.58,
+  "peak_memory": 812.51,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR terminator",
+    "ColE1",
+    "Tagtef1"
+  ],
+  "number": 4
+},
+  "113417_addgene_out.xml": {
+  "time": 14636.08,
+  "peak_memory": 812.28,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR terminator",
+    "ColE1"
+  ],
+  "number": 3
+},
+  "83762_addgene_out.xml": {
+  "time": 12975.94,
+  "peak_memory": 812.54,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR terminator",
+    "R0010"
+  ],
+  "number": 3
+},
+  "20982_addgene_out.xml": {
+  "time": 12387.97,
+  "peak_memory": 810.92,
+  "new_elements": [],
+  "number": 0
+},
+  "86551_addgene_out.xml": {
+  "time": 12699.23,
+  "peak_memory": 811.06,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR terminator",
+    "ColE1"
+  ],
+  "number": 3
+},
+  "130514_addgene_out.xml": {
+  "time": 12876.11,
+  "peak_memory": 811.75,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR terminator",
+    "ColE1"
+  ],
+  "number": 3
+},
+  "172416_addgene_out.xml": {
+  "time": 13187.7,
+  "peak_memory": 812.71,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR terminator",
+    "ColE1",
+    "R0010"
+  ],
+  "number": 4
+},
+  "106863_addgene_out.xml": {
+  "time": 10698.13,
+  "peak_memory": 811.62,
+  "new_elements": [
+    "AmpR promoter"
+  ],
+  "number": 1
+},
+  "26933_addgene_out.xml": {
+  "time": 14443.91,
+  "peak_memory": 811.37,
+  "new_elements": [
+    "AmpR terminator"
+  ],
+  "number": 1
+},
+  "63304_addgene_out.xml": {
+  "time": 12331.58,
+  "peak_memory": 811.03,
+  "new_elements": [],
+  "number": 0
+},
+  "62411_addgene_out.xml": {
+  "time": 14184.23,
+  "peak_memory": 811.26,
+  "new_elements": [
+    "AmpR promoter",
+    "ColE1"
+  ],
+  "number": 2
+},
+  "47398_addgene_out.xml": {
+  "time": 12752.6,
+  "peak_memory": 811.06,
+  "new_elements": [
+    "AmpR terminator"
+  ],
+  "number": 1
+},
+  "48973_addgene_out.xml": {
+  "time": 12485.18,
+  "peak_memory": 810.96,
+  "new_elements": [],
+  "number": 0
+},
+  "131728_addgene_out.xml": {
+  "time": 13081.01,
+  "peak_memory": 813.02,
+  "new_elements": [
+    "AmpR promoter",
+    "ColE1",
+    "R0010"
+  ],
+  "number": 3
+},
+  "135474_addgene_out.xml": {
+  "time": 10883.62,
+  "peak_memory": 811.95,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR terminator"
+  ],
+  "number": 2
+},
+  "53516_addgene_out.xml": {
+  "time": 14058.97,
+  "peak_memory": 810.95,
+  "new_elements": [],
+  "number": 0
+},
+  "169722_addgene_out.xml": {
+  "time": 15201.43,
+  "peak_memory": 811.92,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR terminator",
+    "ColE1",
+    "R0010"
+  ],
+  "number": 4
+},
+  "91439_addgene_out.xml": {
+  "time": 10991.85,
+  "peak_memory": 812.1,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR terminator"
+  ],
+  "number": 2
+},
+  "46279_addgene_out.xml": {
+  "time": 14579.97,
+  "peak_memory": 812.1,
+  "new_elements": [
+    "AmpR terminator"
+  ],
+  "number": 1
+},
+  "175094_addgene_out.xml": {
+  "time": 12775.15,
+  "peak_memory": 811.58,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR terminator"
+  ],
+  "number": 2
+},
+  "139712_addgene_out.xml": {
+  "time": 15108.13,
+  "peak_memory": 811.77,
+  "new_elements": [
+    "R0010"
+  ],
+  "number": 1
+},
+  "108546_addgene_out.xml": {
+  "time": 12872.66,
+  "peak_memory": 812.09,
+  "new_elements": [
+    "AmpR promoter",
+    "R0010",
+    "AmpR terminator",
+    "ColE1"
+  ],
+  "number": 4
+},
+  "121977_addgene_out.xml": {
+  "time": 12514.59,
+  "peak_memory": 811.56,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR terminator",
+    "ColE1"
+  ],
+  "number": 3
+},
+  "22892_addgene_out.xml": {
+  "time": 14195.33,
+  "peak_memory": 810.96,
+  "new_elements": [],
+  "number": 0
+},
+  "106103_addgene_out.xml": {
+  "time": 10888.02,
+  "peak_memory": 811.62,
+  "new_elements": [],
+  "number": 0
+},
+  "60975_addgene_out.xml": {
+  "time": 14723.27,
+  "peak_memory": 811.78,
+  "new_elements": [
+    "AmpR promoter",
+    "ColE1",
+    "R0010"
+  ],
+  "number": 3
+},
+  "104108_addgene_out.xml": {
+  "time": 12748.23,
+  "peak_memory": 811.78,
+  "new_elements": [
+    "AmpR promoter",
+    "ColE1",
+    "R0010"
+  ],
+  "number": 3
+},
+  "124838_addgene_out.xml": {
+  "time": 14812.73,
+  "peak_memory": 812.75,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR terminator",
+    "ColE1",
+    "R0010"
+  ],
+  "number": 4
+},
+  "61825_addgene_out.xml": {
+  "time": 12851.92,
+  "peak_memory": 811.46,
+  "new_elements": [
+    "BBa_B0010",
+    "ECK120051383"
+  ],
+  "number": 2
+},
+  "120339_addgene_out.xml": {
+  "time": 12710.25,
+  "peak_memory": 811.61,
+  "new_elements": [
+    "ColE1"
+  ],
+  "number": 1
+},
+  "129005_addgene_out.xml": {
+  "time": 15114.72,
+  "peak_memory": 812.17,
+  "new_elements": [
+    "mRuby2",
+    "tENO1",
+    "pRPL18B",
+    "tSSA1",
+    "tADH1",
+    "URA3 promoter",
+    "URA3 terminator",
+    "URA3 3' Homology",
+    "ColE1",
+    "URA3 5' Homology",
+    "pTEF1",
+    "KanR promoter"
+  ],
+  "number": 12
+},
+  "101104_addgene_out.xml": {
+  "time": 13079.42,
+  "peak_memory": 812.15,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR terminator"
+  ],
+  "number": 2
+},
+  "121539_addgene_out.xml": {
+  "time": 10981.11,
+  "peak_memory": 811.99,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR terminator"
+  ],
+  "number": 2
+},
+  "147462_addgene_out.xml": {
+  "time": 14693.42,
+  "peak_memory": 811.63,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR terminator"
+  ],
+  "number": 2
+}
+}
