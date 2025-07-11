@@ -17,7 +17,6 @@ class SAMFeatureMapper:
 
     def parse_cigar_for_query_coords(self, read):
         cigar_tuples = read.cigartuples
-        #print("cigar_tuples: ", cigar_tuples)
         query_len = 0
         query_consuming_ops = {0, 1, 7, 8}  # M, I, =, X
 
@@ -44,9 +43,6 @@ class SAMFeatureMapper:
 
         samfile = pysam.AlignmentFile(self.sam_path, "r")
         for read in samfile.fetch(until_eof=True):
-            if read.mapping_quality < self.min_mapq:
-                continue
-
             try:
                 reference_name, start, end = self.parse_cigar_for_query_coords(read)
                 #ref_name = samfile.get_reference_name(read.reference_id)
