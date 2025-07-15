@@ -37,7 +37,7 @@ def test_annotate(feature_docs, feature_library, doc):
     bwa.align(doc, output_sam_path, exact_match=False)
 
     mapper = SAMFeatureMapper('aligned.sam')
-    inline_matches, rc_matches = mapper.extract_matches()
+    inline_matches, rc_matches = mapper.extract_matches(True)
     simple = FeatureAnnotatorSimple(feature_library, inline_matches, rc_matches)
 
     #doc = load_sbol("/home/sophia/git_repo/SYNBICT/example/add_gene/100005_addgene_out.xml")

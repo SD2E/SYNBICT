@@ -606,10 +606,10 @@ class FeatureLibrary():
             seqs = cls.get_DNA_sequences(comp_definition, source_doc)
         else:
             seqs = cls.get_sequences(comp_definition, source_doc)
-        print("min_seq_length: ", min_seq_length)
+        #print("min_seq_length: ", min_seq_length)
         if min_seq_length == 0 or (len(seqs) > 0 and len(seqs[0].elements) >= min_seq_length):
             namespace = '/'.join(comp_definition.identity.split('/')[:-2])
-            print("import_namespace: ", import_namespace)
+            #print("import_namespace: ", import_namespace)
             if import_namespace:
                 if namespace == sbol2.getHomespace():
                     try:
@@ -618,7 +618,7 @@ class FeatureLibrary():
                         return None
 
                     try:
-                        print("namespace: ", namespace)
+                        #print("namespace: ", namespace)
                         definition_copy = comp_definition.copy(sink_doc, namespace, str(version + 1))
                     except RuntimeError:
                         return sink_doc.getComponentDefinition('/'.join([sbol2.getHomespace(),
@@ -657,10 +657,10 @@ class FeatureLibrary():
                 if make_variant:
                     cls.make_variant_definition(sink_doc, definition_copy)
             else:
-                print("Else")
+                #print("Else")
                 try:
                     sink_doc.getComponentDefinition(comp_definition.identity)
-                    print("Sink doc has comp def")
+                    #print("Sink doc has comp def")
                     return None
                 except RuntimeError:
                     definition_copy = comp_definition.copy(sink_doc)
@@ -669,7 +669,7 @@ class FeatureLibrary():
                         definition_copy = comp_definition.copy(sink_doc)
                     else:
                         raise
-            print("Run to here")
+            #print("Run to here")
             if shallow_copy:
                 definition_copy.sequences = list(comp_definition.sequences)
             elif import_sequences:
@@ -882,7 +882,7 @@ class FeatureAnnotater():
                                                       sub_comp.identity)
 
                     if copy_definitions:
-                        print("is this called?")
+                        #print("is this called?")
                         feature_doc = self.feature_library.get_document(feature.identity)
 
                         FeatureLibrary.copy_component_definition(feature_definition, feature_doc, target_doc)
@@ -1031,7 +1031,7 @@ class FeatureAnnotater():
 
         for target in target_library.features:
             if self.__has_min_length(target, min_target_length):
-                print("Logic 1")
+                #print("Logic 1")
                 self.logger.info('Annotating %s', target.identity)
 
                 inline_elements = ' '.join(target.nucleotides)
@@ -1041,7 +1041,7 @@ class FeatureAnnotater():
                 rc_matches = self.feature_matcher.extract_keywords(rc_elements, span_info=True)
 
                 if len(inline_matches) > 0 or len(rc_matches) > 0:
-                    print("Logic 1.1")
+                    #print("Logic 1.1")
                     target_doc = target_library.get_document(target.identity)
 
                     target_definition = target_doc.getComponentDefinition(target.identity)
@@ -1049,11 +1049,11 @@ class FeatureAnnotater():
                     doc_index = target_library.get_document_index(target.identity)
                     
                     if output_library and doc_index < len(output_library.docs):
-                        print("logic 1.1.1")
+                        #print("logic 1.1.1")
                         output_doc = output_library.docs[doc_index]
 
                         if in_place:
-                            print("logic 1.1.1.1")
+                            #print("logic 1.1.1.1")
                             definition_copy = FeatureLibrary.copy_component_definition(target_definition,
                                                                                        target_doc,
                                                                                        output_doc,
@@ -1061,7 +1061,7 @@ class FeatureAnnotater():
                                                                                        shallow_copy=True,
                                                                                        strip_prefixes=strip_prefixes)
                         else:
-                            print("logic 1.1.1.2")
+                            #print("logic 1.1.1.2")
                             definition_copy = FeatureLibrary.copy_component_definition(target_definition,
                                                                                        target_doc,
                                                                                        output_doc, True,
@@ -1069,17 +1069,17 @@ class FeatureAnnotater():
                                                                                        shallow_copy=True,
                                                                                        strip_prefixes=strip_prefixes)
                     elif in_place:
-                        print("logic 1.1.2")
+                        #print("logic 1.1.2")
                         definition_copy = target_definition
                     else:
-                        print("logic 1.1.3")
+                        #print("logic 1.1.3")
                         definition_copy = FeatureLibrary.copy_component_definition(target_definition, target_doc,
                                                                                    target_doc, True,
                                                                                    min_target_length,
                                                                                    strip_prefixes=strip_prefixes)
 
                     if definition_copy:
-                        print("logic 2")
+                        #print("logic 2")
                         copy_definitions = (not output_library or doc_index >= len(output_library.docs))
 
                         output_match_list = self.__process_feature_matches(target_doc,
@@ -1103,16 +1103,16 @@ class FeatureAnnotater():
 
                         annotated_identities.append(definition_copy.identity)
                     else:
-                        print("logic 2.1")
+                        #print("logic 2.1")
                         self.logger.warning('%s was not annotated because its version could not be incremented.',
                                         target.identity)
 
                 self.logger.info('Finished annotating %s', target.identity)
         if output_matches:
-            print("logic 3")
+            #print("logic 3")
             return annotated_identities, output_match_lists
         else:
-            print("logic 3.1")
+            #print("logic 3.1")
             return annotated_identities
 
 class FeaturePruner():
