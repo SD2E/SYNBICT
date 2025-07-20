@@ -1,0 +1,64 @@
+python -m memory_profiler test_memory_profile_alternative.py 
+WARNING:synbict:https://synbiohub.programmingbiology.org/public/Cello_Parts/YFP_reporter/1 not loaded since its DNA sequence was not found
+[M::mm_idx_gen::0.067*1.00] collected minimizers
+[M::mm_idx_gen::0.085*1.33] sorted minimizers
+[M::main::0.109*1.26] loaded/built the index for 4889 target sequence(s)
+[M::mm_idx_stat] kmer size: 15; skip: 10; is_hpc: 0; #seq: 4889
+[M::mm_idx_stat::0.114*1.24] distinct minimizers: 411935 (97.19% are singletons); average occurrences: 1.044; average spacing: 5.552; total length: 2386783
+[M::main] Version: 2.29-r1283
+[M::main] CMD: minimap2 -d test.mmi test.fasta
+[M::main] Real time: 0.119 sec; CPU: 0.147 sec; Peak RSS: 0.679 GB
+annotation:  https://synbioks.org/public/MoClo_Yeast_Toolkit_Dueber_Lab/AmpR_u32_terminator/1 11961 12092
+annotation:  https://synbioks.org/public/MoClo_Yeast_Toolkit_Dueber_Lab/AmpR_u32_promoter/1 12950 13047
+Filename: test_memory_profile_alternative.py
+
+Line #    Mem usage    Increment  Occurrences   Line Contents
+=============================================================
+    24    691.6 MiB    691.6 MiB           1   @profile
+    25                                         def test_annotate(feature_docs, feature_library, doc):
+    26    694.8 MiB      3.1 MiB           1       tmp = FeatureExtractor(feature_docs)
+    27    694.8 MiB      0.0 MiB           1       fasta_path = 'test.fasta' #'/home/sophia/git_repo/SYNBICT/example/test.fasta'
+    28    694.8 MiB      0.0 MiB           1       index_prefix = 'test'
+    29    694.9 MiB      0.1 MiB           1       tmp.write_fasta(fasta_path)
+    30                                             #tmp.write_metadata('test_metadata.json') # '/home/sophia/git_repo/SYNBICT/example/test_metadata.json'
+    31    694.9 MiB      0.0 MiB           1       tmp.build_index(fasta_path, index_prefix, tool='minimap2')
+    32                                         
+    33                                             
+    34    694.9 MiB      0.0 MiB           1       index_prefix = 'test'
+    35    694.9 MiB      0.0 MiB           1       minimap2 = Minimap2Aligner(index_prefix)
+    36    694.9 MiB      0.0 MiB           1       output_sam_path = 'aligned.sam'
+    37    694.9 MiB      0.0 MiB           1       minimap2.align(doc, output_sam_path, exact_match=True)
+    38                                         
+    39    694.9 MiB      0.0 MiB           1       mapper = SAMFeatureMapper('aligned.sam')
+    40    697.4 MiB      2.5 MiB           1       inline_matches, rc_matches = mapper.extract_matches(True)
+    41    697.4 MiB      0.0 MiB           1       simple = FeatureAnnotatorSimple(feature_library, inline_matches, rc_matches)
+    42                                         
+    43                                             #doc = load_sbol("/home/sophia/git_repo/SYNBICT/example/add_gene/100005_addgene_out.xml")
+    44                                             # doc is target_doc
+    45    697.4 MiB      0.0 MiB           1       target_library = FeatureLibrary([doc], False)
+    46    697.4 MiB      0.0 MiB           1       output_docs = []
+    47    697.4 MiB      0.0 MiB           1       output_library = FeatureLibrary(output_docs, False) # 
+    48    697.4 MiB      0.0 MiB           1       simple.annotate(inline_matches, rc_matches, target_library, 40, in_place=True, output_library=output_library, output_matches=False)
+
+
+Design........................0
+Build.........................0
+Test..........................0
+Analysis......................0
+ComponentDefinition...........3
+ModuleDefinition..............0
+Model.........................0
+Sequence......................3
+Collection....................0
+Activity......................0
+Plan..........................0
+Agent.........................0
+Attachment....................0
+CombinatorialDerivation.......0
+Implementation................0
+SampleRoster..................0
+Experiment....................0
+ExperimentalData..............0
+Annotation Objects............2
+---
+Total: .........................8
