@@ -39,15 +39,15 @@ class SAMFeatureMapper:
         return read.reference_name, query_start, query_end
 
     def extract_matches(self, exact_match=True):
-        samfile = pysam.AlignmentFile(self.sam_path, "r")
-        for read in samfile.fetch(until_eof=True):
-            try:
-                if read.query_sequence is None:
-                    continue
+        try:
+            samfile = pysam.AlignmentFile(self.sam_path, "r")
+            for read in samfile.fetch(until_eof=True):
                 if(exact_match):
                     if not (read.has_tag("NM") and read.get_tag("NM") == 0):
                         continue
                 reference_name, start, end = self.parse_cigar_for_query_coords(read)
+
+                print("annotation: ", reference_name, start, end)
                 #ref_name = samfile.get_reference_name(read.reference_id)
                 #feature_pre = self.metadata_dict.get(ref_name)
                 #print("feature_pre: ", feature_pre)
@@ -63,14 +63,14 @@ class SAMFeatureMapper:
                     #sub_identities=feature_pre.get('sub_identities', []),
                     #parent_identities=feature_pre.get('parent_identities', [])
                     )
-                
+                    
                 match = ([feature], start, end)
                 if read.is_reverse:
                     self.rc_matches.append(match)
                 else:
                     self.inline_matches.append(match)
-            except Exception as e:
-                print("Failed to process read:", read.query_name, "Error:", e)
+        except Exception as e:
+            print("Failed to process read:", read.query_name, "Error:", e)
 
         return self.inline_matches, self.rc_matches
 
