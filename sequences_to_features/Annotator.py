@@ -47,7 +47,7 @@ class SAMFeatureMapper:
                         continue
                 reference_name, start, end = self.parse_cigar_for_query_coords(read)
 
-                print("annotation: ", reference_name, start, end)
+                #print("annotation: ", reference_name, start, end)
                 #ref_name = samfile.get_reference_name(read.reference_id)
                 #feature_pre = self.metadata_dict.get(ref_name)
                 #print("feature_pre: ", feature_pre)

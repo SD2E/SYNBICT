@@ -12,7 +12,7 @@ class BwaAligner(Aligner):
         with tempfile.NamedTemporaryFile(mode='w+', suffix='.fasta', delete=False) as fasta_file:
             fasta_path = fasta_file.name
             seq = sbol_sequence(query_sbol)
-            fasta_file.write(f">query_sequence\n{seq}\n") #'bwa', 'mem', '-B', '100', '-O', '100', '-E', '100',
+            fasta_file.write(f">query_sequence\n{seq}\n")
         with open(output_sam_path, 'w') as out_sam, open(output_sam_path + '.log', 'w') as err_log:
             if(exact_match):
                 subprocess.run(

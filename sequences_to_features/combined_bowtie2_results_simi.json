@@ -1,0 +1,1691 @@
+{
+  "127789_addgene_out.xml": {
+  "time": 786.25,
+  "peak_memory": 0.37,
+  "new_elements": [
+    "KanR",
+    "KanR",
+    "ColE1",
+    "AmpR terminator",
+    "LacI-M",
+    "LacI",
+    "LacI",
+    "C0012m",
+    "NAT",
+    "KanamycinR",
+    "R0010",
+    "treRT-LAA",
+    "KanR promoter"
+  ],
+  "number": 13
+},
+  "19939_addgene_out.xml": {
+  "time": 87.75,
+  "peak_memory": 0.07,
+  "new_elements": [],
+  "number": 0
+},
+  "75176_addgene_out.xml": {
+  "time": 436.91,
+  "peak_memory": 0.44,
+  "new_elements": [
+    "KanR",
+    "KanR",
+    "ColE1",
+    "KanamycinR",
+    "NAT",
+    "KanR promoter",
+    "LacI",
+    "LacI",
+    "LacI-M",
+    "R0010",
+    "C0012m",
+    "BBa_B0010",
+    "Bba_B0015",
+    "B0015",
+    "ECK120051382",
+    "ECK120051383"
+  ],
+  "number": 16
+},
+  "102356_addgene_out.xml": {
+  "time": 503.07,
+  "peak_memory": 0.33,
+  "new_elements": [
+    "AmpR",
+    "AmpR",
+    "AmpR promoter",
+    "mScarlet",
+    "mScarlet",
+    "ColE1",
+    "LacI",
+    "LacI",
+    "LacI-M",
+    "R0010",
+    "AmpR terminator",
+    "C0012m"
+  ],
+  "number": 12
+},
+  "12641_addgene_out.xml": {
+  "time": 93.84,
+  "peak_memory": 0.06,
+  "new_elements": [],
+  "number": 0
+},
+  "62228_addgene_out.xml": {
+  "time": 1101.04,
+  "peak_memory": 0.34,
+  "new_elements": [
+    "AmpR promoter",
+    "URA3 promoter",
+    "AmpR",
+    "AmpR",
+    "URA3",
+    "pGAL1",
+    "URA3 terminator",
+    "2micron",
+    "HIS3",
+    "ColE1",
+    "HIS3 Promoter",
+    "AmpR terminator"
+  ],
+  "number": 12
+},
+  "105368_addgene_out.xml": {
+  "time": 256.7,
+  "peak_memory": 0.27,
+  "new_elements": [
+    "AmpR promoter",
+    "SpecR",
+    "ColE1",
+    "ColE1",
+    "AmpR terminator",
+    "C0012m",
+    "LacI",
+    "LacI",
+    "LacI-M",
+    "R0010"
+  ],
+  "number": 10
+},
+  "153353_addgene_out.xml": {
+  "time": 355.84,
+  "peak_memory": 0.36,
+  "new_elements": [
+    "KanR",
+    "KanR",
+    "BBa_B0053",
+    "BBa_B0062-R",
+    "ColE1",
+    "NAT",
+    "KanamycinR",
+    "AmpR promoter",
+    "CamR Terminator",
+    "CamR Promoter",
+    "CamR Promoter",
+    "BBa_B0057",
+    "BBa_B0052"
+  ],
+  "number": 13
+},
+  "136905_addgene_out.xml": {
+  "time": 562.78,
+  "peak_memory": 0.29,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR",
+    "AmpR",
+    "ColE1",
+    "R0010",
+    "AmpR terminator",
+    "LacI-M",
+    "LacI",
+    "LacI",
+    "C0012m"
+  ],
+  "number": 10
+},
+  "166117_addgene_out.xml": {
+  "time": 567.11,
+  "peak_memory": 0.29,
+  "new_elements": [
+    "AmpR promoter",
+    "E0030",
+    "deGFP",
+    "YFP",
+    "yEGFP_Sec",
+    "yEGFP",
+    "ColE1",
+    "deCFP",
+    "eBFP2",
+    "AmpR terminator"
+  ],
+  "number": 10
+},
+  "10736_addgene_out.xml": {
+  "time": 251.35,
+  "peak_memory": 0.15,
+  "new_elements": [
+    "AmpR",
+    "AmpR",
+    "AmpR promoter",
+    "ColE1",
+    "AmpR terminator"
+  ],
+  "number": 5
+},
+  "157212_addgene_out.xml": {
+  "time": 264.64,
+  "peak_memory": 0.13,
+  "new_elements": [
+    "AmpR",
+    "AmpR",
+    "ColE1",
+    "AmpR terminator"
+  ],
+  "number": 4
+},
+  "61372_addgene_out.xml": {
+  "time": 364.97,
+  "peak_memory": 0.44,
+  "new_elements": [
+    "KanR",
+    "KanR",
+    "ColE1",
+    "NAT",
+    "KanamycinR",
+    "KanR promoter",
+    "LacI",
+    "LacI",
+    "LacI-M",
+    "R0010",
+    "C0012m",
+    "BBa_B0010",
+    "B0015",
+    "Bba_B0015",
+    "ECK120051382",
+    "ECK120051383"
+  ],
+  "number": 16
+},
+  "61493_addgene_out.xml": {
+  "time": 70.7,
+  "peak_memory": 0.06,
+  "new_elements": [],
+  "number": 0
+},
+  "114666_addgene_out.xml": {
+  "time": 647.93,
+  "peak_memory": 0.41,
+  "new_elements": [
+    "AmpR",
+    "AmpR",
+    "URA3 promoter",
+    "URA3",
+    "AmpR promoter",
+    "Cerulean",
+    "E0040m",
+    "URA3 terminator",
+    "ColE1",
+    "R0010",
+    "LacI-M",
+    "LacI",
+    "LacI",
+    "AmpR terminator",
+    "C0012m"
+  ],
+  "number": 15
+},
+  "91583_addgene_out.xml": {
+  "time": 298.25,
+  "peak_memory": 0.36,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR",
+    "AmpR",
+    "gN2 gRNA",
+    "gV1 Cas9 gRNA",
+    "gQi Cas9 gRNA",
+    "ColE1",
+    "R0010",
+    "LacI",
+    "LacI",
+    "LacI-M",
+    "AmpR terminator",
+    "C0012m"
+  ],
+  "number": 13
+},
+  "104748_addgene_out.xml": {
+  "time": 718.88,
+  "peak_memory": 0.37,
+  "new_elements": [
+    "KanR",
+    "KanR",
+    "ColE1",
+    "AmpR terminator",
+    "LacI",
+    "LacI",
+    "C0012m",
+    "LacI-M",
+    "KanamycinR",
+    "NAT",
+    "treRT-LAA",
+    "R0010",
+    "KanR promoter"
+  ],
+  "number": 13
+},
+  "62145_addgene_out.xml": {
+  "time": 867.75,
+  "peak_memory": 0.92,
+  "new_elements": [
+    "KanR",
+    "KanR",
+    "ColE1",
+    "yEGFP",
+    "E0030",
+    "NAT",
+    "KanamycinR",
+    "yEGFP_Sec",
+    "deGFP",
+    "deCFP",
+    "YFP",
+    "eBFP2",
+    "KanR promoter",
+    "LacI",
+    "LacI",
+    "LacI-M",
+    "R0010",
+    "sfCFP",
+    "C0012m",
+    "sfCFP-LAA)",
+    "sfCFPpdt3",
+    "sfGFP",
+    "sfGFP",
+    "sfYFP-AAV-ssrA",
+    "sfYFP-pdt3",
+    "sfYFP",
+    "sfYFP-ssrA",
+    "sfYFP-DAS-ssrA",
+    "NahR-sfGFP fusion",
+    "BBa_B0010",
+    "B0015",
+    "Bba_B0015",
+    "ECK120051382",
+    "ECK120051383"
+  ],
+  "number": 34
+},
+  "159682_addgene_out.xml": {
+  "time": 445.54,
+  "peak_memory": 0.29,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR",
+    "AmpR",
+    "ColE1",
+    "LacI",
+    "LacI",
+    "LacI-M",
+    "R0010",
+    "AmpR terminator",
+    "C0012m"
+  ],
+  "number": 10
+},
+  "136143_addgene_out.xml": {
+  "time": 385.3,
+  "peak_memory": 0.32,
+  "new_elements": [
+    "C0012m",
+    "LacI",
+    "LacI",
+    "LacI-M",
+    "CamR",
+    "ChlorR",
+    "R0010",
+    "CamR Promoter",
+    "CamR Promoter",
+    "ColE1",
+    "treRT-LAA"
+  ],
+  "number": 11
+},
+  "154908_addgene_out.xml": {
+  "time": 333.16,
+  "peak_memory": 0.21,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR",
+    "AmpR",
+    "ColE1",
+    "AmpR terminator",
+    "SpecR",
+    "SpecR Promoter"
+  ],
+  "number": 7
+},
+  "127277_addgene_out.xml": {
+  "time": 425.56,
+  "peak_memory": 0.29,
+  "new_elements": [
+    "AmpR",
+    "AmpR",
+    "AmpR promoter",
+    "ColE1",
+    "LacI",
+    "LacI",
+    "LacI-M",
+    "R0010",
+    "AmpR terminator",
+    "C0012m"
+  ],
+  "number": 10
+},
+  "154115_addgene_out.xml": {
+  "time": 505.42,
+  "peak_memory": 0.31,
+  "new_elements": [
+    "AmpR",
+    "AmpR",
+    "AmpR promoter",
+    "HygromycinR",
+    "ColE1",
+    "R0010",
+    "AmpR terminator",
+    "LacI-M",
+    "LacI",
+    "LacI",
+    "C0012m"
+  ],
+  "number": 11
+},
+  "147521_addgene_out.xml": {
+  "time": 490.34,
+  "peak_memory": 0.36,
+  "new_elements": [
+    "AmpR",
+    "AmpR",
+    "AmpR promoter",
+    "LacI-M",
+    "C0012m",
+    "LacI",
+    "LacI",
+    "ColE1",
+    "R0010",
+    "AmpR terminator",
+    "treRT-LAA",
+    "PTac",
+    "pTac"
+  ],
+  "number": 13
+},
+  "159629_addgene_out.xml": {
+  "time": 338.22,
+  "peak_memory": 0.21,
+  "new_elements": [
+    "AmpR",
+    "AmpR",
+    "AmpR promoter",
+    "ColE1",
+    "AmpR terminator",
+    "SpecR",
+    "SpecR Promoter"
+  ],
+  "number": 7
+},
+  "157080_addgene_out.xml": {
+  "time": 257.15,
+  "peak_memory": 0.12,
+  "new_elements": [
+    "AmpR",
+    "AmpR",
+    "ColE1",
+    "AmpR terminator"
+  ],
+  "number": 4
+},
+  "32993_addgene_out.xml": {
+  "time": 73.5,
+  "peak_memory": 0.06,
+  "new_elements": [],
+  "number": 0
+},
+  "87620_addgene_out.xml": {
+  "time": 337.62,
+  "peak_memory": 0.29,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR",
+    "AmpR",
+    "ColE1",
+    "LacI",
+    "LacI",
+    "LacI-M",
+    "R0010",
+    "AmpR terminator",
+    "C0012m"
+  ],
+  "number": 10
+},
+  "68783_addgene_out.xml": {
+  "time": 287.11,
+  "peak_memory": 0.28,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR",
+    "AmpR",
+    "R0010",
+    "ColE1",
+    "AmpR terminator",
+    "LacI",
+    "LacI",
+    "LacI-M",
+    "C0012m"
+  ],
+  "number": 10
+},
+  "31671_addgene_out.xml": {
+  "time": 69.17,
+  "peak_memory": 0.06,
+  "new_elements": [],
+  "number": 0
+},
+  "63465_addgene_out.xml": {
+  "time": 150.25,
+  "peak_memory": 0.2,
+  "new_elements": [
+    "BBa_B0010",
+    "B0015",
+    "Bba_B0015",
+    "ECK120051382",
+    "ECK120051383",
+    "SpecR Promoter",
+    "R0010"
+  ],
+  "number": 7
+},
+  "168436_addgene_out.xml": {
+  "time": 478.37,
+  "peak_memory": 0.31,
+  "new_elements": [
+    "AmpR promoter",
+    "2micron",
+    "tADH1",
+    "Tadh1",
+    "ColE1",
+    "LacI",
+    "LacI",
+    "LacI-M",
+    "R0010",
+    "AmpR terminator",
+    "C0012m"
+  ],
+  "number": 11
+},
+  "115218_addgene_out.xml": {
+  "time": 661.11,
+  "peak_memory": 0.31,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR",
+    "AmpR",
+    "ColE1",
+    "AmpR terminator",
+    "LacI-M",
+    "C0012m",
+    "LacI",
+    "LacI",
+    "treRT-LAA",
+    "R0010"
+  ],
+  "number": 11
+},
+  "89572_addgene_out.xml": {
+  "time": 366.28,
+  "peak_memory": 0.29,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR",
+    "AmpR",
+    "ColE1",
+    "LacI",
+    "LacI",
+    "LacI-M",
+    "R0010",
+    "AmpR terminator",
+    "C0012m"
+  ],
+  "number": 10
+},
+  "102622_addgene_out.xml": {
+  "time": 523.02,
+  "peak_memory": 0.37,
+  "new_elements": [
+    "KanR",
+    "KanR",
+    "ColE1",
+    "AmpR terminator",
+    "LacI-M",
+    "LacI",
+    "LacI",
+    "C0012m",
+    "NAT",
+    "KanamycinR",
+    "R0010",
+    "treRT-LAA",
+    "KanR promoter"
+  ],
+  "number": 13
+},
+  "41036_addgene_out.xml": {
+  "time": 457.13,
+  "peak_memory": 0.29,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR",
+    "AmpR",
+    "ColE1",
+    "AmpR terminator",
+    "LacI-M",
+    "LacI",
+    "LacI",
+    "R0010",
+    "C0012m"
+  ],
+  "number": 10
+},
+  "117273_addgene_out.xml": {
+  "time": 458.02,
+  "peak_memory": 0.37,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR",
+    "AmpR",
+    "mScarlet",
+    "E1010m",
+    "mRFP",
+    "ColE1",
+    "LacI",
+    "LacI",
+    "LacI-M",
+    "R0010",
+    "AmpR terminator",
+    "C0012m"
+  ],
+  "number": 13
+},
+  "110114_addgene_out.xml": {
+  "time": 348.33,
+  "peak_memory": 0.18,
+  "new_elements": [
+    "AmpR",
+    "AmpR",
+    "AmpR promoter",
+    "HygromycinR",
+    "ColE1",
+    "AmpR terminator"
+  ],
+  "number": 6
+},
+  "153942_addgene_out.xml": {
+  "time": 255.44,
+  "peak_memory": 0.15,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR",
+    "AmpR",
+    "ColE1",
+    "AmpR terminator"
+  ],
+  "number": 5
+},
+  "162453_addgene_out.xml": {
+  "time": 441.75,
+  "peak_memory": 0.41,
+  "new_elements": [
+    "AmpR promoter",
+    "KanR",
+    "KanR",
+    "KanamycinR",
+    "NAT",
+    "pGAL1",
+    "ColE1",
+    "LacI",
+    "LacI",
+    "LacI-M",
+    "R0010",
+    "C0012m",
+    "AmpR terminator",
+    "CEN6/ARS4",
+    "CEN6/ARS4"
+  ],
+  "number": 15
+},
+  "162427_addgene_out.xml": {
+  "time": 321.35,
+  "peak_memory": 0.28,
+  "new_elements": [
+    "AmpR promoter",
+    "yEGFP",
+    "deCFP",
+    "E0030",
+    "yEGFP_Sec",
+    "YFP",
+    "ColE1",
+    "eBFP2",
+    "deGFP",
+    "AmpR terminator"
+  ],
+  "number": 10
+},
+  "12382_addgene_out.xml": {
+  "time": 528.0,
+  "peak_memory": 0.47,
+  "new_elements": [
+    "KanR",
+    "KanR",
+    "AmpR promoter",
+    "AmpR",
+    "AmpR",
+    "KanamycinR",
+    "NAT",
+    "AgTEF Promoter",
+    "AgTEF Terminator",
+    "Tagtef1",
+    "ColE1",
+    "AmpR terminator",
+    "LacI-M",
+    "LacI",
+    "LacI",
+    "C0012m",
+    "R0010"
+  ],
+  "number": 17
+},
+  "115466_addgene_out.xml": {
+  "time": 409.41,
+  "peak_memory": 0.29,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR",
+    "AmpR",
+    "ColE1",
+    "R0010",
+    "AmpR terminator",
+    "LacI",
+    "LacI",
+    "LacI-M",
+    "C0012m"
+  ],
+  "number": 10
+},
+  "19743_addgene_out.xml": {
+  "time": 68.59,
+  "peak_memory": 0.06,
+  "new_elements": [],
+  "number": 0
+},
+  "87597_addgene_out.xml": {
+  "time": 546.58,
+  "peak_memory": 0.32,
+  "new_elements": [
+    "AmpR promoter",
+    "2micron",
+    "tADH1",
+    "Tadh1",
+    "ColE1",
+    "LacI",
+    "LacI",
+    "LacI-M",
+    "R0010",
+    "C0012m",
+    "AmpR terminator"
+  ],
+  "number": 11
+},
+  "140869_addgene_out.xml": {
+  "time": 316.24,
+  "peak_memory": 0.31,
+  "new_elements": [
+    "KanR",
+    "KanR",
+    "ColE1",
+    "NAT",
+    "KanamycinR",
+    "LacI",
+    "LacI",
+    "LacI-M",
+    "KanR promoter",
+    "R0010",
+    "C0012m"
+  ],
+  "number": 11
+},
+  "169321_addgene_out.xml": {
+  "time": 213.47,
+  "peak_memory": 0.23,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR",
+    "AmpR",
+    "gV1 Cas9 gRNA",
+    "gQi Cas9 gRNA",
+    "gN2 gRNA",
+    "ColE1",
+    "AmpR terminator"
+  ],
+  "number": 8
+},
+  "72974_addgene_out.xml": {
+  "time": 206.25,
+  "peak_memory": 0.25,
+  "new_elements": [
+    "E0040m",
+    "Cerulean",
+    "Citrine",
+    "Venus",
+    "Venus",
+    "mTurquoise2",
+    "BBa_B0062-R",
+    "BBa_B0057",
+    "BBa_B0052"
+  ],
+  "number": 9
+},
+  "107656_addgene_out.xml": {
+  "time": 364.34,
+  "peak_memory": 0.39,
+  "new_elements": [
+    "KanR",
+    "KanR",
+    "ColE1",
+    "KanamycinR",
+    "NAT",
+    "KanR promoter",
+    "LacI",
+    "LacI",
+    "LacI-M",
+    "R0010",
+    "C0012m",
+    "BBa_B0010",
+    "Bba_B0015",
+    "B0015"
+  ],
+  "number": 14
+},
+  "164481_addgene_out.xml": {
+  "time": 329.7,
+  "peak_memory": 0.32,
+  "new_elements": [
+    "AmpR",
+    "AmpR",
+    "AmpR promoter",
+    "ColE1",
+    "R0010",
+    "R0010",
+    "AmpR terminator",
+    "LacI-M",
+    "LacI",
+    "LacI",
+    "C0012m"
+  ],
+  "number": 11
+},
+  "109140_addgene_out.xml": {
+  "time": 608.44,
+  "peak_memory": 0.34,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR",
+    "AmpR",
+    "E0040m",
+    "Cerulean",
+    "ColE1",
+    "AmpR terminator",
+    "LacI",
+    "LacI",
+    "LacI-M",
+    "R0010",
+    "C0012m"
+  ],
+  "number": 12
+},
+  "125463_addgene_out.xml": {
+  "time": 1521.15,
+  "peak_memory": 0.32,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR",
+    "AmpR",
+    "Cas9",
+    "ColE1",
+    "LacI",
+    "LacI",
+    "LacI-M",
+    "AmpR terminator",
+    "R0010",
+    "C0012m"
+  ],
+  "number": 11
+},
+  "83932_addgene_out.xml": {
+  "time": 429.92,
+  "peak_memory": 0.37,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR",
+    "AmpR",
+    "ColE1",
+    "AmpR terminator",
+    "R0010",
+    "LacI",
+    "LacI",
+    "LacI-M",
+    "gN2 gRNA",
+    "gV1 Cas9 gRNA",
+    "gQi Cas9 gRNA",
+    "C0012m"
+  ],
+  "number": 13
+},
+  "163920_addgene_out.xml": {
+  "time": 287.89,
+  "peak_memory": 0.28,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR",
+    "AmpR",
+    "ColE1",
+    "AmpR terminator",
+    "R0010",
+    "LacI-M",
+    "LacI",
+    "LacI",
+    "C0012m"
+  ],
+  "number": 10
+},
+  "71854_addgene_out.xml": {
+  "time": 79.41,
+  "peak_memory": 0.07,
+  "new_elements": [],
+  "number": 0
+},
+  "102254_addgene_out.xml": {
+  "time": 718.83,
+  "peak_memory": 0.59,
+  "new_elements": [
+    "AmpR promoter",
+    "deGFP",
+    "E0030",
+    "yEGFP",
+    "YFP",
+    "deCFP",
+    "ColE1",
+    "yEGFP_Sec",
+    "eBFP2",
+    "AmpR terminator",
+    "sfGFP",
+    "sfGFP",
+    "sfYFP-pdt3",
+    "sfYFP-ssrA",
+    "sfYFP-DAS-ssrA",
+    "sfYFP-AAV-ssrA",
+    "sfYFP",
+    "NahR-sfGFP fusion",
+    "sfCFP",
+    "sfCFP-LAA)",
+    "sfCFPpdt3"
+  ],
+  "number": 21
+},
+  "104764_addgene_out.xml": {
+  "time": 865.12,
+  "peak_memory": 0.43,
+  "new_elements": [
+    "KanR",
+    "KanR",
+    "ColE1",
+    "AmpR terminator",
+    "LacI-M",
+    "LacI-M",
+    "C0012m",
+    "C0012m",
+    "LacI",
+    "LacI",
+    "LacI",
+    "LacI",
+    "NAT",
+    "KanamycinR",
+    "treRT-LAA",
+    "R0010"
+  ],
+  "number": 16
+},
+  "84328_addgene_out.xml": {
+  "time": 281.31,
+  "peak_memory": 0.23,
+  "new_elements": [
+    "AmpR promoter",
+    "ColE1",
+    "mScarlet",
+    "AmpR terminator",
+    "mScarlet-I-pdt3",
+    "mScarlet-I codon optimized",
+    "Bxb1 integrase - mScarlet-i-LAA",
+    "mScarlet-I-LAA"
+  ],
+  "number": 8
+},
+  "176697_addgene_out.xml": {
+  "time": 1036.91,
+  "peak_memory": 0.2,
+  "new_elements": [
+    "AmpR",
+    "AmpR",
+    "AmpR promoter",
+    "ColE1",
+    "AmpR terminator",
+    "SpecR Promoter",
+    "SpecR"
+  ],
+  "number": 7
+},
+  "146469_addgene_out.xml": {
+  "time": 294.1,
+  "peak_memory": 0.15,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR",
+    "AmpR",
+    "ColE1",
+    "AmpR terminator"
+  ],
+  "number": 5
+},
+  "61616_addgene_out.xml": {
+  "time": 602.98,
+  "peak_memory": 0.31,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR",
+    "AmpR",
+    "ColE1",
+    "AmpR terminator",
+    "LacI",
+    "LacI",
+    "C0012m",
+    "LacI-M",
+    "R0010",
+    "R0010"
+  ],
+  "number": 11
+},
+  "170211_addgene_out.xml": {
+  "time": 767.6,
+  "peak_memory": 0.32,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR",
+    "AmpR",
+    "HygromycinR",
+    "ColE1",
+    "AmpR terminator",
+    "LacI",
+    "LacI",
+    "LacI-M",
+    "R0010",
+    "C0012m"
+  ],
+  "number": 11
+},
+  "134577_addgene_out.xml": {
+  "time": 554.55,
+  "peak_memory": 0.37,
+  "new_elements": [
+    "KanR",
+    "KanR",
+    "ColE1",
+    "AmpR terminator",
+    "LacI-M",
+    "C0012m",
+    "LacI",
+    "LacI",
+    "NAT",
+    "KanamycinR",
+    "treRT-LAA",
+    "R0010",
+    "KanR promoter"
+  ],
+  "number": 13
+},
+  "149467_addgene_out.xml": {
+  "time": 553.92,
+  "peak_memory": 0.56,
+  "new_elements": [
+    "mRFP1",
+    "mRFP",
+    "ColE1",
+    "E1010m",
+    "AmpR promoter",
+    "AmpR",
+    "AmpR",
+    "SpecR Promoter",
+    "SpecR",
+    "RiboJ + UTR1",
+    "RiboJ + BCD2",
+    "L3S3P21",
+    "LacI",
+    "LacI",
+    "LacI-M",
+    "ChlorR",
+    "CamR",
+    "R0010",
+    "C0012m"
+  ],
+  "number": 19
+},
+  "58788_addgene_out.xml": {
+  "time": 356.95,
+  "peak_memory": 0.29,
+  "new_elements": [
+    "AmpR",
+    "AmpR",
+    "AmpR promoter",
+    "ColE1",
+    "LacI",
+    "LacI",
+    "LacI-M",
+    "R0010",
+    "AmpR terminator",
+    "C0012m"
+  ],
+  "number": 10
+},
+  "84797_addgene_out.xml": {
+  "time": 79.91,
+  "peak_memory": 0.07,
+  "new_elements": [
+    "AmpR terminator"
+  ],
+  "number": 1
+},
+  "92174_addgene_out.xml": {
+  "time": 492.7,
+  "peak_memory": 0.39,
+  "new_elements": [
+    "AmpR",
+    "AmpR",
+    "AmpR promoter",
+    "CEN6/ARS4",
+    "ColE1",
+    "LacI",
+    "LacI",
+    "LacI-M",
+    "AgTEF Terminator",
+    "AgTEF Promoter",
+    "R0010",
+    "Tagtef1",
+    "AmpR terminator",
+    "C0012m"
+  ],
+  "number": 14
+},
+  "113417_addgene_out.xml": {
+  "time": 381.13,
+  "peak_memory": 0.29,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR",
+    "AmpR",
+    "ColE1",
+    "LacI",
+    "LacI",
+    "LacI-M",
+    "R0010",
+    "AmpR terminator",
+    "C0012m"
+  ],
+  "number": 10
+},
+  "83762_addgene_out.xml": {
+  "time": 611.87,
+  "peak_memory": 0.47,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR",
+    "AmpR",
+    "yEGFP",
+    "E0030",
+    "yEGFP_Sec",
+    "deGFP",
+    "deCFP",
+    "YFP",
+    "eBFP2",
+    "ColE1",
+    "LacI",
+    "LacI",
+    "LacI-M",
+    "R0010",
+    "AmpR terminator",
+    "C0012m"
+  ],
+  "number": 17
+},
+  "20982_addgene_out.xml": {
+  "time": 70.19,
+  "peak_memory": 0.06,
+  "new_elements": [],
+  "number": 0
+},
+  "86551_addgene_out.xml": {
+  "time": 253.1,
+  "peak_memory": 0.28,
+  "new_elements": [
+    "AmpR",
+    "AmpR",
+    "AmpR promoter",
+    "ColE1",
+    "AmpR terminator",
+    "C0012m",
+    "LacI",
+    "LacI",
+    "LacI-M",
+    "R0010"
+  ],
+  "number": 10
+},
+  "130514_addgene_out.xml": {
+  "time": 468.55,
+  "peak_memory": 0.36,
+  "new_elements": [
+    "AmpR",
+    "AmpR",
+    "AmpR promoter",
+    "yEGFP",
+    "E0030",
+    "deCFP",
+    "yEGFP_Sec",
+    "eBFP2",
+    "YFP",
+    "deGFP",
+    "ColE1",
+    "R0010",
+    "AmpR terminator"
+  ],
+  "number": 13
+},
+  "172416_addgene_out.xml": {
+  "time": 512.63,
+  "peak_memory": 0.32,
+  "new_elements": [
+    "AmpR",
+    "AmpR",
+    "AmpR promoter",
+    "HygromycinR",
+    "ColE1",
+    "LacI",
+    "LacI",
+    "LacI-M",
+    "R0010",
+    "AmpR terminator",
+    "C0012m"
+  ],
+  "number": 11
+},
+  "106863_addgene_out.xml": {
+  "time": 289.04,
+  "peak_memory": 0.37,
+  "new_elements": [
+    "AmpR",
+    "AmpR",
+    "AmpR promoter",
+    "gN2 gRNA",
+    "gV1 Cas9 gRNA",
+    "gQi Cas9 gRNA",
+    "ColE1",
+    "AmpR terminator",
+    "R0010",
+    "LacI-M",
+    "C0012m",
+    "LacI",
+    "LacI"
+  ],
+  "number": 13
+},
+  "26933_addgene_out.xml": {
+  "time": 625.3,
+  "peak_memory": 0.41,
+  "new_elements": [
+    "AmpR promoter",
+    "deCFP",
+    "deCFP",
+    "eBFP2",
+    "eBFP2",
+    "yEGFP",
+    "yEGFP",
+    "yEGFP_Sec",
+    "yEGFP_Sec",
+    "YFP",
+    "YFP",
+    "E0030",
+    "E0030",
+    "ColE1",
+    "deGFP",
+    "deGFP",
+    "AmpR terminator"
+  ],
+  "number": 17
+},
+  "63304_addgene_out.xml": {
+  "time": 127.04,
+  "peak_memory": 0.14,
+  "new_elements": [
+    "B0015",
+    "Bba_B0015",
+    "BBa_B0010",
+    "ECK120051382",
+    "SpecR Promoter"
+  ],
+  "number": 5
+},
+  "62411_addgene_out.xml": {
+  "time": 170.92,
+  "peak_memory": 0.15,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR",
+    "AmpR",
+    "ColE1",
+    "AmpR terminator"
+  ],
+  "number": 5
+},
+  "47398_addgene_out.xml": {
+  "time": 98.9,
+  "peak_memory": 0.09,
+  "new_elements": [
+    "AmpR",
+    "AmpR",
+    "AmpR terminator"
+  ],
+  "number": 3
+},
+  "48973_addgene_out.xml": {
+  "time": 154.53,
+  "peak_memory": 0.23,
+  "new_elements": [
+    "mScarlet",
+    "mRFP",
+    "mRFP1",
+    "E1010m",
+    "mScarlet-I-pdt3",
+    "mScarlet-I codon optimized",
+    "Bxb1 integrase - mScarlet-i-LAA",
+    "mScarlet-I-LAA"
+  ],
+  "number": 8
+},
+  "131728_addgene_out.xml": {
+  "time": 434.03,
+  "peak_memory": 0.29,
+  "new_elements": [
+    "AmpR",
+    "AmpR",
+    "AmpR promoter",
+    "ColE1",
+    "R0010",
+    "AmpR terminator",
+    "LacI",
+    "LacI",
+    "LacI-M",
+    "C0012m"
+  ],
+  "number": 10
+},
+  "135474_addgene_out.xml": {
+  "time": 483.81,
+  "peak_memory": 0.49,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR",
+    "AmpR",
+    "ColE1",
+    "ColE1",
+    "AmpR terminator",
+    "LacI-M",
+    "LacI",
+    "LacI",
+    "C0012m",
+    "R0010",
+    "eBFP2",
+    "yEGFP",
+    "E0030",
+    "yEGFP_Sec",
+    "deCFP",
+    "deGFP",
+    "YFP"
+  ],
+  "number": 18
+},
+  "53516_addgene_out.xml": {
+  "time": 70.79,
+  "peak_memory": 0.06,
+  "new_elements": [],
+  "number": 0
+},
+  "169722_addgene_out.xml": {
+  "time": 362.51,
+  "peak_memory": 0.28,
+  "new_elements": [
+    "AmpR",
+    "AmpR",
+    "AmpR promoter",
+    "ColE1",
+    "LacI",
+    "LacI",
+    "LacI-M",
+    "R0010",
+    "AmpR terminator",
+    "C0012m"
+  ],
+  "number": 10
+},
+  "91439_addgene_out.xml": {
+  "time": 553.32,
+  "peak_memory": 0.37,
+  "new_elements": [
+    "AmpR",
+    "AmpR",
+    "AmpR promoter",
+    "C0012m",
+    "LacI",
+    "LacI",
+    "LacI-M",
+    "R0010",
+    "treRT-LAA",
+    "pTac",
+    "PTac",
+    "ColE1",
+    "AmpR terminator"
+  ],
+  "number": 13
+},
+  "46279_addgene_out.xml": {
+  "time": 459.99,
+  "peak_memory": 0.28,
+  "new_elements": [
+    "AmpR promoter",
+    "E0030",
+    "yEGFP",
+    "deCFP",
+    "YFP",
+    "ColE1",
+    "yEGFP_Sec",
+    "eBFP2",
+    "deGFP",
+    "AmpR terminator"
+  ],
+  "number": 10
+},
+  "175094_addgene_out.xml": {
+  "time": 275.69,
+  "peak_memory": 0.15,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR",
+    "AmpR",
+    "ColE1",
+    "AmpR terminator"
+  ],
+  "number": 5
+},
+  "139712_addgene_out.xml": {
+  "time": 535.14,
+  "peak_memory": 0.14,
+  "new_elements": [
+    "R0010",
+    "LacI-M",
+    "LacI",
+    "ColE1"
+  ],
+  "number": 4
+},
+  "108546_addgene_out.xml": {
+  "time": 420.93,
+  "peak_memory": 0.28,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR",
+    "AmpR",
+    "ColE1",
+    "R0010",
+    "AmpR terminator",
+    "LacI-M",
+    "LacI",
+    "LacI",
+    "C0012m"
+  ],
+  "number": 10
+},
+  "121977_addgene_out.xml": {
+  "time": 409.51,
+  "peak_memory": 0.29,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR",
+    "AmpR",
+    "ColE1",
+    "AmpR terminator",
+    "R0010",
+    "LacI",
+    "LacI",
+    "C0012m",
+    "LacI-M"
+  ],
+  "number": 10
+},
+  "22892_addgene_out.xml": {
+  "time": 100.34,
+  "peak_memory": 0.06,
+  "new_elements": [],
+  "number": 0
+},
+  "106103_addgene_out.xml": {
+  "time": 439.55,
+  "peak_memory": 0.43,
+  "new_elements": [
+    "KanR",
+    "KanR",
+    "ColE1",
+    "KanamycinR",
+    "NAT",
+    "KanR promoter",
+    "LacI-M",
+    "LacI",
+    "LacI",
+    "R0010",
+    "C0012m",
+    "BBa_B0010",
+    "Bba_B0015",
+    "B0015",
+    "ECK120051382",
+    "ECK120051383"
+  ],
+  "number": 16
+},
+  "60975_addgene_out.xml": {
+  "time": 845.75,
+  "peak_memory": 0.37,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR",
+    "AmpR",
+    "Cerulean",
+    "E0040m",
+    "mScarlet",
+    "ColE1",
+    "R0010",
+    "AmpR terminator",
+    "LacI",
+    "LacI",
+    "LacI-M",
+    "C0012m"
+  ],
+  "number": 13
+},
+  "104108_addgene_out.xml": {
+  "time": 435.58,
+  "peak_memory": 0.28,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR",
+    "AmpR",
+    "ColE1",
+    "LacI",
+    "LacI",
+    "LacI-M",
+    "AmpR terminator",
+    "R0010",
+    "C0012m"
+  ],
+  "number": 10
+},
+  "124838_addgene_out.xml": {
+  "time": 1407.4,
+  "peak_memory": 0.72,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR",
+    "AmpR",
+    "deGFP",
+    "deGFP",
+    "deGFP",
+    "eBFP2",
+    "eBFP2",
+    "eBFP2",
+    "YFP",
+    "YFP",
+    "YFP",
+    "deCFP",
+    "deCFP",
+    "deCFP",
+    "E0030",
+    "E0030",
+    "E0030",
+    "yEGFP_Sec",
+    "yEGFP_Sec",
+    "yEGFP_Sec",
+    "yEGFP",
+    "yEGFP",
+    "yEGFP",
+    "ColE1",
+    "LacI-M",
+    "LacI",
+    "LacI",
+    "R0010",
+    "AmpR terminator",
+    "C0012m"
+  ],
+  "number": 31
+},
+  "61825_addgene_out.xml": {
+  "time": 444.06,
+  "peak_memory": 0.39,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR",
+    "AmpR",
+    "ColE1",
+    "pBAD",
+    "I13453",
+    "AmpR terminator",
+    "BBa_B0010",
+    "Bba_B0015",
+    "B0015",
+    "ECK120051382",
+    "ECK120051383",
+    "C0080",
+    "AraC"
+  ],
+  "number": 14
+},
+  "120339_addgene_out.xml": {
+  "time": 215.16,
+  "peak_memory": 0.13,
+  "new_elements": [
+    "AmpR",
+    "AmpR",
+    "ColE1",
+    "AmpR promoter"
+  ],
+  "number": 4
+},
+  "129005_addgene_out.xml": {
+  "time": 938.2,
+  "peak_memory": 0.59,
+  "new_elements": [
+    "KanR",
+    "KanR",
+    "mRuby2",
+    "URA3",
+    "ColE1",
+    "tADH1",
+    "tSSA1",
+    "URA3 5' Homology",
+    "pRPL18B",
+    "pTEF1",
+    "Ptef1",
+    "pGAL1",
+    "Teno1",
+    "tENO1",
+    "URA3 promoter",
+    "URA3 3' Homology",
+    "Tadh1",
+    "URA3 terminator",
+    "NAT",
+    "KanamycinR",
+    "KanR promoter"
+  ],
+  "number": 21
+},
+  "101104_addgene_out.xml": {
+  "time": 321.4,
+  "peak_memory": 0.15,
+  "new_elements": [
+    "AmpR",
+    "AmpR",
+    "AmpR promoter",
+    "ColE1",
+    "AmpR terminator"
+  ],
+  "number": 5
+},
+  "121539_addgene_out.xml": {
+  "time": 244.61,
+  "peak_memory": 0.15,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR",
+    "AmpR",
+    "ColE1",
+    "AmpR terminator"
+  ],
+  "number": 5
+},
+  "147462_addgene_out.xml": {
+  "time": 320.06,
+  "peak_memory": 0.15,
+  "new_elements": [
+    "AmpR promoter",
+    "AmpR",
+    "AmpR",
+    "ColE1",
+    "AmpR terminator"
+  ],
+  "number": 5
+}
+}
