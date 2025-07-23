@@ -57,6 +57,8 @@ class FeatureExtractor():
             subprocess.run(['minimap2', '-d', f'{index_prefix}.mmi', fasta_path], check=True)
         elif tool == 'bowtie2':
             subprocess.run(['bowtie2-build', fasta_path, index_prefix], check=True)
+        elif tool == 'blast':
+            subprocess.run(['makeblastdb', '-in', fasta_path, '-dbtype', 'nucl', '-out', index_prefix], check=True)
         else:
             raise ValueError("Unsupported tool for indexing")
 

@@ -2,7 +2,50 @@
 from FeatureAnnotatorBase import FeatureAnnotatorSimple
 from sequences_to_features import Feature
 import json, pysam
+class TableFeatureMapper:
+    def __init__(self, tab_path, min_mapq=20):
+        self.tab_path = tab_path
+        self.min_mapq = min_mapq
+        #self.metadata_dict = self._load_metadata(metadata_path)
+        self.inline_matches = []
+        self.rc_matches = []
 
+    def _load_metadata(self, metadata_path):
+        with open(metadata_path, "r") as f:
+            return json.load(f)
+
+    def extract_matches(self, exact_match=True):
+        blast_output = self.tab_path # error, filename error
+        with open(blast_output) as f:
+            for line in f:
+                if line.startswith("#") or not line.strip():
+                    continue  # skip headers or blank lines
+                segs = line.strip().split('\t')
+                if len(segs) < 11:
+                    continue  # skip incomplete lines
+                # change to query start and end
+                ref_name = segs[1]  # ref_name, # sseqid
+                start = int(segs[6]) # qstart
+                end = int(segs[7]) # qend
+                feature = Feature(
+                            nucleotides='',
+                            identity=ref_name,# will be replaced later
+                            roles='',
+                            sub_identities='',
+                            parent_identities=''
+                            #identity=feature_pre['original_identity'],
+                            #roles=feature_pre['roles'],
+                            #sub_identities=feature_pre.get('sub_identities', []),
+                            #parent_identities=feature_pre.get('parent_identities', [])
+                            )
+                    
+                match = ([feature], start, end)
+                if start > end:
+                    self.rc_matches.append(match)
+                else:
+                    self.inline_matches.append(match)
+        return self.inline_matches, self.rc_matches
+    
 class SAMFeatureMapper:
     def __init__(self, sam_path, min_mapq=20):
         self.sam_path = sam_path
