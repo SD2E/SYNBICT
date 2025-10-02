@@ -14,9 +14,9 @@ class BwaAligner(Aligner):
             seq = sbol_sequence(query_sbol)
             fasta_file.write(f">query_sequence\n{seq}\n")
         with open(output_sam_path, 'w') as out_sam, open(output_sam_path + '.log', 'w') as err_log:
-            if(exact_match):
+            if(exact_match):#'bwa', 'mem', '-a', '-B', '100', '-O', '100', '-E', '100', self.index_prefix, fasta_path
                 subprocess.run(
-                    ['bwa', 'mem', '-a', '-B', '100', '-O', '100', '-E', '100', self.index_prefix, fasta_path],
+                    ['bwa', 'mem', '-a', '-T', '0', self.index_prefix, fasta_path],
                     stdout=out_sam,
                     stderr=err_log,
                     check=True

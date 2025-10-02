@@ -9,7 +9,6 @@ class BowtieAligner(Aligner):
     def align(self, query_sbol, output_sam_path, exact_match=False):
         with tempfile.NamedTemporaryFile(mode='w+', suffix='.fasta', delete=False) as fasta_file:
             fasta_path = fasta_file.name
-            print(f"Writing query sequence to {fasta_path}")
             seq = sbol_sequence(query_sbol)
             fasta_file.write(f">query_sequence\n{seq}\n")
         bowtie2_command = [
@@ -17,7 +16,7 @@ class BowtieAligner(Aligner):
             "-x", "test",
             "-f",
             "-U", fasta_path,
-            "--local",
+            "--very-sensitive-local",
             "-a",
             "-S", output_sam_path
         ]

@@ -13,7 +13,7 @@ class BlastAligner(Aligner):
             fasta_path = fasta_file.name
             seq = sbol_sequence(query_sbol)
             fasta_file.write(f">query_sequence\n{seq}\n")
-        output_path = 'output.txt'
+        output_path = output_sam_path
         blast_command_simi = [
             'blastn', 
             '-query', 
@@ -23,9 +23,8 @@ class BlastAligner(Aligner):
             '-out',
             output_path,
             '-outfmt',
-            '6'
+            '6 std qlen slen nident'
         ]
-
         with open(output_path, 'w') as out, open(output_path + '.log', 'w') as err_log:
             subprocess.run(
                 blast_command_simi,
@@ -33,20 +32,3 @@ class BlastAligner(Aligner):
                 stderr=err_log,
                 check=True
             )
-        
-        # filter aligned.txt
-        # Now filter results in Python
-        if exact_match:
-            # Filter for exact matches (100% identity)
-            with open(output_path) as infile, open(output_sam_path, 'w') as outfile:
-                for line in infile:
-                    fields = line.strip().split('\t')
-                    if float(fields[2]) == 100.0:  # identity column is the 3rd field (0-based index 2)
-                        outfile.write(line)
-        else:
-            # Filter for matches with at least 90% identity
-            with open(output_path) as infile, open(output_sam_path, 'w') as outfile:
-                for line in infile:
-                    fields = line.strip().split('\t')
-                    if float(fields[2]) >= 90.0:  # identity column is the 3rd field (0-based index 2)
-                        outfile.write(line)

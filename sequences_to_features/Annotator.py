@@ -1,7 +1,8 @@
 # write an Annotator python class, that read sam file and convert the alignment result and find the coresponding metadata dictionary from FeatureExtractor class or from the saved json file to find the metadata and wrtie all this insert into a SBOL file.
+from os import read
 from FeatureAnnotatorBase import FeatureAnnotatorSimple
 from sequences_to_features import Feature
-import json, pysam
+import json, pysam, math
 class TableFeatureMapper:
     def __init__(self, tab_path, min_mapq=20):
         self.tab_path = tab_path
@@ -14,19 +15,54 @@ class TableFeatureMapper:
         with open(metadata_path, "r") as f:
             return json.load(f)
 
-    def extract_matches(self, exact_match=True):
+    def extract_matches(self, exact_match=True, min_feature_length=40):
         blast_output = self.tab_path # error, filename error
         with open(blast_output) as f:
             for line in f:
                 if line.startswith("#") or not line.strip():
                     continue  # skip headers or blank lines
                 segs = line.strip().split('\t')
-                if len(segs) < 11:
-                    continue  # skip incomplete lines
-                # change to query start and end
-                ref_name = segs[1]  # ref_name, # sseqid
-                start = int(segs[6]) # qstart
-                end = int(segs[7]) # qend
+                if len(segs) < 14:
+                    # vsearch output
+                    
+                    thi = int(segs[9])  # sstart
+                    tlo = int(segs[8])
+                    ids = int(segs[12])
+                    ref_name = segs[1]
+                    ref_length = abs(thi - tlo) + 1
+                    pid_ref = 100.0 * ids / ref_length
+                    if(exact_match):
+                        if not (segs[3] == ref_length and math.isclose(pid_ref, 100.0, rel_tol=0.0, abs_tol=1e-6)):
+                            continue
+                    else:
+                        if(pid_ref < 95.0):
+                            continue
+                    
+                else:
+                    # change to query start and end
+                    ref_name = segs[1]  # ref_name, # sseqid
+                    align_len = int(segs[3]) # alignment length (matches+mismatches+gaps)
+                    start = int(segs[6]) # qstart
+                    end = int(segs[7]) # qend
+                    pident = float(segs[2]) # pident
+                    ref_length = int(segs[13]) # slen
+                    if exact_match:
+                        # Check for exact match, e.g., if the alignment length matches the reference length
+                        if not (segs[1] == ref_name 
+                                and (abs(end - start) + 1) == ref_length 
+                                and math.isclose(pident, 100.0, rel_tol=0.0, abs_tol=1e-6)):
+                            continue
+                    else:
+                        if(len(segs) > 14 and segs[14] is not None): # improve
+                            nident = int(segs[14]) # nident
+                            pid_ref = 100.0 * nident / ref_length
+                        else:
+                            pid_ref = 100.0 * align_len / ref_length # estimate
+                        if(pid_ref < 95.0):
+                            continue
+
+                if ref_length < min_feature_length:
+                    continue
                 feature = Feature(
                             nucleotides='',
                             identity=ref_name,# will be replaced later
@@ -71,7 +107,6 @@ class SAMFeatureMapper:
         hard_clip_end = cigar_tuples[-1][1] if cigar_tuples[-1][0] in {4, 5} else 0
 
         full_query_len = hard_clip_front + query_len + hard_clip_end
-
         if read.is_reverse:
             query_end = full_query_len - hard_clip_front
             query_start = query_end - query_len
@@ -81,14 +116,51 @@ class SAMFeatureMapper:
 
         return read.reference_name, query_start, query_end
 
-    def extract_matches(self, exact_match=True):
+    def extract_matches(self, exact_match=True, min_feature_length=40, is_bowtie2=False): # need change back
         try:
             samfile = pysam.AlignmentFile(self.sam_path, "r")
-            for read in samfile.fetch(until_eof=True):
-                if(exact_match):
-                    if not (read.has_tag("NM") and read.get_tag("NM") == 0):
+            for aln in samfile.fetch(until_eof=True):    
+                ref_name = aln.reference_name
+                length = samfile.get_reference_length(ref_name)  
+                if exact_match:
+                    # Check for exact match AS = len(ref)
+                    if is_bowtie2:
+                        print("yes bowtie2")
+                        if not (aln.get_tag("XO") == 0 and aln.get_tag("XM") == 0 and aln.cigartuples[1][1] == length):
+                            continue
+                    else:
+                        if not (aln.has_tag("NM") and aln.get_tag("NM") == 0 and aln.cigartuples[1][1] == length):
+                            continue
+                else:
+                    # if identity >= threshold 
+                    M = I = D = EQ = X = 0
+                    for op, ln in (aln.cigartuples or []):
+                        if op == 0: M += ln      # M (match+mismatch)
+                        elif op == 1: I += ln;   # insertion (run)
+                        elif op == 2: D += ln;   # deletion (run)
+                        elif op == 7: EQ += ln   # '=' exact match
+                        elif op == 8: X  += ln   # 'X' mismatch
+
+                    block = (EQ + X) if (EQ + X) > 0 else M
+                    
+                    # mismatches:
+                    if (EQ + X) > 0:
+                        mismatches = X
+                        matches = EQ
+                    else:
+                        NM = aln.get_tag("NM")
+                        mismatches = max(NM - I - D, 0)
+                        matches = max(block - mismatches, 0)
+
+                    # BLAST alignment length includes gaps (I + D)
+                    aln_len = block + I + D
+                    if aln_len == 0:
                         continue
-                reference_name, start, end = self.parse_cigar_for_query_coords(read)
+                    pident = 100.0 * matches / (length + I + D) 
+                    if pident < 95.0:
+                        continue
+
+                reference_name, start, end = self.parse_cigar_for_query_coords(aln)
 
                 #print("annotation: ", reference_name, start, end)
                 #ref_name = samfile.get_reference_name(read.reference_id)
@@ -108,12 +180,12 @@ class SAMFeatureMapper:
                     )
                     
                 match = ([feature], start, end)
-                if read.is_reverse:
+                if aln.is_reverse:
                     self.rc_matches.append(match)
                 else:
                     self.inline_matches.append(match)
         except Exception as e:
-            print("Failed to process read:", read.query_name, "Error:", e)
+            print("Failed to process alignment","Error:", e)
 
         return self.inline_matches, self.rc_matches
 

@@ -3,6 +3,7 @@ import subprocess
 import uuid
 import json
 import logging
+from sequences_to_features import load_sbol
 
 
 # SBOL ➜ FASTA + metadata + indexing (one-time) 
@@ -14,12 +15,14 @@ class FeatureExtractor():
 
     def __extract_features(self, docs, require_sequence):
         for doc_index, doc in enumerate(docs):
+            if(len(doc.componentDefinitions) == 0):
+                logging.warning(f"No component definitions found in document {doc_index}. Skipping.")
+                continue
             for comp_def in doc.componentDefinitions:
                 if sbol2.BIOPAX_DNA not in comp_def.types:
                     continue
-
                 dna_seqs = self.get_DNA_sequences(comp_def, doc)
-                if not dna_seqs and require_sequence:
+                if require_sequence and not dna_seqs:
                     continue
 
                 seq = dna_seqs[0].elements if dna_seqs else ''
@@ -44,7 +47,6 @@ class FeatureExtractor():
             for record_id, sequence in self.fasta_records:
                 fasta_file.write(f">{record_id}\n{sequence}\n")
 
-
     def write_metadata(self, metadata_path):
         with open(metadata_path, 'w') as f:
             json.dump(self.metadata_dict, f, indent=2)
@@ -59,6 +61,10 @@ class FeatureExtractor():
             subprocess.run(['bowtie2-build', fasta_path, index_prefix], check=True)
         elif tool == 'blast':
             subprocess.run(['makeblastdb', '-in', fasta_path, '-dbtype', 'nucl', '-out', index_prefix], check=True)
+        elif tool == 'vsearch':
+            subprocess.run(['vsearch', '--makeudb_usearch', fasta_path, '-output', f'{index_prefix}.udb'], check=True)
+        elif tool == 'mmseqs2':
+            subprocess.run(['mmseqs', 'createdb', fasta_path, f'{index_prefix}.mmseqs'], check=True)
         else:
             raise ValueError("Unsupported tool for indexing")
 
