@@ -1,10 +1,7 @@
 import sbol2
 import subprocess
-import uuid
 import json
 import logging
-from sequences_to_features import load_sbol
-
 
 # SBOL ➜ FASTA + metadata + indexing (one-time) 
 class FeatureExtractor():

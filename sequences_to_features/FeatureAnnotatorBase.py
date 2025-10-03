@@ -1,10 +1,23 @@
 import logging
-from sequences_to_features import FeaturePruner
-from sequences_to_features import FeatureLibrary
+from FeaturePruner import FeaturePruner
+from FeatureLibrary import FeatureLibrary
 import sbol2
-
-from sequences_to_features import NotUniqueError
 # run this after alignment, input is inline_matches, output is sbol
+# Set up the not found error for catching
+try:
+    # SBOLError is in the native python module
+    NotFoundError = sbol2.SBOLError
+except NameError:
+    # The swig wrapper raises RuntimeError on not found
+    NotFoundError = RuntimeError
+
+# Set up the not unique error for catching
+try:
+    # SBOLError is in the native python module
+    NotUniqueError = sbol2.SBOLError
+except NameError:
+    # The swig wrapper raises RuntimeError on not unique
+    NotUniqueError = RuntimeError
 class FeatureAnnotatorSimple:
     def __init__(self, feature_library, inline_matches, rc_matches):
         self.feature_library = feature_library

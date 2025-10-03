@@ -1,6 +1,8 @@
+from importlib import simple
 import logging
 import argparse
 import os
+from pydoc import doc
 import sys
 import requests
 import json
@@ -8,7 +10,16 @@ import json
 from Bio.Seq import Seq
 from Bio import Align
 import sbol2
+from Feature import Feature
+from FeatureLibrary import FeatureLibrary 
+from FeaturePruner import FeaturePruner
 from flashtext import KeywordProcessor
+from Annotator import SAMFeatureMapper, TableFeatureMapper
+from FeatureAnnotatorBase import FeatureAnnotatorSimple
+from FeatureExtractor import FeatureExtractor
+from BwaAligner import BwaAligner
+from BlastAligner import BlastAligner
+from Minimap2Aligner import Minimap2Aligner
 
 # import time
 
@@ -163,594 +174,6 @@ class FeatureCurator():
                                                   strip_prefixes)
 
         # self.logger.info('Extension Time: ' + str(time.clock() - start_time))
-
-class Feature():
-
-    SO_REGION = 'http://identifiers.org/so/SO:0000001'
-    SO_SEQUENCE_FEATURE = 'http://identifiers.org/so/SO:0000110'
-
-    GENERIC_ROLES = {
-        SO_REGION,
-        SO_SEQUENCE_FEATURE
-    }
-
-    def __init__(self, nucleotides, identity, roles, sub_identities=[], parent_identities=[]):
-        self.nucleotides = nucleotides
-        self.identity = identity
-        self.sub_identities = sub_identities
-        self.parent_identities = parent_identities
-        self.roles = set(roles)
-
-        self.logger = logging.getLogger('synbict')
-
-    def reverse_complement_nucleotides(self):
-        return str(Seq(self.nucleotides).reverse_complement())
-
-    @classmethod
-    def has_non_generic_role(cls, roles):
-        return len(roles.difference(cls.GENERIC_ROLES)) > 0
-
-    def is_non_generic(self):
-        return self.has_non_generic_role(self.roles)
-
-class FeatureLibrary():
-
-    def __init__(self, docs, require_sequence=True):
-        self.features = []
-        self.docs = docs
-
-        self.__updated_indices = set()
-        self.__feature_map = {}
-        self.__feature_dict = {}
-        self.__name_to_idents = {}
-
-        self.logger = logging.getLogger('synbict')
-
-        self.logger.info('Loading features')
-
-        for i in range(0, len(self.docs)):
-            self.__load_features(self.docs[i], i, require_sequence)
-
-    def update(self, require_sequence=True):
-        added_features = []
-
-        for i in range(0, len(self.docs)):
-            added_features.extend(self.__load_features(self.docs[i], i, require_sequence))
-
-        for added_feature in added_features:
-            self.__updated_indices.add(self.get_document_index(added_feature.identity))
-
-        return added_features
-
-    def get_updated_documents(self):
-        updated_docs = []
-
-        for updated_index in self.__updated_indices:
-            updated_docs.append(self.docs[updated_index])
-
-        return updated_docs
-
-    def get_non_updated_indices(self):
-        non_updated_indices = []
-
-        for i in range(0, len(self.docs)):
-            if i not in self.__updated_indices:
-                non_updated_indices.append(i)
-
-        return non_updated_indices
-
-    def __load_features(self, doc, doc_index, require_sequence=True):
-        loaded_features = []
-
-        comp_seq_identities = set()
-
-        for comp_definition in doc.componentDefinitions:
-            if sbol2.BIOPAX_DNA in comp_definition.types:
-                dna_seqs = self.get_DNA_sequences(comp_definition, doc)
-
-                for dna_seq in dna_seqs:
-                    comp_seq_identities.add(dna_seq.identity)
-
-                if comp_definition.identity not in self.__feature_map:
-                    sub_identities = []
-
-                    for sub_comp in comp_definition.components:
-                        sub_identities.append(sub_comp.definition)
-
-                    if len(dna_seqs) > 0:
-                        feature = Feature(dna_seqs[0].elements,
-                                          comp_definition.identity,
-                                          comp_definition.roles,
-                                          sub_identities,
-                                          comp_definition.wasDerivedFrom)
-
-                        loaded_features.append(feature)
-                        self.features.append(feature)
-
-                        self.__feature_map[comp_definition.identity] = doc_index
-                        self.__feature_dict[comp_definition.identity] = feature
-
-                        if comp_definition.name:
-                            if comp_definition.name not in self.__name_to_idents:
-                                self.__name_to_idents[comp_definition.name] = []
-
-                            self.__name_to_idents[comp_definition.name].append(comp_definition.identity)
-                    elif not require_sequence:
-                        feature = Feature('',
-                                          comp_definition.identity,
-                                          comp_definition.roles,
-                                          sub_identities,
-                                          comp_definition.wasDerivedFrom)
-
-                        loaded_features.append(feature)
-                        self.features.append(feature)
-
-                        self.__feature_map[comp_definition.identity] = doc_index
-                        self.__feature_dict[comp_definition.identity] = feature
-
-                        if comp_definition.name:
-                            if comp_definition.name not in self.__name_to_idents:
-                                self.__name_to_idents[comp_definition.name] = []
-
-                            self.__name_to_idents[comp_definition.name].append(comp_definition.identity)
-                    else:
-                        self.logger.warning('%s not loaded since its DNA sequence was not found', comp_definition.identity)
-
-        for seq in doc.sequences:
-            if seq.identity not in comp_seq_identities and seq.encoding == sbol2.SBOL_ENCODING_IUPAC:
-                seq_comp_definition = sbol2.ComponentDefinition(seq.displayId + '_comp', sbol2.BIOPAX_DNA, '1')
-                seq_comp_definition.sequences = [seq.identity]
-
-                try:
-                    doc.addComponentDefinition(seq_comp_definition)
-
-                    feature = Feature(seq.elements,
-                                      seq_comp_definition.identity,
-                                      [],
-                                      [],
-                                      [])
-
-                    loaded_features.append(feature)
-                    self.features.append(feature)
-
-                    self.__feature_map[seq_comp_definition.identity] = doc_index
-                    self.__feature_dict[seq_comp_definition.identity] = feature
-                except RuntimeError:
-                    self.logger.warning('Component could not be automatically generated for DNA sequence %s', seq.identity)
-                except NotUniqueError as exc:
-                    if exc.error_code() == sbol2.SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE:
-                        self.logger.warning('Component could not be automatically generated for DNA sequence %s', seq.identity)
-                    else:
-                        raise
-
-        return loaded_features
-
-    def get_features(self, min_feature_length=0, children_only=False):
-        features = []
-
-        if children_only:
-            parent_identities = set()
-
-            for feature in self.features:
-                for parent_identity in feature.parent_identities:
-                    parent_identities.add(parent_identity)
-
-            for feature in self.features:
-                if (min_feature_length == 0 or len(feature.nucleotides) > min_feature_length) and feature.identity not in parent_identities:
-                    features.append(feature)
-        else:
-            for feature in self.features:
-                if min_feature_length == 0 or len(feature.nucleotides) > min_feature_length:
-                    features.append(feature)
-
-        return features
-
-    def get_added_feature_identities(self):
-        added_feature_identities = set()
-
-        for doc in self.docs:
-            for comp_definition in doc.componentDefinitions:
-                if comp_definition.identity not in self.__feature_map:
-                    added_feature_identities.append(comp_definition.identity)
-
-        return added_feature_identities
-
-    def get_document(self, identity):
-        return self.docs[self.get_document_index(identity)]
-
-    def get_document_index(self, identity):
-        if identity in self.__feature_map:
-            return self.__feature_map[identity]
-        else:
-            return -1
-
-    def get_definition(self, identity):
-        return self.get_document(identity).getComponentDefinition(identity)
-
-    def get_definitions_by_name(self, name):
-        name_keys = []
-
-        if name in self.__name_to_idents:
-            name_keys.append(name)
-        else:
-            for other_name in self.__name_to_idents:
-                if name in other_name or other_name in name:
-                    name_keys.append(other_name)
-
-        definitions = []
-
-        for name_key in name_keys:
-            identities = self.__name_to_idents[name_key]
-
-            for identity in identities:
-                definitions.append(self.get_definition(identity))
-
-        return definitions
-
-    def has_feature(self, identity):
-        return identity in self.__feature_map
-
-    def get_feature(self, identity):
-        return self.__feature_dict[identity]
-
-    @classmethod
-    def get_DNA_sequences(cls, comp_definition, doc):
-        dna_seqs = []
-
-        for seq_URI in comp_definition.sequences:
-            try:
-                seq = doc.getSequence(seq_URI)
-            except RuntimeError:
-                seq = None
-            except NotFoundError as exc:
-                if is_sbol_not_found(exc):
-                    seq = None
-                else:
-                    raise
-
-            if seq and seq.encoding == sbol2.SBOL_ENCODING_IUPAC:
-                dna_seqs.append(seq)
-
-        return dna_seqs
-
-    @classmethod
-    def get_sequences(cls, comp_definition, doc):
-        seqs = []
-
-        for seq_URI in comp_definition.sequences:
-            try:
-                seq = doc.getSequence(seq_URI)
-            except RuntimeError:
-                seq = None
-            except NotFoundError as exc:
-                if is_sbol_not_found(exc):
-                    seq = None
-                else:
-                    raise
-
-            if seq:
-                seqs.append(seq)
-
-        return seqs
-
-    @classmethod
-    def copy_sequence(cls, seq, source_doc, sink_doc, import_namespace=False, strip_prefixes=[]):
-        if import_namespace:
-            namespace = '/'.join(seq.identity.split('/')[:-2])
-
-            if namespace == sbol2.getHomespace():
-                try:
-                    version = int(seq.version)
-                except (TypeError, ValueError):
-                    return None
-
-                try:
-                    seq_copy = seq.copy(sink_doc, namespace, str(version + 1))
-
-                except RuntimeError:
-                    return sink_doc.getSequence('/'.join([sbol2.getHomespace(), seq.displayId,
-                                                          str(version + 1)]))
-                except NotUniqueError as exc:
-                    if exc.error_code() == sbol2.SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE:
-                        return sink_doc.getSequence('/'.join([sbol2.getHomespace(), seq.displayId,
-                                                              str(version + 1)]))
-                    else:
-                        raise
-                    
-            else:
-                try:
-                    seq_copy = seq.copy(sink_doc, namespace, '1')
-                except RuntimeError:
-                    return sink_doc.getSequence('/'.join([sbol2.getHomespace(), seq.displayId, '1']))
-                except NotUniqueError as exc:
-                    if exc.error_code() == sbol2.SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE:
-                        return sink_doc.getSequence('/'.join([sbol2.getHomespace(), seq.displayId, '1']))
-                    else:
-                        raise
-
-            cls.strip_origin_properties(seq_copy, strip_prefixes)
-        else:
-            try:
-                sink_doc.getSequence(seq.identity)
-                
-                return None
-            except RuntimeError:
-                seq_copy = seq.copy(sink_doc)
-            except NotFoundError as exc:
-                if is_sbol_not_found(exc):
-                    seq_copy = seq.copy(sink_doc)
-                else:
-                    raise
-
-        return seq_copy
-
-    @classmethod
-    def make_variant_definition(cls, doc, definition_copy):
-        doc.componentDefinitions.remove(definition_copy.identity)
-
-        variant_index = 1
-        unique_flag = False
-        
-        while not unique_flag:
-            variant_ID = '_'.join([definition_copy.displayId, 'v' + str(variant_index)])
-
-            split_identity = definition_copy.identity.split('/')
-            variant_identity = '/'.join(split_identity[:-2] + [variant_ID, split_identity[-1]])
-            variant_p_identity = '/'.join(split_identity[:-2] + [variant_ID])
-
-            original_identity = definition_copy.identity
-            original_ID = definition_copy.displayId
-            original_p_identity = definition_copy.persistentIdentity
-
-            definition_copy.identity = variant_identity
-            definition_copy.displayId = variant_ID
-            definition_copy.persistentIdentity = variant_p_identity
-
-            try:
-                doc.componentDefinitions.add(definition_copy)
-
-                unique_flag = True
-            except RuntimeError:
-                definition_copy.identity = original_identity
-                definition_copy.displayId = original_ID
-                definition_copy.persistentIdentity = original_p_identity
-
-                variant_index = variant_index + 1
-
-                unique_flag = False
-            except NotUniqueError as exc:
-                if exc.error_code() == sbol2.SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE:
-                    definition_copy.identity = original_identity
-                    definition_copy.displayId = original_ID
-                    definition_copy.persistentIdentity = original_p_identity
-
-                    variant_index = variant_index + 1
-
-                    unique_flag = False
-                else:
-                    raise
-
-    @classmethod
-    def make_variant_sequence(cls, doc, sequence_copy):
-        doc.sequences.remove(sequence_copy.identity)
-
-        variant_index = 1
-        unique_flag = False
-        
-        while not unique_flag:
-            variant_ID = '_'.join([sequence_copy.displayId, 'v' + str(variant_index)])
-
-            split_identity = sequence_copy.identity.split('/')
-            variant_identity = '/'.join(split_identity[:-2] + [variant_ID, split_identity[-1]])
-            variant_p_identity = '/'.join(split_identity[:-2] + [variant_ID])
-
-            original_identity = sequence_copy.identity
-            original_ID = sequence_copy.displayId
-            original_p_identity = sequence_copy.persistentIdentity
-
-            sequence_copy.identity = variant_identity
-            sequence_copy.displayId = variant_ID
-            sequence_copy.persistentIdentity = variant_p_identity
-
-            try:
-                doc.sequences.add(sequence_copy)
-
-                unique_flag = True
-            except RuntimeError:
-                sequence_copy.identity = original_identity
-                sequence_copy.displayId = original_ID
-
-                variant_index = variant_index + 1
-
-                unique_flag = False
-            except NotUniqueError as exc:
-                if exc.error_code() == sbol2.SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE:
-                    sequence_copy.identity = original_identity
-                    sequence_copy.displayId = original_ID
-
-                    variant_index = variant_index + 1
-
-                    unique_flag = False
-                else:
-                    raise
-
-    # prop.startswith('http://wiki.synbiohub.org/wiki/Terms/synbiohub#')
-    # prop.startswith('http://www.ncbi.nlm.nih.gov/genbank#')
-    # prop.startswith('http://sbols.org/genBankConversion#')
-
-    @classmethod
-    def strip_origin_properties(cls, sbol_obj, other_prefixes):
-        strip_props = []
-
-        origin_prefixes = ['http://purl.org/dc/terms/created',
-                           'http://purl.org/dc/terms/modified',
-                           'http://purl.org/dc/terms/creator']
-
-        strip_prefixes = tuple(origin_prefixes + other_prefixes)
-
-        for prop in sbol_obj.properties:
-            if prop.startswith(strip_prefixes):
-                strip_props.append(prop)
-        for strip_prop in strip_props:
-            del sbol_obj.properties[strip_prop]
-
-        sbol_obj.wasGeneratedBy = []
-
-    @classmethod
-    def copy_component_definition(cls, comp_definition, source_doc, sink_doc, import_namespace=False,
-                                  min_seq_length=0, import_sequences=False, seq_elements=None,
-                                  parent_definitions=[], parent_doc=None, make_variant=False,
-                                  shallow_copy=False, strip_prefixes=[]):
-
-        if sbol2.BIOPAX_DNA in comp_definition.types:
-            seqs = cls.get_DNA_sequences(comp_definition, source_doc)
-        else:
-            seqs = cls.get_sequences(comp_definition, source_doc)
-        #print("min_seq_length: ", min_seq_length)
-        if min_seq_length == 0 or (len(seqs) > 0 and len(seqs[0].elements) >= min_seq_length):
-            namespace = '/'.join(comp_definition.identity.split('/')[:-2])
-            #print("import_namespace: ", import_namespace)
-            if import_namespace:
-                if namespace == sbol2.getHomespace():
-                    try:
-                        version = int(comp_definition.version)
-                    except (TypeError, ValueError):
-                        return None
-
-                    try:
-                        #print("namespace: ", namespace)
-                        definition_copy = comp_definition.copy(sink_doc, namespace, str(version + 1))
-                    except RuntimeError:
-                        return sink_doc.getComponentDefinition('/'.join([sbol2.getHomespace(),
-                                                                         comp_definition.displayId,
-                                                                         str(version + 1)]))
-                    except NotUniqueError as exc:
-                        if exc.error_code() == sbol2.SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE:
-                            return sink_doc.getComponentDefinition('/'.join([sbol2.getHomespace(),
-                                                                             comp_definition.displayId,
-                                                                             str(version + 1)]))
-                        else:
-                            raise
-                        
-                else:
-                    try:
-                        definition_copy = comp_definition.copy(sink_doc, namespace, '1')
-                    except RuntimeError:
-                        return sink_doc.getComponentDefinition('/'.join([sbol2.getHomespace(),
-                                                                         comp_definition.displayId, '1']))
-                    except NotUniqueError as exc:
-                        if exc.error_code() == sbol2.SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE:
-                            return sink_doc.getComponentDefinition('/'.join([sbol2.getHomespace(),
-                                                                             comp_definition.displayId, '1']))
-                        else:
-                            raise
-
-                cls.strip_origin_properties(definition_copy, strip_prefixes)
-                for sub_comp_copy in definition_copy.components:
-                    cls.strip_origin_properties(sub_comp_copy, strip_prefixes)
-                for anno_copy in definition_copy.sequenceAnnotations:
-                    cls.strip_origin_properties(anno_copy, strip_prefixes)
-
-                    for loc_copy in anno_copy.locations:
-                        cls.strip_origin_properties(loc_copy, strip_prefixes)
-
-                if make_variant:
-                    cls.make_variant_definition(sink_doc, definition_copy)
-            else:
-                #print("Else")
-                try:
-                    sink_doc.getComponentDefinition(comp_definition.identity)
-                    #print("Sink doc has comp def")
-                    return None
-                except RuntimeError:
-                    definition_copy = comp_definition.copy(sink_doc)
-                except NotFoundError as exc:
-                    if is_sbol_not_found(exc):
-                        definition_copy = comp_definition.copy(sink_doc)
-                    else:
-                        raise
-            #print("Run to here")
-            if shallow_copy:
-                definition_copy.sequences = list(comp_definition.sequences)
-            elif import_sequences:
-                if len(seqs) > 0:
-                    seq_copy = cls.copy_sequence(seqs[0], source_doc, sink_doc, True, strip_prefixes)
-
-                    if make_variant:
-                        cls.make_variant_sequence(sink_doc, seq_copy)
-
-                    if seq_elements:
-                        seq_copy.elements = seq_elements
-
-                    if parent_doc:
-                        for parent_definition in parent_definitions:
-                            if sbol2.BIOPAX_DNA in parent_definition.types:
-                                parent_seqs = cls.get_DNA_sequences(parent_definition, parent_doc)
-
-                                if len(parent_seqs) > 0:
-                                    seq_copy.wasDerivedFrom = seq_copy.wasDerivedFrom + [parent_seqs[0].identity]
-                            elif len(parent_definition.sequences) > 0:
-                                seq_copy.wasDerivedFrom = seq_copy.wasDerivedFrom + [parent_definition.sequences[0].identity]
-
-                    definition_copy.sequences = [seq_copy.identity]
-                else:
-                    return None
-            else:
-                for seq_URI in comp_definition.sequences:
-                    seq = source_doc.getSequence(seq_URI)
-
-                    cls.copy_sequence(seq, source_doc, sink_doc, False, strip_prefixes)
-
-                definition_copy.sequences = list(comp_definition.sequences)
-
-            if make_variant:
-                definition_copy.sequenceAnnotations = []
-                definition_copy.components = []
-            else:
-                for seq_anno in comp_definition.sequenceAnnotations:
-                    if seq_anno.component:
-                        sub_comp = comp_definition.components.get(seq_anno.component)
-
-                        sub_copy = definition_copy.components.get(sub_comp.displayId)
-
-                        anno_copy = definition_copy.sequenceAnnotations.get(seq_anno.displayId)
-                        anno_copy.component = sub_copy.identity
-
-                for sub_comp in comp_definition.components:
-                    try:
-                        sub_definition = source_doc.getComponentDefinition(sub_comp.definition)
-                    except RuntimeError:
-                        sub_definition = None
-                    except NotFoundError as exc:
-                        if is_sbol_not_found(exc):
-                            sub_definition = None
-                        else:
-                            raise
-
-                    sub_copy = definition_copy.components.get(sub_comp.displayId)
-
-                    if sub_definition:
-                        if shallow_copy:
-                            sub_copy.definition = sub_definition.identity
-                        else:
-                            sub_definition_copy = cls.copy_component_definition(sub_definition, source_doc, sink_doc,
-                                                                                import_namespace, min_seq_length,
-                                                                                shallow_copy=shallow_copy,
-                                                                                strip_prefixes=strip_prefixes)
-
-                            if sub_definition_copy:
-                                sub_copy.definition = sub_definition_copy.identity
-                            else:
-                                sub_copy.definition = sub_definition.identity
-                    else:
-                        sub_copy.definition = sub_comp.definition
-
-            for parent_definition in parent_definitions:
-                definition_copy.wasDerivedFrom = definition_copy.wasDerivedFrom + [parent_definition.identity]
-
-            return definition_copy
-        else:
-            return None
 
 class FeatureAnnotater():
 
@@ -1031,7 +454,7 @@ class FeatureAnnotater():
 
         for target in target_library.features:
             if self.__has_min_length(target, min_target_length):
-                #print("Logic 1")
+                print("Logic 1")
                 self.logger.info('Annotating %s', target.identity)
 
                 inline_elements = ' '.join(target.nucleotides)
@@ -1041,19 +464,20 @@ class FeatureAnnotater():
                 rc_matches = self.feature_matcher.extract_keywords(rc_elements, span_info=True)
 
                 if len(inline_matches) > 0 or len(rc_matches) > 0:
-                    #print("Logic 1.1")
+                    print("Logic 1.1")
                     target_doc = target_library.get_document(target.identity)
 
                     target_definition = target_doc.getComponentDefinition(target.identity)
 
                     doc_index = target_library.get_document_index(target.identity)
                     
+                    print("doc_index: ", doc_index, len(output_library.docs))
                     if output_library and doc_index < len(output_library.docs):
-                        #print("logic 1.1.1")
+                        print("logic 1.1.1")
                         output_doc = output_library.docs[doc_index]
 
                         if in_place:
-                            #print("logic 1.1.1.1")
+                            print("logic 1.1.1.1")
                             definition_copy = FeatureLibrary.copy_component_definition(target_definition,
                                                                                        target_doc,
                                                                                        output_doc,
@@ -1061,7 +485,7 @@ class FeatureAnnotater():
                                                                                        shallow_copy=True,
                                                                                        strip_prefixes=strip_prefixes)
                         else:
-                            #print("logic 1.1.1.2")
+                            print("logic 1.1.1.2")
                             definition_copy = FeatureLibrary.copy_component_definition(target_definition,
                                                                                        target_doc,
                                                                                        output_doc, True,
@@ -1069,17 +493,17 @@ class FeatureAnnotater():
                                                                                        shallow_copy=True,
                                                                                        strip_prefixes=strip_prefixes)
                     elif in_place:
-                        #print("logic 1.1.2")
+                        print("logic 1.1.2")
                         definition_copy = target_definition
                     else:
-                        #print("logic 1.1.3")
+                        print("logic 1.1.3")
                         definition_copy = FeatureLibrary.copy_component_definition(target_definition, target_doc,
                                                                                    target_doc, True,
                                                                                    min_target_length,
                                                                                    strip_prefixes=strip_prefixes)
 
                     if definition_copy:
-                        #print("logic 2")
+                        print("logic 2")
                         copy_definitions = (not output_library or doc_index >= len(output_library.docs))
 
                         output_match_list = self.__process_feature_matches(target_doc,
@@ -1103,391 +527,23 @@ class FeatureAnnotater():
 
                         annotated_identities.append(definition_copy.identity)
                     else:
-                        #print("logic 2.1")
+                        print("logic 2.1")
                         self.logger.warning('%s was not annotated because its version could not be incremented.',
                                         target.identity)
 
                 self.logger.info('Finished annotating %s', target.identity)
         if output_matches:
-            #print("logic 3")
+            print("logic 3")
             return annotated_identities, output_match_lists
         else:
-            #print("logic 3.1")
+            print("logic 3.1")
             return annotated_identities
-
-class FeaturePruner():
-
-    COMMON_ROLE_DICT = {
-        sbol2.SO_PROMOTER: 'promoter',
-        sbol2.SO_CDS: 'CDS',
-        sbol2.SO_TERMINATOR: 'terminator',
-        'http://identifiers.org/so/SO:0001977': 'ribonuclease_site'
-    }
-
-    def __init__(self, feature_library, roles=set()):
-        self.feature_library = feature_library
-        self.roles = roles
-
-        self.logger = logging.getLogger('synbict')
-
-    @classmethod
-    def __has_min_length(cls, feature, min_feature_length):
-        return min_feature_length == 0 or len(feature.nucleotides) >= min_feature_length
-
-    @classmethod
-    def __is_covered(cls, anno, cover_annos, cover_offset):
-        for cover_anno in cover_annos:
-            if not abs(cover_anno[0] - anno[0]) <= cover_offset or not abs(cover_anno[1] - anno[1]) <= cover_offset:
-                return False
-
-        return True
-
-    def __remove_annotations(self, indices, annos, target_definition):
-        for i in range(len(annos) - 1, -1, -1):
-            if annos[i][5] is None:
-                feature_identity = annos[i][2]
-            else:
-                feature_identity = target_definition.components.get(annos[i][5]).definition
-            
-            if i in indices:
-                target_definition.sequenceAnnotations.remove(annos[i][2])
-
-                if annos[i][5]:
-                    target_definition.components.remove(annos[i][5])
-
-                self.logger.debug('Removed %s at [%s, %s] in %s', feature_identity, annos[i][0], annos[i][1],
-                              target_definition.identity)
-
-                del annos[i]
-
-    @classmethod
-    def get_common_role(cls, roles):
-        for role in roles:
-            if role in cls.COMMON_ROLE_DICT:
-                return cls.COMMON_ROLE_DICT[role]
-
-        return 'sequence_feature'
-
-    @classmethod
-    def __ask_swap_annotations(cls, anno, sub_part_anno, target_definition):
-        if anno[4] is None:
-            anno_ID = anno[3]
-        else:
-            anno_ID = anno[4]
-
-        if sub_part_anno[4] is None:
-            sub_part_anno_ID = sub_part_anno[3]
-        else:
-            sub_part_anno_ID = sub_part_anno[4]
-
-        select_message = 'Annotation {an} ({ai}) and\nsub-part annotation {sp} ({si})\nat [{st}, {en}] in {td} appear \
-to be nearly identical.\nRemove second annotation and link first to sub-part? \
-(0=no,1=yes):\n'.format(an=anno[2],
-                        ai=anno_ID,
-                        sp=sub_part_anno[2],
-                        si=sub_part_anno_ID,
-                        st=anno[0],
-                        en=anno[1],
-                        td=target_definition.identity)
-
-        selected_message = input(select_message)
-
-        try:
-            return int(selected_message.strip()) == 1
-        except ValueError:
-            return False
-
-    @classmethod
-    def __select_annotations(cls, doc, target_definition, annos, ask_user=True, canonical_library=None, keep_flat=True):
-        kept_indices = []
-
-        feature_messages = []
-
-        for i in range(0, len(annos)):
-            if annos[i][5] is None:
-                if annos[i][4] is None:
-                    feature_ID = annos[i][3]
-                else:
-                    feature_ID = annos[i][4]
-
-                feature_role = cls.get_common_role(annos[i][6])
-
-                if ask_user:
-                    if annos[i][7] and len(annos[i][7]) > 0:
-                        if len(feature_role) > 0:
-                            feature_messages.append('{nx}: {id} ({fi}, {ro}) at [{st}, {en}]. {de}'.format(nx=str(i), id=annos[i][2],
-                                fi=feature_ID, ro=feature_role, st=annos[i][0], en=annos[i][1], de=annos[i][7]))
-                        else:
-                            feature_messages.append('{nx}: {id} ({fi}) at [{st}, {en}]. {de}'.format(nx=str(i), id=annos[i][2],
-                                fi=feature_ID, st=annos[i][0], en=annos[i][1], de=annos[i][7]))
-                    elif len(feature_role) > 0:
-                        feature_messages.append('{nx}: {id} ({fi}, {ro}) at [{st}, {en}]'.format(nx=str(i), id=annos[i][2],
-                            fi=feature_ID, ro=feature_role, st=annos[i][0], en=annos[i][1]))
-                    else:
-                        feature_messages.append('{nx}: {id} ({fi}) at [{st}, {en}]'.format(nx=str(i), id=annos[i][2],
-                            fi=feature_ID, st=annos[i][0], en=annos[i][1]))
-                elif keep_flat:
-                    kept_indices.append(i)
-            else:
-                feature_identity = target_definition.components.get(annos[i][5]).definition
-
-                if ask_user:
-                    feature_definition = doc.getComponentDefinition(feature_identity)
-                    
-                    if feature_definition.name is None:
-                        feature_ID = feature_definition.displayId
-                    else:
-                        feature_ID = feature_definition.name
-
-                    feature_role = cls.get_common_role(feature_definition.roles)
-
-                    feature_description = feature_definition.description
-
-                    if feature_description and len(feature_description) > 0:
-                        if len(feature_role) > 0:
-                            feature_messages.append('{nx}: {id} ({fi}, {ro}) at [{st}, {en}]. {de}'.format(nx=str(i), id=feature_identity,
-                                fi=feature_ID, ro=feature_role, st=annos[i][0], en=annos[i][1], de=feature_description))
-                        else:
-                            feature_messages.append('{nx}: {id} ({fi}) at [{st}, {en}]. {de}'.format(nx=str(i), id=feature_identity,
-                                fi=feature_ID, st=annos[i][0], en=annos[i][1], de=feature_description))
-                    elif len(feature_role) > 0:
-                        feature_messages.append('{nx}: {id} ({fi}, {ro}) at [{st}, {en}]'.format(nx=str(i), id=feature_identity,
-                            fi=feature_ID, ro=feature_role, st=annos[i][0], en=annos[i][1]))
-                    else:
-                        feature_messages.append('{nx}: {id} ({fi}) at [{st}, {en}]'.format(nx=str(i), id=feature_identity,
-                            fi=feature_ID, st=annos[i][0], en=annos[i][1]))
-                elif not canonical_library or canonical_library.has_feature(feature_identity):
-                    kept_indices.append(i)
-
-        if ask_user:
-            if target_definition.name is None:
-                target_ID = target_definition.displayId
-            else:
-                target_ID = target_definition.name
-
-            select_message = 'There appear to be redundant features in {pi}:\n{fm}\nPlease select which ones to \
-remove if any (comma-separated list of indices, for example 0,2,5):\n'.format(fm='\n'.join(feature_messages),
-                                                                              pi=target_ID)
-
-            selected_message = input(select_message)
-
-            try:
-                selected_indices = [int(si.strip()) for si in selected_message.split(',')]
-            except ValueError:
-                selected_indices = []
-
-            return set(selected_indices)
-        else:
-            return set(range(0, len(annos))).difference(set(kept_indices))
-
-    def __filter_annotations(self, annos, target_definition):
-        for i in range(len(annos) - 1, -1, -1):
-            if annos[i][5] is None:
-                feature_identity = annos[i][2]
-
-                feature_roles = annos[i][6]
-            else:
-                feature_identity = target_definition.components.get(annos[i][5]).definition
-
-                feature_roles = set(self.feature_library.get_definition(feature_identity).roles)
-
-            if len(feature_roles.intersection(self.roles)) == 0:
-                target_definition.sequenceAnnotations.remove(annos[i][2])
-
-                if annos[i][5]:
-                    target_definition.components.remove(annos[i][5])
-
-                self.logger.debug('Removed %s at [%s, %s] in %s', feature_identity, annos[i][0], annos[i][1],
-                              target_definition.identity)
-
-                del annos[i]
-
-    def __are_swappable(self, anno, sub_part_anno, target_definition):
-        if not anno[5] and sub_part_anno[5] and anno[0] == sub_part_anno[0] and anno[1] == sub_part_anno[1]:
-            feature_identity = target_definition.components.get(sub_part_anno[5]).definition
-
-            feature_definition = self.feature_library.get_definition(feature_identity)
-
-            return (not Feature.has_non_generic_role(anno[6]) or
-                    anno[6] == set(feature_definition.roles))
-        else:
-            return False
-
-    def __swap_annotations(self, anno, sub_part_anno, target_definition):
-        seq_anno = target_definition.sequenceAnnotations.get(anno[2])
-
-        seq_anno.roles = []
-        seq_anno.component = sub_part_anno[5]
-
-        target_definition.sequenceAnnotations.remove(sub_part_anno[2])
-
-        self.logger.debug('Removed %s at [%s, %s] in %s', sub_part_anno[2], sub_part_anno[0], sub_part_anno[1],
-                      target_definition.identity)
-        self.logger.debug('Modified %s at [%s, %s] in %s to refer to %s', anno[2], anno[0], anno[1],
-                      target_definition.identity, sub_part_anno[5])
-
-    # @classmethod
-    # def __get_annotations(cls, doc, comp_definition):
-    #     cut_annos = [(sa.locations.getCut().at, sa.locations.getCut().at, sa.identity, sa.displayId, sa.name, sa.component, set(sa.roles)) for sa in comp_definition.sequenceAnnotations if len(sa.locations) == 1 and sa.locations[0].getTypeURI() == SBOL_CUT]
-    #     annos = [(sa.locations.getRange().start, sa.locations.getRange().end, sa.identity, sa.displayId, sa.name, sa.component, set(sa.roles)) for sa in comp_definition.sequenceAnnotations if len(sa.locations) == 1 and sa.locations[0].getTypeURI() == SBOL_RANGE]
-            
-    #     annos.extend(cut_annos)
-
-    #     for sub_comp in comp_definition.components:
-    #         try:
-    #             sub_definition = doc.getComponentDefinition(comp_definition.identity)
-    #         except RuntimeError:
-    #             sub_definition = None
-
-    #         if sub_definition is not None:
-    #             annos.extend(cls.__get_annotations(doc, sub_definition))
-
-    #     return annos
-
-    @classmethod
-    def __get_flat_annotation_indices(cls, anno_group):
-        flat_indices = []
-
-        for i in range(0, len(anno_group)):
-            if anno_group[i][5] is None:
-                flat_indices.append(i)
-
-        return flat_indices
-
-    def clean(self, feature_library, annotated_features, annotating_features):
-        self.logger.info('Cleaning up')
-
-        sub_definitions = set()
-
-        for annotated_feature in annotated_features:
-            annotated_doc = feature_library.get_document(annotated_feature.identity)
-            annotated_definition = annotated_doc.getComponentDefinition(annotated_feature.identity)
-
-            sub_IDs = set()
-            temp_sub_definitions = set()
-
-            for comp in annotated_definition.components:
-                sub_IDs.add(comp.displayId)
-                temp_sub_definitions.add(comp.definition)
-            for seq_anno in annotated_definition.sequenceAnnotations:
-                sub_IDs.add(seq_anno.displayId)
-
-            parent_sub_IDs = set()
-
-            for parent_identity in annotated_definition.wasDerivedFrom:
-                parent_doc = feature_library.get_document(parent_identity)
-
-                if parent_doc:
-                    parent_definition = parent_doc.getComponentDefinition(parent_identity)
-
-                    for comp in parent_definition.components:
-                        parent_sub_IDs.add(comp.displayId)
-                    for seq_anno in parent_definition.sequenceAnnotations:
-                        parent_sub_IDs.add(seq_anno.displayId)
-
-            if len(sub_IDs) == len(parent_sub_IDs) and len(sub_IDs) == len(sub_IDs.intersection(parent_sub_IDs)):
-                annotated_doc.componentDefinitions.remove(annotated_feature.identity)
-
-                self.logger.debug('Removed %s from %s', annotated_feature.identity, annotated_doc.name)
-            else:
-                sub_definitions.update(temp_sub_definitions)
-
-        for annotating_feature in annotating_features:
-            if annotating_feature.identity not in sub_definitions:
-                annotating_doc = feature_library.get_document(annotating_feature.identity)
-                annotating_definition = annotating_doc.getComponentDefinition(annotating_feature.identity)
-
-                annotating_doc.componentDefinitions.remove(annotating_feature.identity)
-                for seq_identity in annotating_definition.sequences:
-                    try:
-                        annotating_doc.sequences.remove(seq_identity)
-                    except ValueError:
-                        pass
-
-                self.logger.debug('Removed %s from %s', annotating_feature.identity, annotating_doc.name)
-
-        self.logger.info('Finished cleaning up')
-
-    def prune(self, target_library, cover_offset, min_target_length, ask_user=True, canonical_library=None,
-              delete_flat=False, keep_flat=True, target_features=[], auto_swap=False, require_sequence=True):
-        target_identities = set()
-        for target_feature in target_features:
-            target_identities.add(target_feature.identity)
-
-        for target in target_library.features:
-            if ((not require_sequence or self.__has_min_length(target, min_target_length))
-                    and (len(target_identities) == 0 or target.identity in target_identities)):
-                self.logger.info('Pruning %s', target.identity)
-
-                target_doc = target_library.get_document(target.identity)
-
-                target_definition = target_doc.getComponentDefinition(target.identity)
-
-                cut_annos = [(sa.locations.getCut().at, sa.locations.getCut().at, sa.identity, sa.displayId, sa.name, sa.component, set(sa.roles), sa.description) for sa in target_definition.sequenceAnnotations if len(sa.locations) == 1 and sa.locations[0].getTypeURI() == sbol2.SBOL_CUT]
-                annos = [(sa.locations.getRange().start, sa.locations.getRange().end, sa.identity, sa.displayId, sa.name, sa.component, set(sa.roles), sa.description) for sa in target_definition.sequenceAnnotations if len(sa.locations) == 1 and sa.locations[0].getTypeURI() == sbol2.SBOL_RANGE]
-                
-                annos.extend(cut_annos)
-
-                if len(self.roles) > 0:
-                    self.__filter_annotations(annos, target_definition)
-
-                annos.sort()
-
-                grouped_annos = [[]]
-
-                for anno in annos:
-                    if len(grouped_annos) > 1 and self.__is_covered(anno, grouped_annos[-2], cover_offset):
-                        grouped_annos[-2].append(anno)
-                    elif self.__is_covered(anno, grouped_annos[-1], cover_offset):
-                        grouped_annos[-1].append(anno)
-                    else:
-                        grouped_annos.append([anno])
-
-                if delete_flat:
-                    for anno_group in grouped_annos:
-                        flat_indices = self.__get_flat_annotation_indices(anno_group)
-
-                        self.__remove_annotations(flat_indices, anno_group, target_definition)
-
-                for anno_group in grouped_annos:
-                    if len(anno_group) > 1:
-                        selected_indices = self.__select_annotations(target_doc, target_definition, anno_group,
-                            ask_user, canonical_library, keep_flat)
-
-                        self.__remove_annotations(selected_indices, anno_group, target_definition)
-
-                for anno_group in grouped_annos:
-                    if ask_user or auto_swap:
-                        if len(anno_group) == 2:
-                            if (self.__are_swappable(anno_group[0], anno_group[1], target_definition) and
-                                    (auto_swap or
-                                    self.__ask_swap_annotations(anno_group[0], anno_group[1], target_definition))):
-                                self.__swap_annotations(anno_group[0], anno_group[1], target_definition)
-                            elif (self.__are_swappable(anno_group[1], anno_group[0], target_definition) and
-                                    (auto_swap or
-                                    self.__ask_swap_annotations(anno_group[1], anno_group[0], target_definition))):
-                                self.__swap_annotations(anno_group[1], anno_group[0], target_definition)
-
-                for anno_group in grouped_annos:
-                    if len(anno_group) > 1:
-                        redundant_URIs = []
-
-                        for anno in anno_group:
-                            if anno[5]:
-                                redundant_URIs.append(target_definition.components.get(anno[5]).definition)
-                            else:
-                                redundant_URIs.append(anno[2])
-
-                        self.logger.debug('Detected potentially redundant sub-parts in %s: %s.',
-                                          target_definition.identity, 
-                                          str(redundant_URIs))
-
-                self.logger.info('Finished pruning %s', target.identity)
 
 def curate(feature_library, target_library, output_library, output_files, extend_features, no_annotation,
            min_feature_length, min_target_length, extension_threshold, extension_suffix, in_place, minimal_output,
            no_pruning, deletion_roles, cover_offset, delete_flat, auto_swap, non_interactive, logger,
-           complete_matches=False, strip_prefixes=[]):
+           complete_matches=False, strip_prefixes=[], flashtext_mapping=True, bwa_mapping=False, minimap2_mapping=False,
+           blastn_mapping=False, exact_match=False, build_index=False):
     if extend_features or not no_annotation:
         feature_annotater = FeatureAnnotater(feature_library, min_feature_length)
     
@@ -1515,11 +571,44 @@ def curate(feature_library, target_library, output_library, output_files, extend
         annotated_features = []
         annotating_features = []
     else:
-        (annotated_features, annotating_features) = feature_curator.annotate_features(feature_annotater,
-                                                                                      min_target_length,
-                                                                                      in_place,
-                                                                                      complete_matches,
-                                                                                      strip_prefixes)
+        if(not flashtext_mapping):
+            doc = target_library.docs[0] 
+            index_prefix = 'test'
+            if(bwa_mapping):
+                print("bwa called index is", index_prefix)
+                bwa = BwaAligner(index_prefix)
+                print("exact match: ", exact_match)
+                output_sam_path = 'aligned.sam'
+                bwa.align(doc, output_sam_path, exact_match)
+                print("doc: ", doc)
+                mapper = SAMFeatureMapper('aligned.sam')
+                inline_matches, rc_matches = mapper.extract_matches(min_feature_length, exact_match)
+                print("inline_matches: ", inline_matches, 
+                      "rc_matches: ", rc_matches, "min_len: ", min_feature_length)
+
+            elif(minimap2_mapping):
+                minimap2 = Minimap2Aligner(index_prefix)
+                output_sam_path = 'aligned.sam'
+                minimap2.align(doc, output_sam_path, exact_match)
+                mapper = SAMFeatureMapper('aligned.sam')
+                inline_matches, rc_matches = mapper.extract_matches(min_feature_length, exact_match)
+
+            elif(blastn_mapping):
+                blast = BlastAligner(index_prefix)
+                blast.align(doc, output_sam_path, exact_match) # True for exact match
+                mapper = TableFeatureMapper('aligned.txt')
+                inline_matches, rc_matches = mapper.extract_matches(min_feature_length, exact_match)
+
+            simple = FeatureAnnotatorSimple(feature_library, inline_matches, rc_matches)
+            print("feature_library: ", feature_library.docs) # bug here, feature_library.docs is empty
+            # this is a different annnotate function, belong to FeatureAnnotatorSimple class
+            simple.annotate(inline_matches, rc_matches, target_library, min_feature_length, in_place=True, output_library=output_library, output_matches=False)#True, in_place=True
+        else:
+            (annotated_features, annotating_features) = feature_curator.annotate_features(feature_annotater,
+                                                                                        min_target_length,
+                                                                                        in_place,
+                                                                                        complete_matches,
+                                                                                        strip_prefixes)
 
         if minimal_output:
             for i in range(0, len(output_library.docs)):
@@ -1582,6 +671,19 @@ def download_sequences(doc, synbiohub):
                         logger.warning('Unable to download sequence %s, seq_URI)')
                     else:
                         raise
+# run it the first time                  
+def build_indexes(feature_docs):
+    tmp = FeatureExtractor(feature_docs)
+    fasta_path = 'test.fasta' #'/home/sophia/git_repo/SYNBICT/example/test.fasta'
+    index_prefix = 'test'
+    tmp.write_fasta(fasta_path)
+    #tmp.write_metadata('test_metadata.json') # '/home/sophia/git_repo/SYNBICT/example/test_metadata.json'
+    # build index for bwa
+    tmp.build_index(fasta_path, index_prefix, 'bwa')
+    # build index for blastn
+    tmp.build_index(fasta_path, index_prefix, 'blast')
+    # build index for minimap2
+    tmp.build_index(fasta_path, index_prefix, 'minimap2')
 
 def main(args=None):
     if args is None:
@@ -1623,6 +725,14 @@ def main(args=None):
     parser.add_argument('-w', '--password', nargs='?', default=None)
     parser.add_argument('-F', '--feature_URLs', nargs='*', default=[])
     parser.add_argument('-T', '--target_URLs', nargs='*', default=[])
+    
+    # Mapping method arguments
+    parser.add_argument('-flashText', '--flashText_mapping', action='store_true')
+    parser.add_argument('-bwa', '--bwa_mapping', action='store_true')
+    parser.add_argument('-minimap2', '--minimap2_mapping', action='store_true')
+    parser.add_argument('-blastn', '--blastn_mapping', action='store_true')
+    parser.add_argument('-exact', '--exact_mapping', action='store_true')
+    parser.add_argument('-bi', '--build_index', action='store_true')
     
     args = parser.parse_args(args)
 
@@ -1746,84 +856,62 @@ def main(args=None):
                     raise
 
     feature_library = FeatureLibrary(feature_docs)
-
-    if args.extend_features:
-        target_docs = []
-
-        for target_file in target_files:
-            target_docs.append(load_target_file(target_file))
-
-        if synbiohub:
-            for target_URL in args.target_URLs:
-                target_doc = sbol2.Document()
-
-                try:
-                    synbiohub.pull(target_URL, target_doc)
-
-                    download_sequences(target_doc, synbiohub)
-
-                    target_docs.append(target_doc)
-                except NotFoundError as exc:
-                    target_docs.append(None)
-
-                    if is_sbol_not_found(exc):
-                        logger.warning('Unable to find target URL %s at %s', target_URL, sbh_URL)
-                    else:
-                        raise
-
-        filtered_output_files = [output_files[i] for i in range(0, len(target_docs)) if target_docs[i]]
-
-        target_docs = [target_docs[i] for i in range(0, len(target_docs)) if target_docs[i]]
-
-        target_library = FeatureLibrary(target_docs, False)
-
-        if args.minimal_output:
-            output_docs = [sbol2.Document() for i in range(0, len(target_library.docs))]
-        else:
-            output_docs = []
-
-        output_library = FeatureLibrary(output_docs, False)
-
-        curate(feature_library, target_library, output_library, filtered_output_files, args.extend_features,
-               args.no_annotation, int(args.min_feature_length), int(args.min_target_length),
-               float(args.extension_threshold), args.extension_suffix, args.in_place, args.minimal_output,
-               args.no_pruning, args.deletion_roles, int(args.cover_offset), args.delete_flat, args.auto_swap,
-               args.non_interactive, logger, args.complete_matches, args.strip_prefixes)
+    # test here
+    print("line 860 feature_library docs: ", feature_library.docs)
+    
+    # build index for blastn, bwa, minimap2, this is pre-calculated for fast mode
+    if args.build_index:
+        build_indexes(feature_docs)
+        logger.info('Finished building indexes')
+        
     else:
-        for i in range(0, len(target_files)):
-            target_doc = load_target_file(target_files[i])
 
-            if target_doc:
-                target_library = FeatureLibrary([target_doc], False)
+        if args.extend_features:
+            target_docs = []
 
-                if args.minimal_output:
-                    output_docs = [sbol2.Document()]
-                else:
-                    output_docs = []
+            for target_file in target_files:
+                target_docs.append(load_target_file(target_file))
 
-                output_library = FeatureLibrary(output_docs, False)
-
-                curate(feature_library, target_library, output_library, [output_files[i]], args.extend_features,
-                       args.no_annotation, int(args.min_feature_length), int(args.min_target_length),
-                       float(args.extension_threshold), args.extension_suffix, args.in_place, args.minimal_output,
-                       args.no_pruning, args.deletion_roles, int(args.cover_offset), args.delete_flat, args.auto_swap,
-                       args.non_interactive, logger, args.complete_matches, args.strip_prefixes)
-
-        if synbiohub:
-            for target_URL in args.target_URLs:
-                try:
+            if synbiohub:
+                for target_URL in args.target_URLs:
                     target_doc = sbol2.Document()
 
-                    synbiohub.pull(target_URL, target_doc)
+                    try:
+                        synbiohub.pull(target_URL, target_doc)
 
-                    download_sequences(target_doc, synbiohub)
-                except NotFoundError as exc:
-                    if is_sbol_not_found(exc):
-                        logger.warning('Unable to find target URL %s at %s', target_URL, sbh_URL)
-                    else:
-                        raise
+                        download_sequences(target_doc, synbiohub)
 
-                    target_doc = None
+                        target_docs.append(target_doc)
+                    except NotFoundError as exc:
+                        target_docs.append(None)
+
+                        if is_sbol_not_found(exc):
+                            logger.warning('Unable to find target URL %s at %s', target_URL, sbh_URL)
+                        else:
+                            raise
+
+            filtered_output_files = [output_files[i] for i in range(0, len(target_docs)) if target_docs[i]]
+
+            target_docs = [target_docs[i] for i in range(0, len(target_docs)) if target_docs[i]]
+
+            target_library = FeatureLibrary(target_docs, False)
+
+            if args.minimal_output:
+                output_docs = [sbol2.Document() for i in range(0, len(target_library.docs))]
+            else:
+                output_docs = []
+
+            output_library = FeatureLibrary(output_docs, False)
+
+            curate(feature_library, target_library, output_library, filtered_output_files, args.extend_features,
+                args.no_annotation, int(args.min_feature_length), int(args.min_target_length),
+                float(args.extension_threshold), args.extension_suffix, args.in_place, args.minimal_output,
+                args.no_pruning, args.deletion_roles, int(args.cover_offset), args.delete_flat, args.auto_swap,
+                args.non_interactive, logger, args.complete_matches, args.strip_prefixes, args.flashText_mapping,
+                        args.bwa_mapping, args.minimap2_mapping, args.blastn_mapping, args.exact_mapping, args.build_index)
+        else:
+            for i in range(0, len(target_files)):
+                target_doc = load_target_file(target_files[i])
 
                 if target_doc:
                     target_library = FeatureLibrary([target_doc], False)
@@ -1836,12 +924,46 @@ def main(args=None):
                     output_library = FeatureLibrary(output_docs, False)
 
                     curate(feature_library, target_library, output_library, [output_files[i]], args.extend_features,
-                           args.no_annotation, int(args.min_feature_length), int(args.min_target_length),
-                           float(args.extension_threshold), args.extension_suffix, args.in_place, args.minimal_output,
-                           args.no_pruning, args.deletion_roles, int(args.cover_offset), args.delete_flat, args.auto_swap,
-                           args.non_interactive, logger, args.complete_matches, args.strip_prefixes)
+                        args.no_annotation, int(args.min_feature_length), int(args.min_target_length),
+                        float(args.extension_threshold), args.extension_suffix, args.in_place, args.minimal_output,
+                        args.no_pruning, args.deletion_roles, int(args.cover_offset), args.delete_flat, args.auto_swap,
+                        args.non_interactive, logger, args.complete_matches, args.strip_prefixes, args.flashText_mapping,
+                        args.bwa_mapping, args.minimap2_mapping, args.blastn_mapping, args.exact_mapping, args.build_index)
 
-    logger.info('Finished curating')
+            if synbiohub:
+                for target_URL in args.target_URLs:
+                    try:
+                        target_doc = sbol2.Document()
+
+                        synbiohub.pull(target_URL, target_doc)
+
+                        download_sequences(target_doc, synbiohub)
+                    except NotFoundError as exc:
+                        if is_sbol_not_found(exc):
+                            logger.warning('Unable to find target URL %s at %s', target_URL, sbh_URL)
+                        else:
+                            raise
+
+                        target_doc = None
+
+                    if target_doc:
+                        target_library = FeatureLibrary([target_doc], False)
+
+                        if args.minimal_output:
+                            output_docs = [sbol2.Document()]
+                        else:
+                            output_docs = []
+
+                        output_library = FeatureLibrary(output_docs, False)
+
+                        curate(feature_library, target_library, output_library, [output_files[i]], args.extend_features,
+                            args.no_annotation, int(args.min_feature_length), int(args.min_target_length),
+                            float(args.extension_threshold), args.extension_suffix, args.in_place, args.minimal_output,
+                            args.no_pruning, args.deletion_roles, int(args.cover_offset), args.delete_flat, args.auto_swap,
+                            args.non_interactive, logger, args.complete_matches, args.strip_prefixes, args.flashText_mapping,
+                        args.bwa_mapping, args.minimap2_mapping, args.blastn_mapping, args.exact_mapping, args.build_index)
+
+        logger.info('Finished curating')
 
 if __name__ == '__main__':
     main()

@@ -1,7 +1,7 @@
 # write an Annotator python class, that read sam file and convert the alignment result and find the coresponding metadata dictionary from FeatureExtractor class or from the saved json file to find the metadata and wrtie all this insert into a SBOL file.
 from os import read
 from FeatureAnnotatorBase import FeatureAnnotatorSimple
-from sequences_to_features import Feature
+from Feature import Feature
 import json, pysam, math
 class TableFeatureMapper:
     def __init__(self, tab_path, min_mapq=20):
@@ -15,7 +15,7 @@ class TableFeatureMapper:
         with open(metadata_path, "r") as f:
             return json.load(f)
 
-    def extract_matches(self, exact_match=True, min_feature_length=40):
+    def extract_matches(self, min_feature_length=40, exact_match=True):
         blast_output = self.tab_path # error, filename error
         with open(blast_output) as f:
             for line in f:
@@ -116,7 +116,7 @@ class SAMFeatureMapper:
 
         return read.reference_name, query_start, query_end
 
-    def extract_matches(self, exact_match=True, min_feature_length=40, is_bowtie2=False): # need change back
+    def extract_matches(self, min_feature_length=40, exact_match=True, is_bowtie2=False): # need change back
         try:
             samfile = pysam.AlignmentFile(self.sam_path, "r")
             for aln in samfile.fetch(until_eof=True):    
