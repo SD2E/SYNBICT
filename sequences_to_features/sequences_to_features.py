@@ -305,7 +305,6 @@ class FeatureAnnotater():
                                                       sub_comp.identity)
 
                     if copy_definitions:
-                        #print("is this called?")
                         feature_doc = self.feature_library.get_document(feature.identity)
 
                         FeatureLibrary.copy_component_definition(feature_definition, feature_doc, target_doc)
@@ -454,7 +453,6 @@ class FeatureAnnotater():
 
         for target in target_library.features:
             if self.__has_min_length(target, min_target_length):
-                print("Logic 1")
                 self.logger.info('Annotating %s', target.identity)
 
                 inline_elements = ' '.join(target.nucleotides)
@@ -464,20 +462,16 @@ class FeatureAnnotater():
                 rc_matches = self.feature_matcher.extract_keywords(rc_elements, span_info=True)
 
                 if len(inline_matches) > 0 or len(rc_matches) > 0:
-                    print("Logic 1.1")
                     target_doc = target_library.get_document(target.identity)
 
                     target_definition = target_doc.getComponentDefinition(target.identity)
 
                     doc_index = target_library.get_document_index(target.identity)
                     
-                    print("doc_index: ", doc_index, len(output_library.docs))
                     if output_library and doc_index < len(output_library.docs):
-                        print("logic 1.1.1")
                         output_doc = output_library.docs[doc_index]
 
                         if in_place:
-                            print("logic 1.1.1.1")
                             definition_copy = FeatureLibrary.copy_component_definition(target_definition,
                                                                                        target_doc,
                                                                                        output_doc,
@@ -485,7 +479,6 @@ class FeatureAnnotater():
                                                                                        shallow_copy=True,
                                                                                        strip_prefixes=strip_prefixes)
                         else:
-                            print("logic 1.1.1.2")
                             definition_copy = FeatureLibrary.copy_component_definition(target_definition,
                                                                                        target_doc,
                                                                                        output_doc, True,
@@ -493,17 +486,14 @@ class FeatureAnnotater():
                                                                                        shallow_copy=True,
                                                                                        strip_prefixes=strip_prefixes)
                     elif in_place:
-                        print("logic 1.1.2")
                         definition_copy = target_definition
                     else:
-                        print("logic 1.1.3")
                         definition_copy = FeatureLibrary.copy_component_definition(target_definition, target_doc,
                                                                                    target_doc, True,
                                                                                    min_target_length,
                                                                                    strip_prefixes=strip_prefixes)
 
                     if definition_copy:
-                        print("logic 2")
                         copy_definitions = (not output_library or doc_index >= len(output_library.docs))
 
                         output_match_list = self.__process_feature_matches(target_doc,
@@ -527,16 +517,13 @@ class FeatureAnnotater():
 
                         annotated_identities.append(definition_copy.identity)
                     else:
-                        print("logic 2.1")
                         self.logger.warning('%s was not annotated because its version could not be incremented.',
                                         target.identity)
 
                 self.logger.info('Finished annotating %s', target.identity)
         if output_matches:
-            print("logic 3")
             return annotated_identities, output_match_lists
         else:
-            print("logic 3.1")
             return annotated_identities
 
 def curate(feature_library, target_library, output_library, output_files, extend_features, no_annotation,
@@ -575,16 +562,11 @@ def curate(feature_library, target_library, output_library, output_files, extend
             doc = target_library.docs[0] 
             index_prefix = 'test'
             if(bwa_mapping):
-                print("bwa called index is", index_prefix)
                 bwa = BwaAligner(index_prefix)
-                print("exact match: ", exact_match)
                 output_sam_path = 'aligned.sam'
                 bwa.align(doc, output_sam_path, exact_match)
-                print("doc: ", doc)
                 mapper = SAMFeatureMapper('aligned.sam')
                 inline_matches, rc_matches = mapper.extract_matches(min_feature_length, exact_match)
-                print("inline_matches: ", inline_matches, 
-                      "rc_matches: ", rc_matches, "min_len: ", min_feature_length)
 
             elif(minimap2_mapping):
                 minimap2 = Minimap2Aligner(index_prefix)
@@ -600,7 +582,6 @@ def curate(feature_library, target_library, output_library, output_files, extend
                 inline_matches, rc_matches = mapper.extract_matches(min_feature_length, exact_match)
 
             simple = FeatureAnnotatorSimple(feature_library, inline_matches, rc_matches)
-            print("feature_library: ", feature_library.docs) # bug here, feature_library.docs is empty
             # this is a different annnotate function, belong to FeatureAnnotatorSimple class
             simple.annotate(inline_matches, rc_matches, target_library, min_feature_length, in_place=True, output_library=output_library, output_matches=False)#True, in_place=True
         else:
@@ -857,7 +838,6 @@ def main(args=None):
 
     feature_library = FeatureLibrary(feature_docs)
     # test here
-    print("line 860 feature_library docs: ", feature_library.docs)
     
     # build index for blastn, bwa, minimap2, this is pre-calculated for fast mode
     if args.build_index:

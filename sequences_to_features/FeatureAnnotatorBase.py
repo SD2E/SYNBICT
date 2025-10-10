@@ -1,7 +1,9 @@
 import logging
 from FeaturePruner import FeaturePruner
 from FeatureLibrary import FeatureLibrary
+from Feature import Feature
 import sbol2
+from Bio.Seq import Seq
 # run this after alignment, input is inline_matches, output is sbol
 # Set up the not found error for catching
 try:
@@ -97,55 +99,50 @@ class FeatureAnnotatorSimple:
                 i = -1
 
         return seq_anno
-
-    def __process_feature_matches(self, target_doc, target_definition, feature_matches, orientation, target_length,
+    # target_definition is 
+    def process_feature_matches(self, target_doc, target_definition, feature_matches, orientation, target_length,
                                   copy_definitions=False, complete_matches=False, output_matches=False):
-        print("target_definition: ", target_definition)
-        print("feature_matches: ", feature_matches)
-        print("orientation: ", orientation)
-        print("target_length: ", target_length)
-        print("copy_definitions: ", copy_definitions)
-        print("complete_matches: ", complete_matches)
-        print("output_matches: ", output_matches)
               
         output_match_list = []
         for feature_match in feature_matches:
             start = feature_match[1]
             end = feature_match[2]
-            print("feature_match: ", feature_match, feature_match[0])
             for feature in feature_match[0]: 
                 if end - start < target_length or complete_matches:
-                    print("feature: ", feature, feature.identity)
-                    # optimized version of feature_definition = feature_matches[0][0], it should include name
-                    feature_definition = self.feature_library.get_definition(feature.identity) # this can be optimized to includes only the attributes needed, add name to Feature
-                    print("feature_definition: ", feature_definition)
+                    feature_definition = self.feature_library.get_definition(feature.identity) 
                     if feature_definition.name is None:
                         feature_ID = feature_definition.displayId
                     else:
                         feature_ID = feature_definition.name
-
+                    feature_doc = self.feature_library.get_document(feature.identity)
                     feature_role = FeaturePruner.get_common_role(feature_definition.roles)
-
-                    sub_comp = self.__create_sub_component(target_definition, feature_definition)
-                    self.__create_sequence_annotation(target_definition, feature_definition, orientation, start, end,
-                                                      sub_comp.identity)
-
-                    if copy_definitions: # False
-                        print("is 121 this called?")
-                        # optimized version is replace here by a dictionary
-                        feature_doc = self.feature_library.get_document(feature.identity)
-
-                        FeatureLibrary.copy_component_definition(feature_definition, feature_doc, target_doc)
+                    target_nucleotides = target_definition.sequence.elements[start:end].upper()
+                    rc_target_nucleotides = str(Seq(target_nucleotides).reverse_complement()).upper()
+                    feature_seqs = FeatureLibrary.get_DNA_sequences(feature_definition, feature_doc)
+                    feature_nucleotides = feature_seqs[0].elements.upper()
+                    exact_match = (target_nucleotides == feature_nucleotides or rc_target_nucleotides == feature_nucleotides)
                     
-                    if output_matches: # False
-                        print("is 128 this called?")
-                        output_match_list.append({'feature_identity': feature_definition.identity,
-                                                  'feature_ID':feature_ID,
-                                                  'role': feature_role,
-                                                  'start': start,
-                                                  'end': end,
-                                                  'orientation': orientation,
-                                                  'target_identity': target_definition.identity})
+                    if (exact_match):
+                        sub_comp = self.__create_sub_component(target_definition, feature_definition)
+                        self.__create_sequence_annotation(target_definition, feature_definition, orientation, start, end,
+                                                        sub_comp.identity)
+                        if copy_definitions: 
+                            FeatureLibrary.copy_component_definition(feature_definition, feature_doc, target_doc)
+                            
+                    else:
+                        variant_definition = FeatureLibrary.copy_component_definition(feature_definition,
+                            feature_doc, feature_doc, import_namespace=True, import_sequences=True,
+                            seq_elements=target_nucleotides, parent_definitions=[target_definition],
+                            parent_doc=target_doc, make_variant=True, strip_prefixes=[])
+                        if variant_definition:
+                            sub_identities = []
+                            for sub_comp in variant_definition.components:
+                                sub_identities.append(sub_comp.definition)
+                        self.feature_library.update()
+                        sub_comp = self.__create_sub_component(target_definition, variant_definition)
+                        self.__create_sequence_annotation(target_definition, variant_definition, orientation, start, end,
+                                                    sub_comp.identity)
+                        FeatureLibrary.copy_component_definition(variant_definition, feature_doc, target_doc)
 
                     self.logger.debug('Annotated %s (%s, %s) at [%s, %s] in %s',
                                       feature_definition.identity,
@@ -156,70 +153,38 @@ class FeatureAnnotatorSimple:
                                       target_definition.identity)
         return output_match_list 
 
-    # this function become the encapsulate insert the inline_matches or rc_matches to sbol
-    # only test until this function, other functions is not inside the test
     def annotate(self, inline_matches, rc_matches, target_library, min_target_length, in_place=True, output_library=None, complete_matches=False,
-                 strip_prefixes=[], output_matches=False):
+                 strip_prefixes=[], output_matches=False, exact_match=True):
         annotated_identities = []
         output_match_lists = []
-
         for target in target_library.features:
             if self.__has_min_length(target, min_target_length):
                 self.logger.info('Annotating %s', target.identity)
-
+                
                 if len(inline_matches) > 0 or len(rc_matches) > 0:
-                    #print("Logic 1.1")
                     target_doc = target_library.get_document(target.identity)
 
                     target_definition = target_doc.getComponentDefinition(target.identity)
 
                     doc_index = target_library.get_document_index(target.identity)
                     
-                    if output_library and doc_index < len(output_library.docs):
-                        #print("logic 1.1.1")
-                        output_doc = output_library.docs[doc_index]
-
-                        if in_place:
-                            #print("logic 1.1.1.1")
-                            definition_copy = FeatureLibrary.copy_component_definition(target_definition,
-                                                                                       target_doc,
-                                                                                       output_doc,
-                                                                                       min_seq_length=min_target_length,
-                                                                                       shallow_copy=True,
-                                                                                       strip_prefixes=strip_prefixes)
-                        else:
-                            #print("logic 1.1.1.2")
-                            definition_copy = FeatureLibrary.copy_component_definition(target_definition,
-                                                                                       target_doc,
-                                                                                       output_doc, True,
-                                                                                       min_target_length,
-                                                                                       shallow_copy=True,
-                                                                                       strip_prefixes=strip_prefixes)
-                    elif in_place: # here, in_place is True
-                        print("logic 1.1.2")
-                        definition_copy = target_definition
-                    else:
-                        #print("logic 1.1.3")
-                        definition_copy = FeatureLibrary.copy_component_definition(target_definition, target_doc,
-                                                                                   target_doc, True,
-                                                                                   min_target_length,
-                                                                                   strip_prefixes=strip_prefixes)
+                    definition_copy = target_definition
 
                     if definition_copy:
-                        #print("logic 2")
-                        copy_definitions = (not output_library or doc_index >= len(output_library.docs)) # was true, how to make it false
+                        copy_definitions = (not output_library or doc_index >= len(output_library.docs))
+                        if(in_place):
+                            copy_definitions = False
 
-                        output_match_list = self.__process_feature_matches(target_doc,
+                        output_match_list = self.process_feature_matches(target_doc,
                                                                            definition_copy,
                                                                            inline_matches,
                                                                            sbol2.SBOL_ORIENTATION_INLINE,
                                                                            len(target.nucleotides),
-                                                                           copy_definitions=False,# I set it to false
+                                                                           copy_definitions,
                                                                            complete_matches=complete_matches,
                                                                            output_matches=output_matches)
-                        #print("rc_matches: ", rc_matches)
                         if(len(rc_matches) > 0):
-                            output_match_list.extend(self.__process_feature_matches(target_doc,
+                            output_match_list.extend(self.process_feature_matches(target_doc,
                                                                                     definition_copy,
                                                                                     rc_matches,
                                                                                     sbol2.SBOL_ORIENTATION_REVERSE_COMPLEMENT,
@@ -231,14 +196,11 @@ class FeatureAnnotatorSimple:
 
                         annotated_identities.append(definition_copy.identity)
                     else:
-                        #print("logic 2.1")
                         self.logger.warning('%s was not annotated because its version could not be incremented.',
                                         target.identity)
 
                 self.logger.info('Finished annotating %s', target.identity)
         if output_matches:
-            #print("logic 3")
             return annotated_identities, output_match_lists
         else:
-            #print("logic 3.1")
             return annotated_identities

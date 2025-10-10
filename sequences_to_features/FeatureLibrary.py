@@ -191,8 +191,6 @@ class FeatureLibrary():
             return -1
 
     def get_definition(self, identity):
-        print("debug identity: ", identity)
-        print("debug doc index: ", self.get_document_index(identity))
         return self.get_document(identity).getComponentDefinition(identity)
 
     def get_definitions_by_name(self, name):
@@ -434,10 +432,8 @@ class FeatureLibrary():
             seqs = cls.get_DNA_sequences(comp_definition, source_doc)
         else:
             seqs = cls.get_sequences(comp_definition, source_doc)
-        #print("min_seq_length: ", min_seq_length)
         if min_seq_length == 0 or (len(seqs) > 0 and len(seqs[0].elements) >= min_seq_length):
             namespace = '/'.join(comp_definition.identity.split('/')[:-2])
-            #print("import_namespace: ", import_namespace)
             if import_namespace:
                 if namespace == sbol2.getHomespace():
                     try:
@@ -446,7 +442,6 @@ class FeatureLibrary():
                         return None
 
                     try:
-                        #print("namespace: ", namespace)
                         definition_copy = comp_definition.copy(sink_doc, namespace, str(version + 1))
                     except RuntimeError:
                         return sink_doc.getComponentDefinition('/'.join([sbol2.getHomespace(),
@@ -485,10 +480,8 @@ class FeatureLibrary():
                 if make_variant:
                     cls.make_variant_definition(sink_doc, definition_copy)
             else:
-                #print("Else")
                 try:
                     sink_doc.getComponentDefinition(comp_definition.identity)
-                    #print("Sink doc has comp def")
                     return None
                 except RuntimeError:
                     definition_copy = comp_definition.copy(sink_doc)
@@ -497,7 +490,6 @@ class FeatureLibrary():
                         definition_copy = comp_definition.copy(sink_doc)
                     else:
                         raise
-            #print("Run to here")
             if shallow_copy:
                 definition_copy.sequences = list(comp_definition.sequences)
             elif import_sequences:
