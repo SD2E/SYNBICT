@@ -1,4 +1,3 @@
-from importlib import simple
 import logging
 import argparse
 import os
@@ -62,7 +61,8 @@ def is_sbol_not_found(exc):
         or exc.error_code() == sbol2.SBOLErrorCode.NOT_FOUND_ERROR)
 
 def load_sbol(sbol_file):
-    logger = logging.getLogger('synbict')
+    print("SYNBICT2")
+    logger = logging.getLogger('synbict2')
 
     logger.info('Loading %s', sbol_file)
 
