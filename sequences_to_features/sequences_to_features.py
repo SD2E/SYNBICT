@@ -1,7 +1,6 @@
 import logging
 import argparse
 import os
-from pydoc import doc
 import sys
 import requests
 import json
@@ -9,16 +8,16 @@ import json
 from Bio.Seq import Seq
 from Bio import Align
 import sbol2
-from Feature import Feature
-from FeatureLibrary import FeatureLibrary 
-from FeaturePruner import FeaturePruner
+from .Feature import Feature
+from .FeatureLibrary import FeatureLibrary 
+from .FeaturePruner import FeaturePruner
 from flashtext import KeywordProcessor
-from Annotator import SAMFeatureMapper, TableFeatureMapper
-from FeatureAnnotatorBase import FeatureAnnotatorSimple
-from FeatureExtractor import FeatureExtractor
-from BwaAligner import BwaAligner
-from BlastAligner import BlastAligner
-from Minimap2Aligner import Minimap2Aligner
+from .Annotator import SAMFeatureMapper, TableFeatureMapper
+from .FeatureAnnotatorBase import FeatureAnnotatorSimple
+from .FeatureExtractor import FeatureExtractor
+from .BwaAligner import BwaAligner
+from .BlastAligner import BlastAligner
+from .Minimap2Aligner import Minimap2Aligner
 
 # import time
 

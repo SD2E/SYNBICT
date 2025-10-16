@@ -1,5 +1,5 @@
 import sbol2
-import Feature
+from .Feature import Feature
 import logging
 
 class FeaturePruner():

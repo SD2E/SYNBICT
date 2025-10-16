@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "SYNBICT"
+version = "2.0"
+description = "Synthetic Biology Curation Tools (SYNBICT)"
+readme = "README.md"                     
+requires-python = ">=3.11"                 
+authors = [
+  { name = "Nicholas Roehner", email = "nicholasroehner@gmail.com" },
+  { name = "Chunxiao Liao", email = "sophia2014cs@gmail.com" }
+]
+license = { text = "MIT" }                  
+keywords = ["synthetic biology", "curation", "genomics"]
+
+# Only third-party Python packages you import at runtime.
+# (Do NOT list external tools like minimap2/bwa/blast here.)
+dependencies = [
+  "biopython>=1.78",
+  "dnaplotlib>=1.0",
+  "flashtext>=2.7",
+  "sbol2>=1.3",
+  "matplotlib>=1.5.0",
+  "pysam>=0.23.3"
+]
+
+classifiers = [
+  "Programming Language :: Python :: 3 :: Only"
+]
+
+[project.urls]
+Homepage = "https://github.com/SD2E/SYNBICT"
+Repository = "https://github.com/SD2E/SYNBICT"
+Download = "https://github.com/SD2E/SYNBICT/archive/refs/tags/v2.0.tar.gz" # change to 2.0 URL
+
+[tool.setuptools]
+# default package discovery works; keep this section if you want to customize
+
+[tool.setuptools.packages.find]
+where = ["."]
+exclude = ["tests*", "docs*"]

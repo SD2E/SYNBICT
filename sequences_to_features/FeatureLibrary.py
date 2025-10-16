@@ -1,6 +1,6 @@
 import sbol2
 import logging
-from Feature import Feature
+from .Feature import Feature
 try:
     # SBOLError is in the native python module
     NotFoundError = sbol2.SBOLError

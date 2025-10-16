@@ -1,7 +1,7 @@
 import logging
-from FeaturePruner import FeaturePruner
-from FeatureLibrary import FeatureLibrary
-from Feature import Feature
+from .FeaturePruner import FeaturePruner
+from .FeatureLibrary import FeatureLibrary
+
 import sbol2
 from Bio.Seq import Seq
 # run this after alignment, input is inline_matches, output is sbol

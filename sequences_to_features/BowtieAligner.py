@@ -1,7 +1,7 @@
 import subprocess
 import tempfile
-from sbol_utils import sbol_sequence
-from Aligner import Aligner
+from .sbol_utils import sbol_sequence
+from .Aligner import Aligner
 class BowtieAligner(Aligner):
     def __init__(self, index_prefix):
         super().__init__(index_prefix)

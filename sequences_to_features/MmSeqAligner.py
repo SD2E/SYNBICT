@@ -1,7 +1,7 @@
 import subprocess
 import tempfile, os, glob
-from sbol_utils import sbol_sequence
-from Aligner import Aligner
+from .sbol_utils import sbol_sequence
+from .Aligner import Aligner
 
 
 class MmseqAligner(Aligner):

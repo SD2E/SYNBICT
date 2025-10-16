@@ -1,7 +1,7 @@
 import subprocess
 import tempfile
-from sbol_utils import sbol_sequence
-from Aligner import Aligner
+from .sbol_utils import sbol_sequence
+from .Aligner import Aligner
 
 
 class BwaAligner(Aligner):

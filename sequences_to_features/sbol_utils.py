@@ -1,7 +1,7 @@
 import json
 import requests
 import sbol2
-import logging
+
 
 # for only 1 sequence
 def sbol_sequence(doc):

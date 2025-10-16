@@ -1,0 +1,15 @@
+name: synbict_conda
+channels: [bioconda, conda-forge]
+dependencies:
+  - python=3.11
+  - minimap2=2.29
+  - bwa=0.7.19
+  - blast=2.16.0
+  - pip
+  - numpy=1.26.4
+  - matplotlib>=1.5.0
+  - requests=2.32.5
+  - biopython>=1.78
+  - pysam>=0.23.3
+  - flashtext>=2.7
+
