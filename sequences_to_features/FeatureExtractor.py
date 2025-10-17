@@ -2,6 +2,7 @@ import sbol2
 import subprocess
 import json
 import logging
+from collections.abc import Mapping, Iterable
 
 # SBOL ➜ FASTA + metadata + indexing (one-time) 
 class FeatureExtractor():
@@ -11,24 +12,41 @@ class FeatureExtractor():
         self.__extract_features(docs, require_sequence)
 
     def __extract_features(self, docs, require_sequence):
-        for doc_index, doc in enumerate(docs):
-            if(len(doc.componentDefinitions) == 0):
-                logging.warning(f"No component definitions found in document {doc_index}. Skipping.")
+        """
+        Accepts:
+        - dict-like: {label: doc}
+        - list/tuple of docs
+        - single doc object
+        Appends (id, seq) tuples to self.fasta_records.
+        """
+
+        # --- normalize to an iterator of (label, doc) ---
+        if isinstance(docs, Mapping):
+            pairs = docs.items()                               # (key, doc)
+        elif isinstance(docs, Iterable) and not isinstance(docs, (str, bytes)):
+            pairs = enumerate(docs)                            # (index, doc)
+        else:
+            pairs = [(0, docs)]                                # single doc
+
+        for label, doc in pairs:
+            comp_defs = getattr(doc, "componentDefinitions", None)
+            if not comp_defs:
+                logging.warning(f"No component definitions found in document {label}. Skipping.")
                 continue
-            for comp_def in doc.componentDefinitions:
-                if sbol2.BIOPAX_DNA not in comp_def.types:
+
+            for comp_def in comp_defs:
+                if sbol2.BIOPAX_DNA not in getattr(comp_def, "types", []):
                     continue
+
                 dna_seqs = self.get_DNA_sequences(comp_def, doc)
                 if require_sequence and not dna_seqs:
                     continue
 
-                seq = dna_seqs[0].elements if dna_seqs else ''
-                #new_id = str(uuid.uuid4())
-                new_id = comp_def.identity
+                seq = dna_seqs[0].elements if dna_seqs else ""
+                new_id = getattr(comp_def, "identity", None)
 
                 # Store plain (ID, sequence) tuple instead of SeqRecord
                 self.fasta_records.append((new_id, seq))
-
                 # Store metadata separately
                 # self.metadata_dict[new_id] = {
                 #     'original_identity': comp_def.identity,
