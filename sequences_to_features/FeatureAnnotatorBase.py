@@ -1,4 +1,4 @@
-import logging
+import logging, re
 from .FeaturePruner import FeaturePruner
 from .FeatureLibrary import FeatureLibrary
 
@@ -32,9 +32,37 @@ class FeatureAnnotatorSimple:
         return min_feature_length == 0 or len(feature.nucleotides) >= min_feature_length
 
     @classmethod
+    def __create_similar_sub_component(cls, parent_definition, child_definition):
+        i = 1
+        while i > 0:
+            try:
+                tmp_id = re.sub(r"_v(\d+)", f"_v{i}", child_definition.displayId)
+                sub_comp = parent_definition.components.create('_'.join([tmp_id,
+                                                                         'comp']))
+            except RuntimeError:
+                sub_comp = None
+            except NotUniqueError as exc:
+                if exc.error_code() == sbol2.SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE:
+                    sub_comp = None
+                else:
+                    raise
+
+            if sub_comp is None:
+                match = re.search(r"_v(\d+)", child_definition.displayId)
+                i = int(match.group(1)) + 1
+            else:
+                
+                sub_comp.name = child_definition.name
+                sub_comp.definition = child_definition.identity
+                sub_comp.roleIntegration = None
+
+                i = -1
+
+        return sub_comp
+    
+    @classmethod
     def __create_sub_component(cls, parent_definition, child_definition):
         i = 1
-
         while i > 0:
             try:
                 sub_comp = parent_definition.components.create('_'.join([child_definition.displayId,
@@ -99,6 +127,50 @@ class FeatureAnnotatorSimple:
                 i = -1
 
         return seq_anno
+    
+    @classmethod
+    def __create_similar_sequence_annotation(cls, parent_definition, child_definition, orientation, start, end,
+                                     sub_comp_URI=None, parent_URI=None):
+        i = 1
+
+        while i > 0:
+            try:
+                tmp_id = re.sub(r"_v(\d+)", f"_v{i}", child_definition.displayId)
+                seq_anno = parent_definition.sequenceAnnotations.create('_'.join([tmp_id,
+                                                                                  'anno']))
+                #print("created seq_anno with id: ", seq_anno.displayId)
+            except RuntimeError:
+                seq_anno = None
+            except NotUniqueError as exc:
+                if exc.error_code() == sbol2.SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE:
+                    seq_anno = None
+                else:
+                    raise
+
+            if seq_anno is None:
+                match = re.search(r"_v(\d+)", child_definition.displayId)
+                i = int(match.group(1)) + 1
+                
+            else:
+                seq_anno.name = child_definition.name
+                seq_anno.description = child_definition.description
+                if sub_comp_URI:
+                    seq_anno.component = sub_comp_URI
+                if parent_URI:
+                    seq_anno.roles = seq_anno.roles + child_definition.roles
+                    seq_anno.wasDerivedFrom = seq_anno.wasDerivedFrom + [parent_URI]
+                
+                location = seq_anno.locations.createRange('_'.join([seq_anno.displayId,
+                                                                    'loc']))
+
+                location.orientation = orientation
+                location.start = start
+                location.end = end
+
+                i = -1
+
+        return seq_anno
+    
     # target_definition is 
     def process_feature_matches(self, target_doc, target_definition, feature_matches, orientation, target_length,
                                   copy_definitions=False, complete_matches=False, output_matches=False):
@@ -130,18 +202,24 @@ class FeatureAnnotatorSimple:
                             FeatureLibrary.copy_component_definition(feature_definition, feature_doc, target_doc)
                             
                     else:
+                        # first copy: copy the variant componentDef into feature_doc, but the identity is wrong, which is duplicate of the other library, bug
+                        # both compDef named "'http://seqimprove.synbiohub.org/AmpR_v1/1'"
                         variant_definition = FeatureLibrary.copy_component_definition(feature_definition,
                             feature_doc, feature_doc, import_namespace=True, import_sequences=True,
                             seq_elements=target_nucleotides, parent_definitions=[target_definition],
                             parent_doc=target_doc, make_variant=True, strip_prefixes=[])
+                        #print("seq: ", variant_definition.sequence.elements) #sequence is correct, just doesn't create a new sbol:Sequence object
+                        #because a duplicate identity happens when two Sequence object have duplicate identity (AmpR_v1/1)
+                        
                         if variant_definition:
                             sub_identities = []
                             for sub_comp in variant_definition.components:
                                 sub_identities.append(sub_comp.definition)
                         self.feature_library.update()
-                        sub_comp = self.__create_sub_component(target_definition, variant_definition)
-                        self.__create_sequence_annotation(target_definition, variant_definition, orientation, start, end,
-                                                    sub_comp.identity)
+                        sub_comp = self.__create_similar_sub_component(target_definition, variant_definition)
+                        #print("updated sub_comp id: ", sub_comp.displayId, sub_comp.identity)
+                        self.__create_similar_sequence_annotation(target_definition, variant_definition, orientation, start, end,
+                                                        sub_comp.identity)
                         FeatureLibrary.copy_component_definition(variant_definition, feature_doc, target_doc)
 
                     self.logger.debug('Annotated %s (%s, %s) at [%s, %s] in %s',

@@ -427,7 +427,7 @@ class FeatureLibrary():
                                   min_seq_length=0, import_sequences=False, seq_elements=None,
                                   parent_definitions=[], parent_doc=None, make_variant=False,
                                   shallow_copy=False, strip_prefixes=[]):
-
+        #print("comp_definition: ", comp_definition.identity)
         if sbol2.BIOPAX_DNA in comp_definition.types:
             seqs = cls.get_DNA_sequences(comp_definition, source_doc)
         else:
@@ -457,10 +457,24 @@ class FeatureLibrary():
                         
                 else:
                     try:
-                        definition_copy = comp_definition.copy(sink_doc, namespace, '1')
+                        # base_uri = sbol2.getHomespace()
+                        # custom_str = namespace.split('/')[-1]
+                        # namespace2 = f"{base_uri}/{custom_str}"
+                        # sbol2.setHomespace(namespace2)
+                        # print("namespace after setHomespace: ", sbol2.getHomespace())
+                        #definition_copy = comp_definition.copy(sink_doc, namespace, '1')# bug, namespace is correct, sink_doc is correct, but copy is wrong?
+                        definition_copy = source_doc.getComponentDefinition(comp_definition.identity)
+                        custom_str = namespace.split('/')[-1]
+                        definition_copy.identity = '/'.join([sbol2.getHomespace(), custom_str,
+                                                                         comp_definition.displayId, '1'])
+                        #print("definition_copy identity after copy: ", definition_copy.identity)
+                        
+                        # change id to avoid duplicate
+                        sink_doc.addComponentDefinition(definition_copy)
+                        #print("sink_doc :", sink_doc.componentDefinitions[-1])
                     except RuntimeError:
                         return sink_doc.getComponentDefinition('/'.join([sbol2.getHomespace(),
-                                                                         comp_definition.displayId, '1']))
+                                                                         comp_definition.displayId, '1']))                  
                     except NotUniqueError as exc:
                         if exc.error_code() == sbol2.SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE:
                             return sink_doc.getComponentDefinition('/'.join([sbol2.getHomespace(),
