@@ -16,7 +16,7 @@ class BwaAligner(Aligner):
         with open(output_sam_path, 'w') as out_sam, open(output_sam_path + '.log', 'w') as err_log:
             if(exact_match):#'bwa', 'mem', '-a', '-B', '100', '-O', '100', '-E', '100', self.index_prefix, fasta_path
                 subprocess.run(
-                    ['bwa', 'mem', '-a', '-T', '0', '-D', '0', self.index_prefix, fasta_path],
+                    ['bwa', 'mem', '-a', '-T', '0', self.index_prefix, fasta_path],
                     stdout=out_sam,
                     stderr=err_log,
                     check=True
@@ -24,7 +24,7 @@ class BwaAligner(Aligner):
             else:
                 print(self.index_prefix, fasta_path)
                 subprocess.run(
-                    ['bwa', 'mem', '-a', '-T', '0', '-D', '0', self.index_prefix, fasta_path],
+                   ['bwa', 'mem', '-a', '-T', '0', '-w', '1', self.index_prefix, fasta_path], # '-D', '0'
                     stdout=out_sam,
                     stderr=err_log,
                     check=True
