@@ -13,5 +13,5 @@ dependencies:
   - pysam>=0.23.3
   - flashtext>=2.7
   - prokka=1.13
-  - diamond=2.1.14
+  - emboss>=6.6.0
 
