@@ -357,7 +357,7 @@ class FeatureLibrary():
                     raise
 
     @classmethod
-    def make_variant_sequence(cls, doc, sequence_copy):
+    def make_variant_sequence(cls, doc, sequence_copy, library_name): 
         doc.sequences.remove(sequence_copy.identity)
 
         variant_index = 1
@@ -373,11 +373,12 @@ class FeatureLibrary():
             original_identity = sequence_copy.identity
             original_ID = sequence_copy.displayId
             original_p_identity = sequence_copy.persistentIdentity
-
             sequence_copy.identity = variant_identity
             sequence_copy.displayId = variant_ID
             sequence_copy.persistentIdentity = variant_p_identity
-
+            sequence_copy.identity = variant_identity.replace("http://examples.org/Sequence/", f"http://examples.org/Sequence/{library_name}/")
+            sequence_copy.persistentIdentity = variant_p_identity.replace("http://examples.org/Sequence/", f"http://examples.org/Sequence/{library_name}/")
+            
             try:
                 doc.sequences.add(sequence_copy)
 
@@ -427,7 +428,7 @@ class FeatureLibrary():
                                   min_seq_length=0, import_sequences=False, seq_elements=None,
                                   parent_definitions=[], parent_doc=None, make_variant=False,
                                   shallow_copy=False, strip_prefixes=[]):
-        #print("comp_definition: ", comp_definition.identity)
+        library_name = comp_definition.identity.split('/')[4]
         if sbol2.BIOPAX_DNA in comp_definition.types:
             seqs = cls.get_DNA_sequences(comp_definition, source_doc)
         else:
@@ -457,21 +458,11 @@ class FeatureLibrary():
                         
                 else:
                     try:
-                        # base_uri = sbol2.getHomespace()
-                        # custom_str = namespace.split('/')[-1]
-                        # namespace2 = f"{base_uri}/{custom_str}"
-                        # sbol2.setHomespace(namespace2)
-                        # print("namespace after setHomespace: ", sbol2.getHomespace())
-                        #definition_copy = comp_definition.copy(sink_doc, namespace, '1')# bug, namespace is correct, sink_doc is correct, but copy is wrong?
                         definition_copy = source_doc.getComponentDefinition(comp_definition.identity)
                         custom_str = namespace.split('/')[-1]
                         definition_copy.identity = '/'.join([sbol2.getHomespace(), custom_str,
                                                                          comp_definition.displayId, '1'])
-                        #print("definition_copy identity after copy: ", definition_copy.identity)
-                        
-                        # change id to avoid duplicate
                         sink_doc.addComponentDefinition(definition_copy)
-                        #print("sink_doc :", sink_doc.componentDefinitions[-1])
                     except RuntimeError:
                         return sink_doc.getComponentDefinition('/'.join([sbol2.getHomespace(),
                                                                          comp_definition.displayId, '1']))                  
@@ -511,7 +502,7 @@ class FeatureLibrary():
                     seq_copy = cls.copy_sequence(seqs[0], source_doc, sink_doc, True, strip_prefixes)
 
                     if make_variant:
-                        cls.make_variant_sequence(sink_doc, seq_copy)
+                        cls.make_variant_sequence(sink_doc, seq_copy, library_name)
 
                     if seq_elements:
                         seq_copy.elements = seq_elements

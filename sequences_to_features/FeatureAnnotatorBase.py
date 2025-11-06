@@ -51,10 +51,12 @@ class FeatureAnnotatorSimple:
                 match = re.search(r"_v(\d+)", child_definition.displayId)
                 i = int(match.group(1)) + 1
             else:
-                
-                sub_comp.name = child_definition.name
+                sub_comp.name = child_definition.name 
                 sub_comp.definition = child_definition.identity
                 sub_comp.roleIntegration = None
+                num = re.search(r'_v(\d+)', sub_comp.displayId).group(1) # get the variant number
+                out = "_".join(sub_comp.name.split('_')[:2] + [str(num)])
+                sub_comp.name = out
 
                 i = -1
 
@@ -138,7 +140,6 @@ class FeatureAnnotatorSimple:
                 tmp_id = re.sub(r"_v(\d+)", f"_v{i}", child_definition.displayId)
                 seq_anno = parent_definition.sequenceAnnotations.create('_'.join([tmp_id,
                                                                                   'anno']))
-                #print("created seq_anno with id: ", seq_anno.displayId)
             except RuntimeError:
                 seq_anno = None
             except NotUniqueError as exc:
@@ -204,20 +205,29 @@ class FeatureAnnotatorSimple:
                     else:
                         # first copy: copy the variant componentDef into feature_doc, but the identity is wrong, which is duplicate of the other library, bug
                         # both compDef named "'http://seqimprove.synbiohub.org/AmpR_v1/1'"
+                        
+                        fid = str(feature_definition.identity)
+
                         variant_definition = FeatureLibrary.copy_component_definition(feature_definition,
                             feature_doc, feature_doc, import_namespace=True, import_sequences=True,
                             seq_elements=target_nucleotides, parent_definitions=[target_definition],
                             parent_doc=target_doc, make_variant=True, strip_prefixes=[])
-                        #print("seq: ", variant_definition.sequence.elements) #sequence is correct, just doesn't create a new sbol:Sequence object
-                        #because a duplicate identity happens when two Sequence object have duplicate identity (AmpR_v1/1)
                         
                         if variant_definition:
                             sub_identities = []
                             for sub_comp in variant_definition.components:
                                 sub_identities.append(sub_comp.definition)
+                            
+                            variant_definition.wasDerivedFrom = [fid]
+                            num = re.search(r'_v(\d+)$', variant_definition.displayId).group(1)
+                            variant_definition.name = f"{feature_definition.name}_variant_{num}"
+                            
+                            library_name = variant_definition.identity.split('/')[3]
+                            sequence_id = variant_definition.sequence.identity
+                            variant_definition.description = f"Variant of part with the following description: {variant_definition.description}"
+
                         self.feature_library.update()
                         sub_comp = self.__create_similar_sub_component(target_definition, variant_definition)
-                        #print("updated sub_comp id: ", sub_comp.displayId, sub_comp.identity)
                         self.__create_similar_sequence_annotation(target_definition, variant_definition, orientation, start, end,
                                                         sub_comp.identity)
                         FeatureLibrary.copy_component_definition(variant_definition, feature_doc, target_doc)
