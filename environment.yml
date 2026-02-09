@@ -12,6 +12,4 @@ dependencies:
   - biopython>=1.78
   - pysam>=0.23.3
   - flashtext>=2.7
-  - prokka=1.13
   - emboss>=6.6.0
-

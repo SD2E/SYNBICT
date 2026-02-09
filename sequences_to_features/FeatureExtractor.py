@@ -3,13 +3,19 @@ import subprocess
 import json
 import logging
 from collections.abc import Mapping, Iterable
+from Bio import SeqIO
+from Bio.Seq import Seq
 
 # SBOL ➜ FASTA + metadata + indexing (one-time) 
 class FeatureExtractor():
     def __init__(self, docs, require_sequence=True):
         #self.metadata_dict = {}
         self.fasta_records = []
+        self.protein_fasta_records = []
+        self.cds_id_map = {}
+        self.id_cds_map = {}
         self.__extract_features(docs, require_sequence)
+        self.__extract_protein_sequences(docs, require_sequence)
 
     def __extract_features(self, docs, require_sequence):
         """
@@ -96,3 +102,50 @@ class FeatureExtractor():
                 dna_seqs.append(seq)
 
         return dna_seqs
+    
+    def __extract_protein_sequences(self, docs, require_sequence):
+
+        if isinstance(docs, Mapping):
+            pairs = docs.items()  
+        elif isinstance(docs, Iterable) and not isinstance(docs, (str, bytes)):
+            pairs = enumerate(docs)     
+        else:
+            pairs = [(0, docs)] 
+        counter = 1
+        for label, doc in pairs:
+            comp_defs = getattr(doc, "componentDefinitions", None)
+            
+            if not comp_defs:
+                print(f"No component definitions found in document {label}. Skipping.")
+                continue
+
+            for comp_def in comp_defs:
+                if sbol2.BIOPAX_DNA not in getattr(comp_def, "types", []):
+                    continue
+                roles = comp_def.roles[0]
+                
+                if(roles == "http://identifiers.org/so/SO:0000316"):
+                    dna_seqs = self.get_DNA_sequences(comp_def, doc)
+                    if require_sequence and not dna_seqs:
+                        continue
+
+                    seq = dna_seqs[0].elements if dna_seqs else ""
+                    protein_seq = Seq(seq).translate(to_stop=True)
+                    
+                    id = getattr(comp_def, "identity")
+                    cds_id = f"CDS_{counter:06d}"
+                    self.cds_id_map[cds_id] = id
+                    self.id_cds_map[id] = cds_id
+                    counter += 1
+                    old_des = getattr(comp_def, "description", None)
+                    if old_des is None:
+                        old_des = cds_id
+                    total_id = f"{cds_id} {old_des}"
+
+                    # Store plain (ID, sequence) tuple instead of SeqRecord
+                    self.protein_fasta_records.append((total_id, protein_seq)) # this is DNA seq
+                    
+    def write_protein_fasta(self, fasta_path):
+        with open(fasta_path, "w") as fasta_file:
+            for record_id, sequence in self.protein_fasta_records:
+                fasta_file.write(f">{record_id} \n{sequence}\n")

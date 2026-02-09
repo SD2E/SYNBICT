@@ -1,6 +1,102 @@
 from .FeatureAnnotatorBase import FeatureAnnotatorSimple
 from .Feature import Feature
 import json, pysam, math
+import pandas as pd
+class ProkkaTableFeatureMapper:
+    def __init__(self):
+        self.inline_matches = []
+        self.rc_matches = []
+        
+    def extend_list(self, dna_matches, protein_matches):
+        """
+        Extend dna_matches with protein_matches whose identities are not already present. Prioritizes protein matches.
+        """
+        existing_identities = {
+            match[0][0].identity for match in protein_matches
+        }
+
+        for match in dna_matches:
+            identity = match[0][0].identity
+            if identity not in existing_identities or identity == " ":
+                protein_matches.append(match)
+                existing_identities.add(identity)  # prevent future duplicates
+
+        return protein_matches
+
+
+    def extract_matches(self, cds_df: pd.DataFrame, min_feature_length=40, exact_match=True):
+        """
+        Build inline_matches / rc_matches from Prokka-parsed CDS dataframe.
+
+        Changes requested:
+        1) exact_match=True  -> keep only identity_pct == 100.0 (exact)
+            exact_match=False -> keep ALL rows (no identity filtering)
+        2) Include rows where identity_pct is None/NaN (only excluded by rule #1)
+        3) ref_name = ids_sequence; if ids_sequence is None/NaN/empty -> ref_name=None
+        """
+
+        # reset containers each call
+        self.inline_matches = []
+        self.rc_matches = []
+
+        if cds_df is None or len(cds_df) == 0:
+            return self.inline_matches, self.rc_matches
+
+        def _is_missing(x) -> bool:
+            # True for None, NaN, and empty string
+            if x is None:
+                return True
+            if isinstance(x, float) and math.isnan(x):
+                return True
+            if isinstance(x, str) and x.strip() == "":
+                return True
+            return False
+
+        for _, row in cds_df.iterrows():
+            start = int(row["start"])
+            end = int(row["end"])
+            strand = str(row.get("strand", "+")).strip()
+            type = row["type"]
+
+            feature_len = abs(end - start) + 1
+            if feature_len < min_feature_length:
+                continue
+
+            identity_pct = row.get("identity_pct", None)
+
+            # (2) include identity_pct None/NaN unless exact_match=True requires 100%
+            if exact_match:
+                # (1) exact match -> only keep identity_pct == 100%
+                if _is_missing(identity_pct):
+                    continue
+                if not math.isclose(float(identity_pct), 100.0, rel_tol=0.0, abs_tol=1e-6):
+                    continue
+            else:
+                # (1) non-exact -> keep ALL rows, including missing identity_pct
+                pass
+
+            # (3) ref_name is ids_sequence, or None if missing
+            ids_sequence = row.get("ids_sequence", None)
+            ref_name = " " if _is_missing(ids_sequence) else str(ids_sequence)
+
+            feature = Feature(
+                nucleotides="",
+                identity=ref_name,   # NOTE: can be " ""
+                roles="",
+                sub_identities="",
+                parent_identities="",
+            )
+            # prokka has one more results
+            match = ([feature], start, end, identity_pct, type)
+
+            # Use strand to decide rc vs inline
+            if strand == "-":
+                self.rc_matches.append(match)
+            else:
+                self.inline_matches.append(match)
+
+        return self.inline_matches, self.rc_matches
+
 class TableFeatureMapper:
     def __init__(self, tab_path, min_mapq=20):
         self.tab_path = tab_path

@@ -7,6 +7,7 @@ import json
 
 from Bio.Seq import Seq
 from Bio import Align
+from pathlib import Path
 import sbol2
 from .Feature import Feature
 from .FeatureLibrary import FeatureLibrary 
@@ -18,6 +19,9 @@ from .FeatureExtractor import FeatureExtractor
 from .BwaAligner import BwaAligner
 from .BlastAligner import BlastAligner
 from .Minimap2Aligner import Minimap2Aligner
+from .ProkkaAligner import ProkkaAligner
+from .ProkkaParser import ProkkaParser
+from .Annotator import ProkkaTableFeatureMapper
 
 # import time
 
@@ -179,6 +183,7 @@ class FeatureAnnotater():
     def __init__(self, feature_library, min_feature_length):
         self.feature_library = feature_library
         self.feature_matcher = KeywordProcessor()
+        self.feature_extractor = None
 
         self.logger = logging.getLogger('synbict')
 
@@ -524,18 +529,32 @@ class FeatureAnnotater():
             return annotated_identities, output_match_lists
         else:
             return annotated_identities
+    
+    def build_indexes(self):
+        #self.feature_extractor = FeatureExtractor(feature_docs)
+        dna_path = 'test.fasta' #'/home/sophia/git_repo/SYNBICT/example/test.fasta'
+        index_prefix = 'test'
+        self.feature_extractor.write_fasta(dna_path)
+        # extract protein sequences and write to fasta
+        protein_path = "test_protein.fasta"
+        self.feature_extractor.write_protein_fasta(protein_path)
+        # build index for bwa
+        self.feature_extractor.build_index(dna_path, index_prefix, 'bwa')
+        # build index for blastn
+        self.feature_extractor.build_index(dna_path, index_prefix, 'blast')
+        # build index for minimap2
+        self.feature_extractor.build_index(dna_path, index_prefix, 'minimap2')
+
 
 def curate(feature_library, target_library, output_library, output_files, extend_features, no_annotation,
            min_feature_length, min_target_length, extension_threshold, extension_suffix, in_place, minimal_output,
            no_pruning, deletion_roles, cover_offset, delete_flat, auto_swap, non_interactive, logger,
            complete_matches=False, strip_prefixes=[], flashtext_mapping=True, bwa_mapping=False, minimap2_mapping=False,
-           blastn_mapping=False, exact_match=False, build_index=False):
-    if extend_features or not no_annotation:
-        feature_annotater = FeatureAnnotater(feature_library, min_feature_length)
+           blastn_mapping=False, prokka_mapping=False, exact_match=False, build_index=False, feature_annotater=None):
     
     feature_curator = FeatureCurator(target_library, output_library)
 
-    if extend_features:
+    if extend_features and not feature_annotater == None:
         feature_curator.extend_features(feature_annotater,
                                         min_target_length,
                                         extension_threshold,
@@ -579,7 +598,34 @@ def curate(feature_library, target_library, output_library, output_files, extend
                 blast.align(doc, output_sam_path, exact_match) # True for exact match
                 mapper = TableFeatureMapper('aligned.txt')
                 inline_matches, rc_matches = mapper.extract_matches(min_feature_length, exact_match)
+            
+            if(not exact_match and prokka_mapping):
+                prokka = ProkkaAligner(doc)  # index_prefix is not used in ProkkaAligner
+                prokka.align()
 
+                outdir = Path("PROKKA_SYNBICT")
+                pattern = "PROKKA_SYNBICT.proteins.tmp.*.blast"
+
+                matches = sorted(outdir.glob(pattern))
+                
+                if matches:
+                    blast_path = matches[-1]  # usually newest/last
+                    print("Using:", blast_path)
+
+                    GFF_PATH = "PROKKA_SYNBICT/PROKKA_SYNBICT.gff"
+                    parser = ProkkaParser(GFF_PATH, blast_path)
+                    final_df = parser.parse_gff_and_blast()
+                    # find the cds from ids_cds_map
+                    id_list = final_df[["protein_id"]]
+                    ids_seqs = [feature_annotater.feature_extractor.cds_id_map[cd] if cd in feature_annotater.feature_extractor.cds_id_map else None for cd in id_list['protein_id']]
+                    final_df["ids_sequence"] = ids_seqs
+
+                    prokkaMapper = ProkkaTableFeatureMapper()
+                    prokka_inline_matches, prokka_rc_matches = prokkaMapper.extract_matches(final_df, exact_match=False)
+                    index_prefix = 'test'
+                    inline_matches = prokkaMapper.extend_list(inline_matches, prokka_inline_matches)
+                    rc_matches = prokkaMapper.extend_list(rc_matches, prokka_rc_matches)
+           
             simple = FeatureAnnotatorSimple(feature_library, inline_matches, rc_matches)
             # this is a different annnotate function, belong to FeatureAnnotatorSimple class
             simple.annotate(inline_matches, rc_matches, target_library, min_feature_length, in_place=True, output_library=output_library, output_matches=False)#True, in_place=True
@@ -652,18 +698,6 @@ def download_sequences(doc, synbiohub):
                     else:
                         raise
 # run it the first time                  
-def build_indexes(feature_docs):
-    tmp = FeatureExtractor(feature_docs)
-    fasta_path = 'test.fasta' #'/home/sophia/git_repo/SYNBICT/example/test.fasta'
-    index_prefix = 'test'
-    tmp.write_fasta(fasta_path)
-    #tmp.write_metadata('test_metadata.json') # '/home/sophia/git_repo/SYNBICT/example/test_metadata.json'
-    # build index for bwa
-    tmp.build_index(fasta_path, index_prefix, 'bwa')
-    # build index for blastn
-    tmp.build_index(fasta_path, index_prefix, 'blast')
-    # build index for minimap2
-    tmp.build_index(fasta_path, index_prefix, 'minimap2')
 
 def main(args=None):
     if args is None:
@@ -711,6 +745,7 @@ def main(args=None):
     parser.add_argument('-bwa', '--bwa_mapping', action='store_true')
     parser.add_argument('-minimap2', '--minimap2_mapping', action='store_true')
     parser.add_argument('-blastn', '--blastn_mapping', action='store_true')
+    parser.add_argument('-prokka', '--prokka_mapping', action='store_true')
     parser.add_argument('-exact', '--exact_mapping', action='store_true')
     parser.add_argument('-bi', '--build_index', action='store_true')
     
@@ -836,15 +871,16 @@ def main(args=None):
                     raise
 
     feature_library = FeatureLibrary(feature_docs)
-    # test here
-    
+    feature_annotater = FeatureAnnotater(feature_library, int(args.min_feature_length))
+    feature_annotater.feature_extractor = FeatureExtractor(feature_docs) # assign feature_extractor to feature_annotater, which is used in build_indexes function
+    print("feature_annotater created: ", feature_annotater)
     # build index for blastn, bwa, minimap2, this is pre-calculated for fast mode
-    if args.build_index:
-        build_indexes(feature_docs)
-        logger.info('Finished building indexes')
-        
+    if args.build_index: 
+        if args.extend_features or not args.no_annotation:
+            feature_annotater.build_indexes() # should assign feature_extractor
+            logger.info('Finished building indexes')
     else:
-
+        print("feature_annotater extractor: ", feature_annotater.feature_extractor)
         if args.extend_features:
             target_docs = []
 
@@ -887,7 +923,7 @@ def main(args=None):
                 float(args.extension_threshold), args.extension_suffix, args.in_place, args.minimal_output,
                 args.no_pruning, args.deletion_roles, int(args.cover_offset), args.delete_flat, args.auto_swap,
                 args.non_interactive, logger, args.complete_matches, args.strip_prefixes, args.flashText_mapping,
-                        args.bwa_mapping, args.minimap2_mapping, args.blastn_mapping, args.exact_mapping, args.build_index)
+                        args.bwa_mapping, args.minimap2_mapping, args.blastn_mapping, args.prokka_mapping, args.exact_mapping, args.build_index, feature_annotater)
         else:
             for i in range(0, len(target_files)):
                 target_doc = load_target_file(target_files[i])
@@ -907,7 +943,7 @@ def main(args=None):
                         float(args.extension_threshold), args.extension_suffix, args.in_place, args.minimal_output,
                         args.no_pruning, args.deletion_roles, int(args.cover_offset), args.delete_flat, args.auto_swap,
                         args.non_interactive, logger, args.complete_matches, args.strip_prefixes, args.flashText_mapping,
-                        args.bwa_mapping, args.minimap2_mapping, args.blastn_mapping, args.exact_mapping, args.build_index)
+                        args.bwa_mapping, args.minimap2_mapping, args.blastn_mapping, args.prokka_mapping, args.exact_mapping, args.build_index, feature_annotater)
 
             if synbiohub:
                 for target_URL in args.target_URLs:
@@ -940,7 +976,7 @@ def main(args=None):
                             float(args.extension_threshold), args.extension_suffix, args.in_place, args.minimal_output,
                             args.no_pruning, args.deletion_roles, int(args.cover_offset), args.delete_flat, args.auto_swap,
                             args.non_interactive, logger, args.complete_matches, args.strip_prefixes, args.flashText_mapping,
-                        args.bwa_mapping, args.minimap2_mapping, args.blastn_mapping, args.exact_mapping, args.build_index)
+                        args.bwa_mapping, args.minimap2_mapping, args.blastn_mapping, args.prokka_mapping, args.exact_mapping, args.build_index, feature_annotater)
 
         logger.info('Finished curating')
 
