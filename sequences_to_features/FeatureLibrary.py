@@ -1,5 +1,6 @@
 import sbol2
 import logging
+import inspect
 from .Feature import Feature
 try:
     # SBOLError is in the native python module
@@ -191,6 +192,9 @@ class FeatureLibrary():
             return -1
 
     def get_definition(self, identity):
+        stack = inspect.stack()
+        caller = stack[1]
+        doc2 = self.get_document(identity)
         return self.get_document(identity).getComponentDefinition(identity)
 
     def get_definitions_by_name(self, name):
@@ -458,11 +462,17 @@ class FeatureLibrary():
                         
                 else:
                     try:
-                        definition_copy = source_doc.getComponentDefinition(comp_definition.identity)
+                        definition = source_doc.getComponentDefinition(comp_definition.identity)
                         custom_str = namespace.split('/')[-1]
-                        definition_copy.identity = '/'.join([sbol2.getHomespace(), custom_str,
-                                                                         comp_definition.displayId, '1'])
-                        sink_doc.addComponentDefinition(definition_copy)
+                        # sink_doc is feature_docs[0]
+                        doc2 = sbol2.Document()
+                        definition_copy = definition.copy(doc2)
+                        
+                        new_identity = '/'.join([sbol2.getHomespace(), custom_str,
+                                                                            definition.displayId, '1'])
+                        definition_copy.identity = new_identity
+                        source_doc.addComponentDefinition(definition_copy)
+
                     except RuntimeError:
                         return sink_doc.getComponentDefinition('/'.join([sbol2.getHomespace(),
                                                                          comp_definition.displayId, '1']))                  

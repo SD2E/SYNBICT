@@ -122,7 +122,7 @@ class FeatureExtractor():
             for comp_def in comp_defs:
                 if sbol2.BIOPAX_DNA not in getattr(comp_def, "types", []):
                     continue
-                roles = comp_def.roles[0]
+                roles = comp_def.roles[0] # bug here
                 
                 if(roles == "http://identifiers.org/so/SO:0000316"):
                     dna_seqs = self.get_DNA_sequences(comp_def, doc)

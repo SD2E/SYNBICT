@@ -49,8 +49,7 @@ class FeatureAnnotatorSimple:
                     raise
 
             if sub_comp is None:
-                match = re.search(r"_v(\d+)", child_definition.displayId)
-                i = int(match.group(1)) + 1
+                i += 1
             else:
                 sub_comp.name = child_definition.name 
                 sub_comp.definition = child_definition.identity
@@ -246,8 +245,7 @@ class FeatureAnnotatorSimple:
                     raise
 
             if seq_anno is None:
-                match = re.search(r"_v(\d+)", child_definition.displayId)
-                i = int(match.group(1)) + 1
+                i += 1
                 
             else:
                 seq_anno.name = child_definition.name
@@ -288,8 +286,6 @@ class FeatureAnnotatorSimple:
                 if(feature.identity == " "): 
                     # ref_name = " ", don't know the name; 1 hypothetical protein match; 2 hypothetical RNA match
                     #variant_definition.description = f"Hypothetical of part with the following description: {variant_definition.description}."
-                    print("feature.identity: ", feature.identity)
-                    print("feature type: ", type)
                     target_nucleotides = target_definition.sequence.elements[start:end].upper()
                     # assign DNA sequences from target instead from library, because it is not in the library
                     if(orientation != sbol2.SBOL_ORIENTATION_INLINE):
@@ -349,11 +345,10 @@ class FeatureAnnotatorSimple:
                                 feature_doc, feature_doc, import_namespace=True, import_sequences=True,
                                 seq_elements=target_nucleotides, parent_definitions=[target_definition],
                                 parent_doc=target_doc, make_variant=True, strip_prefixes=[])
-                            print("variant_definition: ", variant_definition)
+
                             if variant_definition:
                                 sub_identities = []
                                 for sub_comp in variant_definition.components:
-                                    print("sub_comp.definition: ", sub_comp.definition)
                                     sub_identities.append(sub_comp.definition)
                                 
                                 variant_definition.wasDerivedFrom = [fid]
@@ -372,7 +367,6 @@ class FeatureAnnotatorSimple:
                                 
                                 self.feature_library.update()
                                 sub_comp = self.__create_similar_sub_component(target_definition, variant_definition)
-                                print("sub_comp: ", sub_comp)
                                 self.__create_similar_sequence_annotation(target_definition, variant_definition, orientation, start, end,
                                                                 sub_comp.identity)
                                 
