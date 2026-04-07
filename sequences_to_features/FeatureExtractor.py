@@ -6,6 +6,8 @@ from collections.abc import Mapping, Iterable
 from Bio import SeqIO
 from Bio.Seq import Seq
 
+sbol2.Config.setOption('sbol_typed_uris', False)
+sbol2.Config.setOption('sbol_compliant_uris', True)
 # SBOL ➜ FASTA + metadata + indexing (one-time) 
 class FeatureExtractor():
     def __init__(self, docs, require_sequence=True):
@@ -53,15 +55,6 @@ class FeatureExtractor():
 
                 # Store plain (ID, sequence) tuple instead of SeqRecord
                 self.fasta_records.append((new_id, seq))
-                # Store metadata separately
-                # self.metadata_dict[new_id] = {
-                #     'original_identity': comp_def.identity,
-                #     'name': comp_def.name,
-                #     'displayId': comp_def.displayId,
-                #     'roles': comp_def.roles,
-                #     'wasDerivedFrom': comp_def.wasDerivedFrom,
-                #     'doc_index': doc_index
-                # }
 
     def write_fasta(self, fasta_path):
         with open(fasta_path, "w") as fasta_file:

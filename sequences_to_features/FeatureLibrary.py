@@ -1,6 +1,5 @@
 import sbol2
 import logging
-import inspect
 from .Feature import Feature
 try:
     # SBOLError is in the native python module
@@ -16,7 +15,8 @@ try:
 except NameError:
     # The swig wrapper raises RuntimeError on not unique
     NotUniqueError = RuntimeError
-    
+sbol2.Config.setOption('sbol_typed_uris', False)
+sbol2.Config.setOption('sbol_compliant_uris', True)
 def is_sbol_not_found(exc):
     return (exc.error_code() == sbol2.SBOLErrorCode.SBOL_ERROR_NOT_FOUND
         or exc.error_code() == sbol2.SBOLErrorCode.NOT_FOUND_ERROR)
@@ -192,9 +192,6 @@ class FeatureLibrary():
             return -1
 
     def get_definition(self, identity):
-        stack = inspect.stack()
-        caller = stack[1]
-        doc2 = self.get_document(identity)
         return self.get_document(identity).getComponentDefinition(identity)
 
     def get_definitions_by_name(self, name):
@@ -316,14 +313,17 @@ class FeatureLibrary():
 
     @classmethod
     def make_variant_definition(cls, doc, definition_copy):
-        doc.componentDefinitions.remove(definition_copy.identity)
+        # Remove only if it already exists in doc
+        try:
+            doc.componentDefinitions.remove(definition_copy.identity)
+        except (RuntimeError, NotFoundError, ValueError):
+            pass  # wasn't added yet, that's fine
 
         variant_index = 1
         unique_flag = False
         
         while not unique_flag:
             variant_ID = '_'.join([definition_copy.displayId, 'v' + str(variant_index)])
-
             split_identity = definition_copy.identity.split('/')
             variant_identity = '/'.join(split_identity[:-2] + [variant_ID, split_identity[-1]])
             variant_p_identity = '/'.join(split_identity[:-2] + [variant_ID])
@@ -338,72 +338,57 @@ class FeatureLibrary():
 
             try:
                 doc.componentDefinitions.add(definition_copy)
-
                 unique_flag = True
-            except RuntimeError:
+            except (RuntimeError, NotUniqueError) as exc:
+                if isinstance(exc, NotUniqueError) and exc.error_code() != sbol2.SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE:
+                    raise
                 definition_copy.identity = original_identity
                 definition_copy.displayId = original_ID
                 definition_copy.persistentIdentity = original_p_identity
-
-                variant_index = variant_index + 1
-
-                unique_flag = False
-            except NotUniqueError as exc:
-                if exc.error_code() == sbol2.SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE:
-                    definition_copy.identity = original_identity
-                    definition_copy.displayId = original_ID
-                    definition_copy.persistentIdentity = original_p_identity
-
-                    variant_index = variant_index + 1
-
-                    unique_flag = False
-                else:
-                    raise
+                variant_index += 1
+        return variant_ID # <- return the variant_ID so sequence can catch it
 
     @classmethod
-    def make_variant_sequence(cls, doc, sequence_copy, library_name): 
-        doc.sequences.remove(sequence_copy.identity)
+    def make_variant_sequence(cls, doc, sequence_copy, library_name, variant_ID=None):
+        try:
+            doc.sequences.remove(sequence_copy.identity)
+        except (RuntimeError, NotFoundError, ValueError):
+            pass
 
         variant_index = 1
         unique_flag = False
-        
+
         while not unique_flag:
-            variant_ID = '_'.join([sequence_copy.displayId, 'v' + str(variant_index)])
+            # Use the same variant_ID as the ComponentDefinition if provided
+            seq_variant_ID = variant_ID if variant_ID else '_'.join([sequence_copy.displayId, 'v' + str(variant_index)])
 
             split_identity = sequence_copy.identity.split('/')
-            variant_identity = '/'.join(split_identity[:-2] + [variant_ID, split_identity[-1]])
-            variant_p_identity = '/'.join(split_identity[:-2] + [variant_ID])
+            variant_identity = '/'.join(split_identity[:-2] + [seq_variant_ID, split_identity[-1]])
+            variant_p_identity = '/'.join(split_identity[:-2] + [seq_variant_ID])
 
             original_identity = sequence_copy.identity
             original_ID = sequence_copy.displayId
             original_p_identity = sequence_copy.persistentIdentity
+
             sequence_copy.identity = variant_identity
-            sequence_copy.displayId = variant_ID
+            sequence_copy.displayId = seq_variant_ID
+            sequence_copy.name = seq_variant_ID
             sequence_copy.persistentIdentity = variant_p_identity
             sequence_copy.identity = variant_identity.replace("http://examples.org/Sequence/", f"http://examples.org/Sequence/{library_name}/")
             sequence_copy.persistentIdentity = variant_p_identity.replace("http://examples.org/Sequence/", f"http://examples.org/Sequence/{library_name}/")
-            
+
             try:
                 doc.sequences.add(sequence_copy)
-
                 unique_flag = True
-            except RuntimeError:
+            except (RuntimeError, NotUniqueError) as exc:
+                if isinstance(exc, NotUniqueError) and exc.error_code() != sbol2.SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE:
+                    raise
                 sequence_copy.identity = original_identity
                 sequence_copy.displayId = original_ID
-
-                variant_index = variant_index + 1
-
-                unique_flag = False
-            except NotUniqueError as exc:
-                if exc.error_code() == sbol2.SBOLErrorCode.SBOL_ERROR_URI_NOT_UNIQUE:
-                    sequence_copy.identity = original_identity
-                    sequence_copy.displayId = original_ID
-
-                    variant_index = variant_index + 1
-
-                    unique_flag = False
-                else:
-                    raise
+                sequence_copy.persistentIdentity = original_p_identity
+                variant_index += 1
+                # If variant_ID was provided but conflicts, fall back to auto-increment
+                variant_ID = None
 
     # prop.startswith('http://wiki.synbiohub.org/wiki/Terms/synbiohub#')
     # prop.startswith('http://www.ncbi.nlm.nih.gov/genbank#')
@@ -471,7 +456,9 @@ class FeatureLibrary():
                         new_identity = '/'.join([sbol2.getHomespace(), custom_str,
                                                                             definition.displayId, '1'])
                         definition_copy.identity = new_identity
-                        source_doc.addComponentDefinition(definition_copy)
+                        
+                        # source_doc.addComponentDefinition(definition_copy) # <-- original, add to FeatureDoc
+                        # sink_doc.addComponentDefinition(definition_copy) # <-- new, add to target doc
 
                     except RuntimeError:
                         return sink_doc.getComponentDefinition('/'.join([sbol2.getHomespace(),
@@ -493,7 +480,7 @@ class FeatureLibrary():
                         cls.strip_origin_properties(loc_copy, strip_prefixes)
 
                 if make_variant:
-                    cls.make_variant_definition(sink_doc, definition_copy)
+                    variant_ID = cls.make_variant_definition(sink_doc, definition_copy)
             else:
                 try:
                     sink_doc.getComponentDefinition(comp_definition.identity)
@@ -512,7 +499,7 @@ class FeatureLibrary():
                     seq_copy = cls.copy_sequence(seqs[0], source_doc, sink_doc, True, strip_prefixes)
 
                     if make_variant:
-                        cls.make_variant_sequence(sink_doc, seq_copy, library_name)
+                        cls.make_variant_sequence(sink_doc, seq_copy, library_name, variant_ID=variant_ID)
 
                     if seq_elements:
                         seq_copy.elements = seq_elements

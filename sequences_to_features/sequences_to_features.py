@@ -64,7 +64,7 @@ def is_sbol_not_found(exc):
         or exc.error_code() == sbol2.SBOLErrorCode.NOT_FOUND_ERROR)
 
 def load_sbol(sbol_file):
-    print("SYNBICT2")
+    print("SYNBICT2 load sbol")
     logger = logging.getLogger('synbict2')
 
     logger.info('Loading %s', sbol_file)
@@ -775,6 +775,7 @@ def main(args=None):
     sbol2.setHomespace(args.namespace)
     sbol2.Config.setOption('validate', args.validate)
     sbol2.Config.setOption('sbol_typed_uris', False)
+    sbol2.Config.setOption('sbol_compliant_uris', True)
 
     sbh_arg_types = []
 

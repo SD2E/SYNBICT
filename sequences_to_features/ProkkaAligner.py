@@ -31,6 +31,7 @@ class ProkkaAligner():
         prokka_cmd = [
             PROKKA_BIN, 
             '--debug', 
+            '--quiet',
             '--rfam', 
             '--proteins', 
             DATABASE_PROTEIN_PATH,

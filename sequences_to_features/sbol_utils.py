@@ -2,7 +2,8 @@ import json
 import requests
 import sbol2
 
-
+sbol2.Config.setOption('sbol_typed_uris', False)
+sbol2.Config.setOption('sbol_compliant_uris', True)
 # for only 1 sequence
 def sbol_sequence(doc):
     seqURI = doc.componentDefinitions[0].sequences[0]

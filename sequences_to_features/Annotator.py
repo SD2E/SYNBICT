@@ -24,15 +24,13 @@ class ProkkaTableFeatureMapper:
         return protein_matches
 
 
-    def extract_matches(self, cds_df: pd.DataFrame, min_feature_length=40, exact_match=True):
+    def extract_matches(self, cds_df: pd.DataFrame, min_feature_length=40, mode='exact'):
         """
         Build inline_matches / rc_matches from Prokka-parsed CDS dataframe.
 
-        Changes requested:
-        1) exact_match=True  -> keep only identity_pct == 100.0 (exact)
-            exact_match=False -> keep ALL rows (no identity filtering)
-        2) Include rows where identity_pct is None/NaN (only excluded by rule #1)
-        3) ref_name = ids_sequence; if ids_sequence is None/NaN/empty -> ref_name=None
+        mode='exact'   -> keep only identity_pct == 100.0 (exact protein match)
+        mode='similar' -> keep all identity_pct < 100%, exclude "hypothetical protein"
+        mode='all'     -> keep every row regardless of identity or product name
         """
 
         # reset containers each call
@@ -52,6 +50,12 @@ class ProkkaTableFeatureMapper:
                 return True
             return False
 
+        def _is_hypothetical(row) -> bool:
+            product = row.get("product", None)
+            if _is_missing(product):
+                return True
+            return "hypothetical" in str(product).lower()
+
         for _, row in cds_df.iterrows():
             start = int(row["start"])
             end = int(row["end"])
@@ -64,16 +68,20 @@ class ProkkaTableFeatureMapper:
 
             identity_pct = row.get("identity_pct", None)
 
-            # (2) include identity_pct None/NaN unless exact_match=True requires 100%
-            if exact_match:
-                # (1) exact match -> only keep identity_pct == 100%
+            if mode == 'exact':
+                # keep only 100% protein identity
                 if _is_missing(identity_pct):
                     continue
-                if not math.isclose(float(identity_pct), 100.0, rel_tol=0.0, abs_tol=1e-6):
+                try:
+                    if not math.isclose(float(identity_pct), 100.0, rel_tol=0.0, abs_tol=1e-6):
+                        continue
+                except (TypeError, ValueError):
                     continue
-            else:
-                # (1) non-exact -> keep ALL rows, including missing identity_pct
-                pass
+            elif mode == 'similar':
+                # keep any identity_pct (including 100%), exclude hypothetical proteins
+                if _is_hypothetical(row):
+                    continue
+            # mode == 'all': keep everything, no filtering
 
             # (3) ref_name is ids_sequence, or None if missing
             ids_sequence = row.get("ids_sequence", None)
@@ -118,7 +126,7 @@ class TableFeatureMapper:
                 segs = line.strip().split('\t')
                 if len(segs) < 14:
                     # vsearch output
-                    
+
                     thi = int(segs[9])  # sstart
                     tlo = int(segs[8])
                     ids = int(segs[12])
@@ -136,14 +144,13 @@ class TableFeatureMapper:
                     # change to query start and end
                     ref_name = segs[1]  # ref_name, # sseqid
                     align_len = int(segs[3]) # alignment length (matches+mismatches+gaps)
-                    start = int(segs[6]) # qstart
+                    start = int(segs[6]) - 1 # qstart (convert from 1-based to 0-based)
                     end = int(segs[7]) # qend
                     pident = float(segs[2]) # pident
                     ref_length = int(segs[13]) # slen
                     if exact_match:
                         # Check for exact match, e.g., if the alignment length matches the reference length
-                        if not (segs[1] == ref_name 
-                                and (abs(end - start) + 1) == ref_length 
+                        if not ((end - start) == ref_length
                                 and math.isclose(pident, 100.0, rel_tol=0.0, abs_tol=1e-6)):
                             continue
                     else:
