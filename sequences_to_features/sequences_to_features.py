@@ -550,7 +550,7 @@ def curate(feature_library, target_library, output_library, output_files, extend
            min_feature_length, min_target_length, extension_threshold, extension_suffix, in_place, minimal_output,
            no_pruning, deletion_roles, cover_offset, delete_flat, auto_swap, non_interactive, logger,
            complete_matches=False, strip_prefixes=[], flashtext_mapping=True, bwa_mapping=False, minimap2_mapping=False,
-           blastn_mapping=False, prokka_mapping=False, exact_match=False, build_index=False, feature_annotater=None):
+           blastn_mapping=False, prokka_mapping=False, prokka_mode='exact', exact_match=False, build_index=False, feature_annotater=None):
     
     feature_curator = FeatureCurator(target_library, output_library)
 
@@ -576,38 +576,41 @@ def curate(feature_library, target_library, output_library, output_files, extend
         annotated_features = []
         annotating_features = []
     else:
+        annotated_features = []
+        annotating_features = []
         if(not flashtext_mapping):
-            doc = target_library.docs[0] 
+            doc = target_library.docs[0]
             index_prefix = 'test'
             if(bwa_mapping):
                 bwa = BwaAligner(index_prefix)
                 output_sam_path = 'aligned.sam'
                 bwa.align(doc, output_sam_path, exact_match)
                 mapper = SAMFeatureMapper('aligned.sam')
-                inline_matches, rc_matches = mapper.extract_matches(min_feature_length, exact_match)
+                inline_matches, rc_matches = mapper.extract_matches(exact_match=exact_match, min_feature_length=min_feature_length, is_bowtie2=False)
 
             elif(minimap2_mapping):
                 minimap2 = Minimap2Aligner(index_prefix)
                 output_sam_path = 'aligned.sam'
                 minimap2.align(doc, output_sam_path, exact_match)
                 mapper = SAMFeatureMapper('aligned.sam')
-                inline_matches, rc_matches = mapper.extract_matches(min_feature_length, exact_match)
+                inline_matches, rc_matches = mapper.extract_matches(exact_match=exact_match, min_feature_length=min_feature_length, is_bowtie2=False)
 
             elif(blastn_mapping):
+                output_sam_path = 'aligned.txt'
                 blast = BlastAligner(index_prefix)
-                blast.align(doc, output_sam_path, exact_match) # True for exact match
+                blast.align(doc, output_sam_path, exact_match)
                 mapper = TableFeatureMapper('aligned.txt')
-                inline_matches, rc_matches = mapper.extract_matches(min_feature_length, exact_match)
+                inline_matches, rc_matches = mapper.extract_matches(exact_match=exact_match, min_feature_length=min_feature_length)
             
-            if(not exact_match and prokka_mapping):
-                prokka = ProkkaAligner(doc)  # index_prefix is not used in ProkkaAligner
+            if prokka_mapping:
+                prokka = ProkkaAligner(doc)
                 prokka.align()
 
                 outdir = Path("PROKKA_SYNBICT")
                 pattern = "PROKKA_SYNBICT.proteins.tmp.*.blast"
 
                 matches = sorted(outdir.glob(pattern))
-                
+
                 if matches:
                     blast_path = matches[-1]  # usually newest/last
                     print("Using:", blast_path)
@@ -615,14 +618,12 @@ def curate(feature_library, target_library, output_library, output_files, extend
                     GFF_PATH = "PROKKA_SYNBICT/PROKKA_SYNBICT.gff"
                     parser = ProkkaParser(GFF_PATH, blast_path)
                     final_df = parser.parse_gff_and_blast()
-                    # find the cds from ids_cds_map
                     id_list = final_df[["protein_id"]]
                     ids_seqs = [feature_annotater.feature_extractor.cds_id_map[cd] if cd in feature_annotater.feature_extractor.cds_id_map else None for cd in id_list['protein_id']]
                     final_df["ids_sequence"] = ids_seqs
 
                     prokkaMapper = ProkkaTableFeatureMapper()
-                    prokka_inline_matches, prokka_rc_matches = prokkaMapper.extract_matches(final_df, exact_match=False)
-                    index_prefix = 'test'
+                    prokka_inline_matches, prokka_rc_matches = prokkaMapper.extract_matches(final_df, mode=prokka_mode)
                     inline_matches = prokkaMapper.extend_list(inline_matches, prokka_inline_matches)
                     rc_matches = prokkaMapper.extend_list(rc_matches, prokka_rc_matches)
            
@@ -746,6 +747,7 @@ def main(args=None):
     parser.add_argument('-minimap2', '--minimap2_mapping', action='store_true')
     parser.add_argument('-blastn', '--blastn_mapping', action='store_true')
     parser.add_argument('-prokka', '--prokka_mapping', action='store_true')
+    parser.add_argument('-prokka_mode', '--prokka_mode', default='exact', choices=['exact', 'similar', 'all'])
     parser.add_argument('-exact', '--exact_mapping', action='store_true')
     parser.add_argument('-bi', '--build_index', action='store_true')
     
@@ -924,7 +926,7 @@ def main(args=None):
                 float(args.extension_threshold), args.extension_suffix, args.in_place, args.minimal_output,
                 args.no_pruning, args.deletion_roles, int(args.cover_offset), args.delete_flat, args.auto_swap,
                 args.non_interactive, logger, args.complete_matches, args.strip_prefixes, args.flashText_mapping,
-                        args.bwa_mapping, args.minimap2_mapping, args.blastn_mapping, args.prokka_mapping, args.exact_mapping, args.build_index, feature_annotater)
+                args.bwa_mapping, args.minimap2_mapping, args.blastn_mapping, args.prokka_mapping, args.prokka_mode, args.exact_mapping, args.build_index, feature_annotater)
         else:
             for i in range(0, len(target_files)):
                 target_doc = load_target_file(target_files[i])
@@ -944,7 +946,7 @@ def main(args=None):
                         float(args.extension_threshold), args.extension_suffix, args.in_place, args.minimal_output,
                         args.no_pruning, args.deletion_roles, int(args.cover_offset), args.delete_flat, args.auto_swap,
                         args.non_interactive, logger, args.complete_matches, args.strip_prefixes, args.flashText_mapping,
-                        args.bwa_mapping, args.minimap2_mapping, args.blastn_mapping, args.prokka_mapping, args.exact_mapping, args.build_index, feature_annotater)
+                        args.bwa_mapping, args.minimap2_mapping, args.blastn_mapping, args.prokka_mapping, args.prokka_mode, args.exact_mapping, args.build_index, feature_annotater)
 
             if synbiohub:
                 for target_URL in args.target_URLs:
@@ -977,7 +979,7 @@ def main(args=None):
                             float(args.extension_threshold), args.extension_suffix, args.in_place, args.minimal_output,
                             args.no_pruning, args.deletion_roles, int(args.cover_offset), args.delete_flat, args.auto_swap,
                             args.non_interactive, logger, args.complete_matches, args.strip_prefixes, args.flashText_mapping,
-                        args.bwa_mapping, args.minimap2_mapping, args.blastn_mapping, args.prokka_mapping, args.exact_mapping, args.build_index, feature_annotater)
+                            args.bwa_mapping, args.minimap2_mapping, args.blastn_mapping, args.prokka_mapping, args.prokka_mode, args.exact_mapping, args.build_index, feature_annotater)
 
         logger.info('Finished curating')
 
