@@ -13,3 +13,7 @@ dependencies:
   - pysam>=0.23.3
   - flashtext>=2.7
   - emboss>=6.6.0
+  - pandas>=1.0
+  - perl-bioperl=1.6.924
+  - perl-xml-simple=2.22
+  - gsl=2.5

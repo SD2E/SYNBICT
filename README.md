@@ -7,9 +7,137 @@ Synthetic Biology Curation Tools
 
 This project depends on Python 3.
 
-To install, run the command below after changing directories to SYNBICT. Note that you may need to clone pySBOL2 from GitHub (https://github.com/SynBioDex/pySBOL2) and install it manually since SYNBICT requires pySBOL2 version 1.3 and at time of writing there is no public release available for this version yet.
+### Quick install
 
-`python setup.py install`
+**Minimum install** (covers `-flashText`, `-bwa`, `-minimap2`, and `-blastn` modes):
+
+```bash
+# 1. Clone the repo
+git clone https://github.com/SD2E/SYNBICT.git
+cd SYNBICT
+
+# 2. Create the conda env (Python 3.11 + minimap2, bwa, blast, emboss, and Python deps)
+conda env create -f environment.yml
+conda activate synbict_conda
+
+# 3. Install SYNBICT in editable mode
+pip install -e .
+```
+
+**Add Prokka** (only if you need `-prokka` protein annotation). SYNBICT expects Prokka 1.14.6 extracted at `./prokka-1.14.6/` (hardcoded in [sequences_to_features/ProkkaAligner.py:8](sequences_to_features/ProkkaAligner.py#L8)). From the SYNBICT root with `synbict_conda` active:
+
+```bash
+# 4. Download and extract the Prokka 1.14.6 release tarball
+wget https://github.com/tseemann/prokka/archive/refs/tags/v1.14.6.tar.gz
+tar -xzf v1.14.6.tar.gz   # creates ./prokka-1.14.6/
+
+# 5. Put Prokka on PATH (persists to ~/.bashrc)
+export PROKKA_HOME="$PWD/prokka-1.14.6"
+export PATH="$PATH:$PROKKA_HOME/bin"
+echo "export PROKKA_HOME=\"$PWD/prokka-1.14.6\"" >> ~/.bashrc
+echo 'export PATH="$PATH:$PROKKA_HOME/bin"' >> ~/.bashrc
+source ~/.bashrc
+
+# 6. Install Prokka's runtime deps into synbict_conda
+conda install -c conda-forge -c bioconda \
+    openjdk perl-bioperl perl-datetime perl-xml-simple perl-digest-md5 "gsl=2.5.*"
+
+# 7. Build the Prokka BLAST database
+prokka --setupdb
+```
+
+**Verify**
+
+```bash
+conda compare environment.yml          # active env matches the spec file
+python -m sequences_to_features --help
+prokka --version                       # only if you installed Prokka
+```
+
+The sections below explain each step in more detail.
+
+### Create the conda environment (recommended)
+
+The repo ships with [`environment.yml`](environment.yml), which provisions Python and the external tools SYNBICT shells out to (`minimap2`, `bwa`, `blast`, `emboss`) along with required Python packages. From the SYNBICT root:
+
+```bash
+conda env create -f environment.yml
+conda activate synbict_conda
+```
+
+After activating the env, install SYNBICT itself in editable mode:
+
+```bash
+pip install -e .
+```
+
+To update the env later after editing `environment.yml`:
+
+```bash
+conda env update -f environment.yml --prune
+```
+
+To verify your active env matches the spec file:
+
+```bash
+conda compare environment.yml
+```
+
+Prokka is optional and not included in `environment.yml`. If you need protein-level annotation (`-prokka` mode), follow the steps in the next section.
+
+### Install Prokka (optional, for `-prokka` mode)
+
+Prokka enables protein-level annotation. Skip this section if you don't need `-prokka`. The steps below assume the `synbict_conda` env is active and you are in the SYNBICT root directory.
+
+SYNBICT expects Prokka **1.14.6** specifically — [sequences_to_features/ProkkaAligner.py:8](sequences_to_features/ProkkaAligner.py#L8) hardcodes `PROKKA_BIN = "./prokka-1.14.6/bin/prokka"`. Use the release tarball, not `git clone` (which would produce a `prokka/` directory the code can't find).
+
+**1. Download and extract the Prokka 1.14.6 release tarball**
+
+```bash
+wget https://github.com/tseemann/prokka/archive/refs/tags/v1.14.6.tar.gz
+tar -xzf v1.14.6.tar.gz   # creates ./prokka-1.14.6/
+```
+
+**2. Add Prokka to PATH**
+
+```bash
+export PROKKA_HOME="$PWD/prokka-1.14.6"
+export PATH="$PATH:$PROKKA_HOME/bin"
+
+echo "export PROKKA_HOME=\"$PWD/prokka-1.14.6\"" >> ~/.bashrc
+echo 'export PATH="$PATH:$PROKKA_HOME/bin"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+**3. Install Prokka's runtime dependencies into `synbict_conda`**
+
+```bash
+conda install -c conda-forge -c bioconda \
+    openjdk \
+    perl-bioperl \
+    perl-datetime \
+    perl-xml-simple \
+    perl-digest-md5 \
+    "gsl=2.5.*"
+```
+
+The versions confirmed working in `synbict_conda` are `gsl=2.5`, `perl-bioperl=1.6.924`, and `perl-xml-simple=2.22`.
+
+**4. Build the Prokka BLAST database**
+
+```bash
+prokka --setupdb
+```
+
+Prokka now works with `-prokka` mode in `sequences_to_features.py`. See the [Protein Annotation (Prokka)](#protein-annotation-prokka) section below for usage.
+
+### Manual installation (alternative)
+
+To install without conda, run the command below after changing directories to SYNBICT. Note that you may need to clone pySBOL2 from GitHub (https://github.com/SynBioDex/pySBOL2) and install it manually since SYNBICT requires pySBOL2 version 1.3 and at time of writing there is no public release available for this version yet.
+
+```bash
+pip install .
+```
 
 If you want to visualize circuits, you need to install matplotlib and the fork of dnaplotlib at https://github.com/nroehner/dnaplotlib.
 
@@ -51,7 +179,7 @@ cd /path/to/SYNBICT
 The tool is invoked as a Python module:
 
 ```bash
-python -m sequences_to_features.sequences_to_features [arguments]
+python -m sequences_to_features [arguments]
 ```
 
 ---
@@ -63,7 +191,7 @@ python -m sequences_to_features.sequences_to_features [arguments]
 This pre-computes indexes for BWA, BLASTN, and Minimap2 from your feature library. Only needed once per library.
 
 ```bash
-python -m sequences_to_features.sequences_to_features \
+python -m sequences_to_features \
     -n http://mynamespace.org \
     -f example/jet_libs/CIDAR_MoClo_*.xml \
     -bi
@@ -80,7 +208,7 @@ This writes `test.fasta` and index files (`test.*`) to the current directory.
 ##### FlashText (default, exact string matching — no index required)
 
 ```bash
-python -m sequences_to_features.sequences_to_features \
+python -m sequences_to_features \
     -n http://mynamespace.org \
     -f example/jet_libs/CIDAR_MoClo_*.xml \
     -t 11508_addgene_out.xml \
@@ -90,7 +218,7 @@ python -m sequences_to_features.sequences_to_features \
 ##### BWA — similar match
 
 ```bash
-python -m sequences_to_features.sequences_to_features \
+python -m sequences_to_features \
     -n http://mynamespace.org \
     -f example/jet_libs/CIDAR_MoClo_*.xml \
     -t 11508_addgene_out.xml \
@@ -100,7 +228,7 @@ python -m sequences_to_features.sequences_to_features \
 ##### BWA — exact match (100% identity)
 
 ```bash
-python -m sequences_to_features.sequences_to_features \
+python -m sequences_to_features \
     -n http://mynamespace.org \
     -f example/jet_libs/CIDAR_MoClo_*.xml \
     -t 11508_addgene_out.xml \
@@ -110,7 +238,7 @@ python -m sequences_to_features.sequences_to_features \
 ##### Minimap2 — similar match
 
 ```bash
-python -m sequences_to_features.sequences_to_features \
+python -m sequences_to_features \
     -n http://mynamespace.org \
     -f example/jet_libs/CIDAR_MoClo_*.xml \
     -t 11508_addgene_out.xml \
@@ -120,7 +248,7 @@ python -m sequences_to_features.sequences_to_features \
 ##### BLASTN — similar match
 
 ```bash
-python -m sequences_to_features.sequences_to_features \
+python -m sequences_to_features \
     -n http://mynamespace.org \
     -f example/jet_libs/CIDAR_MoClo_*.xml \
     -t 11508_addgene_out.xml \
@@ -136,7 +264,7 @@ Prokka runs alongside any of the DNA alignment tools (BWA, Minimap2, BLASTN, or 
 ##### BWA + Prokka
 
 ```bash
-python -m sequences_to_features.sequences_to_features \
+python -m sequences_to_features \
     -n http://mynamespace.org \
     -f example/jet_libs/CIDAR_MoClo_*.xml \
     -t 11508_addgene_out.xml \
@@ -155,7 +283,7 @@ python -m sequences_to_features.sequences_to_features \
 
 ```bash
 # Example: BLASTN + Prokka with similar matches
-python -m sequences_to_features.sequences_to_features \
+python -m sequences_to_features \
     -n http://mynamespace.org \
     -f example/jet_libs/CIDAR_MoClo_*.xml \
     -t 11508_addgene_out.xml \
