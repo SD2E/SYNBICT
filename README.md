@@ -149,15 +149,9 @@ Annotates sequences in SBOL, GenBank, or FASTA target files using a feature libr
 
 ---
 
-### Installation
+### External tool requirements
 
-From the SYNBICT root directory:
-
-```bash
-pip install -e .
-```
-
-Required external tools (only needed for the corresponding alignment method):
+Only needed for the corresponding alignment method:
 
 | Tool | Required for |
 |------|-------------|
