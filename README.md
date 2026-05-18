@@ -205,14 +205,14 @@ This writes `test.fasta` and index files (`test.*`) to the current directory.
 
 #### Step 2 — Annotate a target file
 
-##### FlashText (default, exact string matching — no index required)
+##### FlashText (exact string matching — no index required)
 
 ```bash
 python -m sequences_to_features \
     -n http://mynamespace.org \
     -f example/jet_libs/CIDAR_MoClo_*.xml \
     -t 11508_addgene_out.xml \
-    -np -o 11508_out.xml
+    -flashText -np -o 11508_out.xml
 ```
 
 ##### BWA — similar match
