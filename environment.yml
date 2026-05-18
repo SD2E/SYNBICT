@@ -17,3 +17,10 @@ dependencies:
   - perl-bioperl=1.6.924
   - perl-xml-simple=2.22
   - gsl=2.5
+  # Prokka external dependencies (required by ProkkaAligner)
+  - hmmer>=3.3
+  - aragorn>=1.2
+  - barrnap>=0.9
+  - minced>=0.4
+  - prodigal>=2.6
+  - parallel

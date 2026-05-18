@@ -5,7 +5,7 @@ import tempfile
 from .sbol_utils import sbol_sequence
 
 DATABASE_PROTEIN_PATH = "./database_protein.fasta"
-PROKKA_BIN = "./prokka-1.14.6/bin/prokka"
+PROKKA_BIN = shutil.which("prokka") or "./prokka-1.14.6/bin/prokka"
 
 
 class ProkkaAligner():
