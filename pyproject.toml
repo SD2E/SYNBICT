@@ -22,6 +22,8 @@ dependencies = [
   "dnaplotlib>=1.0",
   "flashtext>=2.7",
   "sbol2>=1.3",
+  # sbol2 1.4.1 uses packaging.version.NegativeInfinity, removed in packaging 22.
+  "packaging<22",
   "matplotlib>=1.5.0",
   "pysam>=0.23.3",
   "pandas>=1.0"
