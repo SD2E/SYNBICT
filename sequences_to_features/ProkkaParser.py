@@ -33,8 +33,8 @@ class ProkkaParser:
         df["ID"]         = df["attributes"].apply(lambda x: self.get_attr(x, "ID"))
 
         ab = df["attributes"].apply(lambda x: self.get_attr(x, "database_protein.fasta"))
-        df["protein_name"] = [x.split(":")[4] if x is not None else "" for x in ab]
-        df["custom_db"]    = [x.split(":")[3] if x is not None else "" for x in ab]
+        df["protein_name"] = [x.split(":")[4] if isinstance(x, str) else "" for x in ab]
+        df["custom_db"]    = [x.split(":")[3] if isinstance(x, str) else "" for x in ab]
 
         # Split CDS vs non-CDS — use .copy() to avoid SettingWithCopyWarning
         only_cds_df = df[df["type"] == "CDS"].copy().reset_index(drop=True)
