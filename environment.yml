@@ -24,3 +24,4 @@ dependencies:
   - minced>=0.4
   - prodigal>=2.6
   - parallel
+  - tbl2asn>=25.7
