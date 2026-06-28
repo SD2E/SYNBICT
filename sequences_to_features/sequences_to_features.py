@@ -22,6 +22,7 @@ from .Minimap2Aligner import Minimap2Aligner
 from .ProkkaAligner import ProkkaAligner
 from .ProkkaParser import ProkkaParser
 from .Annotator import ProkkaTableFeatureMapper
+from .sbol_utils import sbol_sequence
 
 # import time
 
@@ -546,11 +547,30 @@ class FeatureAnnotater():
         self.feature_extractor.build_index(dna_path, index_prefix, 'minimap2')
 
 
+def normalize_circular_matches(matches, target_length):
+    """Resolve alignment matches produced against a circular-extended query.
+
+    The query for a circular target is ``seq + seq[:overlap]`` (length
+    ``target_length + overlap``). A match is kept when its start lies in the
+    original ``[0, target_length)`` window; matches starting at or beyond
+    ``target_length`` are duplicates from the appended overlap and are dropped.
+    Matches that begin before the origin and end past it keep ``end >
+    target_length`` so the annotator emits a wrap-around (two-Range) annotation.
+    """
+    normalized = []
+    for match in matches:
+        start = match[1]
+        if start >= target_length:
+            continue
+        normalized.append(match)
+    return normalized
+
 def curate(feature_library, target_library, output_library, output_files, extend_features, no_annotation,
            min_feature_length, min_target_length, extension_threshold, extension_suffix, in_place, minimal_output,
            no_pruning, deletion_roles, cover_offset, delete_flat, auto_swap, non_interactive, logger,
            complete_matches=False, strip_prefixes=[], flashtext_mapping=True, bwa_mapping=False, minimap2_mapping=False,
-           blastn_mapping=False, prokka_mapping=False, prokka_mode='exact', exact_match=False, build_index=False, feature_annotater=None):
+           blastn_mapping=False, prokka_mapping=False, prokka_mode='exact', exact_match=False, build_index=False, feature_annotater=None,
+           circular=False):
     
     feature_curator = FeatureCurator(target_library, output_library)
 
@@ -581,27 +601,53 @@ def curate(feature_library, target_library, output_library, output_files, extend
         if(not flashtext_mapping):
             doc = target_library.docs[0]
             index_prefix = 'test'
+            inline_matches, rc_matches = [], []
+
+            # ----- Circular plasmid support ---------------------------------
+            # A target is treated as circular if the user passed --circular or if
+            # its ComponentDefinition is already typed SO_CIRCULAR. For a circular
+            # target the query is extended by appending a prefix the length of the
+            # longest feature - 1, so a feature that spans the origin aligns as one
+            # contiguous block. Coordinates beyond the original length are mapped
+            # back in normalize_circular_matches / the annotator.
+            target_seq = sbol_sequence(doc)
+            target_length = len(target_seq)
+            target_cd = doc.componentDefinitions[0]
+            is_circular = circular or (sbol2.SO_CIRCULAR in target_cd.types)
+
+            query_seq = None
+            if is_circular:
+                max_feature_length = max(
+                    (len(f.nucleotides) for f in feature_library.features), default=0)
+                overlap = max(0, min(max_feature_length - 1, target_length))
+                if overlap > 0:
+                    query_seq = target_seq + target_seq[:overlap]
+                if sbol2.SO_CIRCULAR not in target_cd.types:
+                    target_cd.types = target_cd.types + [sbol2.SO_CIRCULAR]
+                logger.info('Annotating %s as circular (origin overlap %s bp)',
+                            target_cd.displayId, overlap)
+
             if(bwa_mapping):
                 bwa = BwaAligner(index_prefix)
                 output_sam_path = 'aligned.sam'
-                bwa.align(doc, output_sam_path, exact_match)
+                bwa.align(doc, output_sam_path, exact_match, query_seq=query_seq)
                 mapper = SAMFeatureMapper('aligned.sam')
                 inline_matches, rc_matches = mapper.extract_matches(exact_match=exact_match, min_feature_length=min_feature_length, is_bowtie2=False)
 
             elif(minimap2_mapping):
                 minimap2 = Minimap2Aligner(index_prefix)
                 output_sam_path = 'aligned.sam'
-                minimap2.align(doc, output_sam_path, exact_match)
+                minimap2.align(doc, output_sam_path, exact_match, query_seq=query_seq)
                 mapper = SAMFeatureMapper('aligned.sam')
                 inline_matches, rc_matches = mapper.extract_matches(exact_match=exact_match, min_feature_length=min_feature_length, is_bowtie2=False)
 
             elif(blastn_mapping):
                 output_sam_path = 'aligned.txt'
                 blast = BlastAligner(index_prefix)
-                blast.align(doc, output_sam_path, exact_match)
+                blast.align(doc, output_sam_path, exact_match, query_seq=query_seq)
                 mapper = TableFeatureMapper('aligned.txt')
                 inline_matches, rc_matches = mapper.extract_matches(exact_match=exact_match, min_feature_length=min_feature_length)
-            
+
             if prokka_mapping:
                 prokka = ProkkaAligner(doc)
                 prokka.align()
@@ -626,7 +672,15 @@ def curate(feature_library, target_library, output_library, output_files, extend
                     prokka_inline_matches, prokka_rc_matches = prokkaMapper.extract_matches(final_df, mode=prokka_mode)
                     inline_matches = prokkaMapper.extend_list(inline_matches, prokka_inline_matches)
                     rc_matches = prokkaMapper.extend_list(rc_matches, prokka_rc_matches)
-           
+
+            if is_circular and query_seq is not None:
+                # Drop matches that fall entirely inside the appended origin overlap
+                # (they are duplicates of matches in the first copy). Matches that
+                # straddle the origin keep end > target_length so the annotator can
+                # emit a two-Range (wrap-around) SequenceAnnotation.
+                inline_matches = normalize_circular_matches(inline_matches, target_length)
+                rc_matches = normalize_circular_matches(rc_matches, target_length)
+
             simple = FeatureAnnotatorSimple(feature_library, inline_matches, rc_matches)
             # this is a different annnotate function, belong to FeatureAnnotatorSimple class
             simple.annotate(inline_matches, rc_matches, target_library, min_feature_length, in_place=True, output_library=output_library, output_matches=False)#True, in_place=True
@@ -750,6 +804,8 @@ def main(args=None):
     parser.add_argument('-prokka_mode', '--prokka_mode', default='exact', choices=['exact', 'similar', 'all'])
     parser.add_argument('-exact', '--exact_mapping', action='store_true')
     parser.add_argument('-bi', '--build_index', action='store_true')
+    parser.add_argument('-cir', '--circular', action='store_true',
+                        help='Treat target sequences as circular plasmids so features spanning the origin are annotated')
     
     args = parser.parse_args(args)
 
@@ -926,7 +982,7 @@ def main(args=None):
                 float(args.extension_threshold), args.extension_suffix, args.in_place, args.minimal_output,
                 args.no_pruning, args.deletion_roles, int(args.cover_offset), args.delete_flat, args.auto_swap,
                 args.non_interactive, logger, args.complete_matches, args.strip_prefixes, args.flashText_mapping,
-                args.bwa_mapping, args.minimap2_mapping, args.blastn_mapping, args.prokka_mapping, args.prokka_mode, args.exact_mapping, args.build_index, feature_annotater)
+                args.bwa_mapping, args.minimap2_mapping, args.blastn_mapping, args.prokka_mapping, args.prokka_mode, args.exact_mapping, args.build_index, feature_annotater, circular=args.circular)
         else:
             for i in range(0, len(target_files)):
                 target_doc = load_target_file(target_files[i])
@@ -946,7 +1002,7 @@ def main(args=None):
                         float(args.extension_threshold), args.extension_suffix, args.in_place, args.minimal_output,
                         args.no_pruning, args.deletion_roles, int(args.cover_offset), args.delete_flat, args.auto_swap,
                         args.non_interactive, logger, args.complete_matches, args.strip_prefixes, args.flashText_mapping,
-                        args.bwa_mapping, args.minimap2_mapping, args.blastn_mapping, args.prokka_mapping, args.prokka_mode, args.exact_mapping, args.build_index, feature_annotater)
+                        args.bwa_mapping, args.minimap2_mapping, args.blastn_mapping, args.prokka_mapping, args.prokka_mode, args.exact_mapping, args.build_index, feature_annotater, circular=args.circular)
 
             if synbiohub:
                 for target_URL in args.target_URLs:
@@ -979,7 +1035,7 @@ def main(args=None):
                             float(args.extension_threshold), args.extension_suffix, args.in_place, args.minimal_output,
                             args.no_pruning, args.deletion_roles, int(args.cover_offset), args.delete_flat, args.auto_swap,
                             args.non_interactive, logger, args.complete_matches, args.strip_prefixes, args.flashText_mapping,
-                            args.bwa_mapping, args.minimap2_mapping, args.blastn_mapping, args.prokka_mapping, args.prokka_mode, args.exact_mapping, args.build_index, feature_annotater)
+                            args.bwa_mapping, args.minimap2_mapping, args.blastn_mapping, args.prokka_mapping, args.prokka_mode, args.exact_mapping, args.build_index, feature_annotater, circular=args.circular)
 
         logger.info('Finished curating')
 

@@ -6,10 +6,12 @@ class Minimap2Aligner(Aligner):
     def __init__(self, index_prefix):
         super().__init__(index_prefix)
 
-    def align(self, query_sbol, output_sam_path, exact_match=False):
+    def align(self, query_sbol, output_sam_path, exact_match=False, query_seq=None):
         with tempfile.NamedTemporaryFile(mode='w+', suffix='.fasta', delete=False) as fasta_file:
             fasta_path = fasta_file.name
-            seq = sbol_sequence(query_sbol)
+            # query_seq lets the caller inject a circular-extended query (origin wrap);
+            # fall back to the SBOL sequence for linear targets.
+            seq = query_seq if query_seq is not None else sbol_sequence(query_sbol)
             fasta_file.write(f">query_sequence\n{seq}\n")
         with open(output_sam_path, 'w') as out_sam, open(output_sam_path + '.log', 'w') as err_log:
             if(exact_match): # For long reads (ONT or PacBio)

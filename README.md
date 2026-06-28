@@ -249,6 +249,23 @@ python -m sequences_to_features \
     -blastn -np -o 11508_out.xml
 ```
 
+##### Circular plasmid — annotate features that span the origin
+
+Add `-cir` to any of the BWA / Minimap2 / BLASTN commands when the target is a
+circular plasmid. SYNBICT extends the query past the origin before alignment, so
+a feature that wraps from the end of the sequence back to the start is detected
+and written as a single annotation with two `Range` locations. The annotated
+target is also typed `SO_CIRCULAR`. A target already typed `SO_CIRCULAR` in the
+input is treated as circular automatically, even without `-cir`.
+
+```bash
+python -m sequences_to_features \
+    -n http://mynamespace.org \
+    -f example/jet_libs/CIDAR_MoClo_*.xml \
+    -t 11508_addgene_out.xml \
+    -blastn -cir -np -o 11508_out.xml
+```
+
 ---
 
 ### Protein Annotation (Prokka)
@@ -333,6 +350,7 @@ Argument | Short Arg | Type | Description | Example
 `--blastn_mapping` | `-blastn` | `Boolean` | **Required (one of)**. Use BLASTN for DNA alignment instead of FlashText. Requires a pre-built BLAST index. | `-blastn`
 `--exact_mapping` | `-exact` | `Boolean` | **Optional**. Require exact (100% identity) matches when using BWA, Minimap2, or BLASTN. Default is similar matching. | `-exact`
 `--build_index` | `-bi` | `Boolean` | **Optional**. Build the alignment index from the feature library before running. | `-bi`
+`--circular` | `-cir` | `Boolean` | **Optional**. Treat target sequences as circular plasmids so that features spanning the origin are annotated. A target is also treated as circular if its `ComponentDefinition` is typed `SO_CIRCULAR` (`SO:0000988`). Applies to the BWA, Minimap2, and BLASTN methods. Origin-spanning matches are written as a single annotation with two `Range` locations, and the annotated target is typed `SO_CIRCULAR`. | `-cir`
 `--prokka_mapping` | `-prokka` | `Boolean` | **Optional**. Run Prokka protein annotation in addition to the selected DNA alignment method. Requires `prokka` on PATH and a `database_protein.fasta` file in the working directory. | `-prokka`
 `--prokka_mode` | `-prokka_mode` | `String` | **Optional**. Controls which Prokka protein matches are kept. `exact`: 100% protein identity only. `similar`: any identity, excludes hypothetical proteins. `all`: keep all matches regardless of identity or product name. Default is `exact`. | `-prokka_mode similar`
 

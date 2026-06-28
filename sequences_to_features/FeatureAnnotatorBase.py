@@ -26,6 +26,31 @@ sbol2.Config.setOption('sbol_compliant_uris', True)
 _VARIANT_RE = re.compile(r'_v(\d+)')
 
 
+def add_location_ranges(seq_anno, orientation, start, end, target_length=None):
+    """Attach Range location(s) to a SequenceAnnotation.
+
+    For a linear feature this creates a single Range [start, end]. For a feature
+    that spans the origin of a circular target (signalled by ``end >
+    target_length``) it creates two Ranges -- [start, target_length] and
+    [0, end - target_length] -- which together describe the wrap-around span.
+    """
+    if target_length is not None and end > target_length:
+        first = seq_anno.locations.createRange('_'.join([seq_anno.displayId, 'loc']))
+        first.orientation = orientation
+        first.start = start
+        first.end = target_length
+
+        second = seq_anno.locations.createRange('_'.join([seq_anno.displayId, 'loc2']))
+        second.orientation = orientation
+        second.start = 0
+        second.end = end - target_length
+    else:
+        location = seq_anno.locations.createRange('_'.join([seq_anno.displayId, 'loc']))
+        location.orientation = orientation
+        location.start = start
+        location.end = end
+
+
 class FeatureAnnotatorSimple:
     def __init__(self, feature_library, inline_matches, rc_matches):
         self.feature_library = feature_library
@@ -88,7 +113,7 @@ class FeatureAnnotatorSimple:
 
     @classmethod
     def __create_sequence_annotation(cls, parent_definition, child_definition, orientation,
-                                     start, end, sub_comp_URI=None, parent_URI=None):
+                                     start, end, sub_comp_URI=None, parent_URI=None, target_length=None):
         i = 1
         while True:
             try:
@@ -112,15 +137,12 @@ class FeatureAnnotatorSimple:
                 seq_anno.roles = seq_anno.roles + child_definition.roles
                 seq_anno.wasDerivedFrom = seq_anno.wasDerivedFrom + [parent_URI]
 
-            location = seq_anno.locations.createRange('_'.join([seq_anno.displayId, 'loc']))
-            location.orientation = orientation
-            location.start = start
-            location.end = end
+            add_location_ranges(seq_anno, orientation, start, end, target_length)
             return seq_anno
 
     @classmethod
     def __create_similar_sequence_annotation(cls, parent_definition, child_definition, orientation,
-                                             start, end, sub_comp_URI=None, parent_URI=None):
+                                             start, end, sub_comp_URI=None, parent_URI=None, target_length=None):
         i = 1
         while True:
             try:
@@ -144,10 +166,7 @@ class FeatureAnnotatorSimple:
                 seq_anno.roles = seq_anno.roles + child_definition.roles
                 seq_anno.wasDerivedFrom = seq_anno.wasDerivedFrom + [parent_URI]
 
-            location = seq_anno.locations.createRange('_'.join([seq_anno.displayId, 'loc']))
-            location.orientation = orientation
-            location.start = start
-            location.end = end
+            add_location_ranges(seq_anno, orientation, start, end, target_length)
             return seq_anno
 
     def create_component_definition(self, doc, base_display_id, name=None, roles=None,
@@ -206,7 +225,7 @@ class FeatureAnnotatorSimple:
     # ------------------------------------------------------------------
 
     def _handle_unknown_feature(self, target_doc, target_definition, target_nucleotides,
-                                orientation, start, end, match_type):
+                                orientation, start, end, match_type, target_length=None):
         """Create a hypothetical CDS or RNA component definition and annotate it."""
         if orientation != sbol2.SBOL_ORIENTATION_INLINE:
             target_nucleotides = str(Seq(target_nucleotides).reverse_complement()).upper()
@@ -233,7 +252,8 @@ class FeatureAnnotatorSimple:
             )
 
         sub_comp = self.__create_sub_component(target_definition, new_compDef)
-        self.__create_sequence_annotation(target_definition, new_compDef, orientation, start, end, sub_comp.identity)
+        self.__create_sequence_annotation(target_definition, new_compDef, orientation, start, end,
+                                          sub_comp.identity, target_length=target_length)
 
     def _handle_known_feature(self, target_doc, target_definition, feature, feature_definition,
                               feature_doc, orientation, start, end, identity_pct,
@@ -261,7 +281,8 @@ class FeatureAnnotatorSimple:
         if exact_match:
             sub_comp = self.__create_sub_component(target_definition, feature_definition)
             self.__create_sequence_annotation(
-                target_definition, feature_definition, orientation, start, end, sub_comp.identity
+                target_definition, feature_definition, orientation, start, end, sub_comp.identity,
+                target_length=target_length
             )
             if copy_definitions:
                 FeatureLibrary.copy_component_definition(feature_definition, feature_doc, target_doc)
@@ -299,7 +320,8 @@ class FeatureAnnotatorSimple:
 
                 sub_comp = self.__create_similar_sub_component(target_definition, variant_definition)
                 self.__create_similar_sequence_annotation(
-                    target_definition, variant_definition, orientation, start, end, sub_comp.identity
+                    target_definition, variant_definition, orientation, start, end, sub_comp.identity,
+                    target_length=target_length
                 )
                 #FeatureLibrary.copy_component_definition(variant_definition, feature_doc, target_doc) <-- new, deleted
 
@@ -321,14 +343,19 @@ class FeatureAnnotatorSimple:
             identity_pct = feature_match[3] if len(feature_match) > 3 else -1
             match_type = feature_match[4] if len(feature_match) > 3 else 'unknown'
 
-            # Slice target nucleotides once per match
-            target_nucleotides = seq_elements[start:end].upper()
+            # Slice target nucleotides once per match. A match that straddles the
+            # origin of a circular target has end > target_length; stitch the tail
+            # of the sequence to its head to recover the contiguous feature.
+            if end > target_length:
+                target_nucleotides = (seq_elements[start:] + seq_elements[:end - target_length]).upper()
+            else:
+                target_nucleotides = seq_elements[start:end].upper()
 
             for feature in feature_match[0]:
                 if feature.identity == ' ':
                     self._handle_unknown_feature(
                         target_doc, target_definition, target_nucleotides,
-                        orientation, start, end, match_type,
+                        orientation, start, end, match_type, target_length,
                     )
                 else:
                     feature_definition = self.feature_library.get_definition(feature.identity)
