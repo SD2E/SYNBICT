@@ -29,25 +29,29 @@ _VARIANT_RE = re.compile(r'_v(\d+)')
 def add_location_ranges(seq_anno, orientation, start, end, target_length=None):
     """Attach Range location(s) to a SequenceAnnotation.
 
-    For a linear feature this creates a single Range [start, end]. For a feature
-    that spans the origin of a circular target (signalled by ``end >
-    target_length``) it creates two Ranges -- [start, target_length] and
-    [0, end - target_length] -- which together describe the wrap-around span.
+    ``start``/``end`` arrive as 0-based half-open coordinates (the alignment
+    query coords). SBOL2 Range is 1-based inclusive, so the start is shifted by
+    +1 while the half-open end already equals the 1-based inclusive end.
+
+    For a linear feature this creates a single Range [start+1, end]. For a
+    feature that spans the origin of a circular target (signalled by ``end >
+    target_length``) it creates two Ranges -- [start+1, target_length] and
+    [1, end - target_length] -- which together describe the wrap-around span.
     """
     if target_length is not None and end > target_length:
         first = seq_anno.locations.createRange('_'.join([seq_anno.displayId, 'loc']))
         first.orientation = orientation
-        first.start = start
+        first.start = start + 1
         first.end = target_length
 
         second = seq_anno.locations.createRange('_'.join([seq_anno.displayId, 'loc2']))
         second.orientation = orientation
-        second.start = 0
+        second.start = 1
         second.end = end - target_length
     else:
         location = seq_anno.locations.createRange('_'.join([seq_anno.displayId, 'loc']))
         location.orientation = orientation
-        location.start = start
+        location.start = start + 1
         location.end = end
 
 
