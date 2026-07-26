@@ -17,8 +17,13 @@ class BwaAligner(Aligner):
             fasta_file.write(f">query_sequence\n{seq}\n")
         with open(output_sam_path, 'w') as out_sam, open(output_sam_path + '.log', 'w') as err_log:
             if(exact_match):#'bwa', 'mem', '-a', '-B', '100', '-O', '100', '-E', '100', self.index_prefix, fasta_path
+                # -k 11 short seed (match blastn word_size); -D 0 keep chains
+                # shorter than the best overlapping chain (nested features);
+                # -W 10 is the lever that recovers the remaining short/RC parts.
+                # (-c/-r/-y were tested and had no effect on this reference.)
                 subprocess.run(
-                    ['bwa', 'mem', '-a', '-T', '0', self.index_prefix, fasta_path],
+                    ['bwa', 'mem', '-a', '-T', '0', '-k', '11', '-D', '0', '-W', '10',
+                     self.index_prefix, fasta_path],
                     stdout=out_sam,
                     stderr=err_log,
                     check=True

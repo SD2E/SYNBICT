@@ -117,37 +117,59 @@ class TableFeatureMapper:
         with open(metadata_path, "r") as f:
             return json.load(f)
 
-    def extract_matches(self, min_feature_length=40, exact_match=True):
-        blast_output = self.tab_path # error, filename error
+    def extract_matches(self, min_feature_length=40, exact_match=True,
+                        pid_threshold=90.0, overlap_frac=0.5):
+        """Parse the blast (or vsearch) tabular output and return the best-scoring,
+        non-overlapping set of feature matches.
+
+        Every hit that clears the identity / length filters is collected as a
+        candidate; overlapping candidates for the same locus are then resolved by
+        keeping the highest-scoring one (bitscore for blast, identities for
+        vsearch). This replaces the previous "emit every hit >= 95%" behaviour,
+        which annotated a shorter partial part over the correct longer one when both
+        passed threshold. Lower `min_feature_length` to recover short parts (RBS,
+        short terminators); `pid_threshold` is coverage-weighted identity
+        (identical bases / reference length)."""
+        blast_output = self.tab_path
+        candidates = []  # (score, start, end, ref_name, sstart, send)
         with open(blast_output) as f:
             for line in f:
                 if line.startswith("#") or not line.strip():
                     continue  # skip headers or blank lines
                 segs = line.strip().split('\t')
+                sstart = send = 0  # subject coords; set in the blast branch below
                 if len(segs) < 14:
                     # vsearch output
-
                     thi = int(segs[9])  # sstart
                     tlo = int(segs[8])
                     ids = int(segs[12])
                     ref_name = segs[1]
                     ref_length = abs(thi - tlo) + 1
                     pid_ref = 100.0 * ids / ref_length
+                    start = int(segs[6]) - 1
+                    end = int(segs[7])
+                    score = ids
                     if(exact_match):
-                        if not (segs[3] == ref_length and math.isclose(pid_ref, 100.0, rel_tol=0.0, abs_tol=1e-6)):
+                        if not (int(segs[3]) == ref_length and math.isclose(pid_ref, 100.0, rel_tol=0.0, abs_tol=1e-6)):
                             continue
                     else:
-                        if(pid_ref < 95.0):
+                        if(pid_ref < pid_threshold):
                             continue
-                    
+
                 else:
                     # change to query start and end
                     ref_name = segs[1]  # ref_name, # sseqid
                     align_len = int(segs[3]) # alignment length (matches+mismatches+gaps)
                     start = int(segs[6]) - 1 # qstart (convert from 1-based to 0-based)
                     end = int(segs[7]) # qend
+                    # subject (feature) coords: blastn keeps the query forward and
+                    # reports sstart>send for minus-strand hits, so strand must be
+                    # read from the subject, not the (always-ascending) query.
+                    sstart = int(segs[8]) # sstart
+                    send = int(segs[9]) # send
                     pident = float(segs[2]) # pident
                     ref_length = int(segs[13]) # slen
+                    score = float(segs[11]) # bitscore -- used to rank overlapping hits
                     if exact_match:
                         # Check for exact match, e.g., if the alignment length matches the reference length
                         if not ((end - start) == ref_length
@@ -159,28 +181,52 @@ class TableFeatureMapper:
                             pid_ref = 100.0 * nident / ref_length
                         else:
                             pid_ref = 100.0 * align_len / ref_length # estimate
-                        if(pid_ref < 95.0):
+                        if(pid_ref < pid_threshold):
                             continue
 
                 if ref_length < min_feature_length:
                     continue
-                feature = Feature(
-                            nucleotides='',
-                            identity=ref_name,# will be replaced later
-                            roles='',
-                            sub_identities='',
-                            parent_identities=''
-                            #identity=feature_pre['original_identity'],
-                            #roles=feature_pre['roles'],
-                            #sub_identities=feature_pre.get('sub_identities', []),
-                            #parent_identities=feature_pre.get('parent_identities', [])
-                            )
-                    
-                match = ([feature], start, end)
-                if start > end:
-                    self.rc_matches.append(match)
-                else:
-                    self.inline_matches.append(match)
+                candidates.append((score, start, end, ref_name, sstart, send))
+
+        # non-maximum suppression over query coordinates: sort by score (desc) and
+        # keep a hit only if it does not substantially overlap a higher-scoring one.
+        # Adjacent parts (promoter/RBS/CDS) barely overlap and all survive; competing
+        # annotations for one locus collapse to the single best-scoring reference.
+        candidates.sort(key=lambda c: -c[0])
+        kept = []
+        for cand in candidates:
+            cscore, s, e, _, _, _ = cand
+            conflict = False
+            for k in kept:
+                ov = min(e, k[2]) - max(s, k[1])
+                # suppress only against a STRICTLY higher-scoring overlap; keep
+                # tied hits (e.g. PJR1 62bp vs Plambda 58bp, identical bitscore) so
+                # the regulation-aware promoter collapse downstream picks the right
+                # one (the repressed promoter) instead of an arbitrary tie-break.
+                if ov > 0 and ov >= overlap_frac * min(e - s, k[2] - k[1]) \
+                        and k[0] > cscore:
+                    conflict = True
+                    break
+            if not conflict:
+                kept.append(cand)
+
+        for score, start, end, ref_name, sstart, send in kept:
+            feature = Feature(
+                        nucleotides='',
+                        identity=ref_name,# will be replaced later
+                        roles='',
+                        sub_identities='',
+                        parent_identities=''
+                        )
+            match = ([feature], start, end)
+            # route by subject strand (sstart>send == minus). The previous
+            # `start > end` test used the query, which blastn always reports
+            # ascending, so rc_matches was never populated and every hit was
+            # annotated inline regardless of its true orientation.
+            if sstart > send:
+                self.rc_matches.append(match)
+            else:
+                self.inline_matches.append(match)
         return self.inline_matches, self.rc_matches
     
 class SAMFeatureMapper:
@@ -220,9 +266,15 @@ class SAMFeatureMapper:
     def extract_matches(self, min_feature_length=40, exact_match=True, is_bowtie2=False): # need change back
         try:
             samfile = pysam.AlignmentFile(self.sam_path, "r")
-            for aln in samfile.fetch(until_eof=True):    
+            for aln in samfile.fetch(until_eof=True):
                 ref_name = aln.reference_name
-                length = samfile.get_reference_length(ref_name)  
+                if aln.is_unmapped or ref_name is None:
+                    continue
+                length = samfile.get_reference_length(ref_name)
+                # enforce the minimum feature length (TableFeatureMapper does this
+                # too); without it short RBS/terminator/promoter refs leak through.
+                if length < min_feature_length:
+                    continue
                 if exact_match:
                     # Check for exact match AS = len(ref)
                     if is_bowtie2:

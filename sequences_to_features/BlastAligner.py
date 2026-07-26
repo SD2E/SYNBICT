@@ -17,8 +17,13 @@ class BlastAligner(Aligner):
             fasta_file.write(f">query_sequence\n{seq}\n")
         output_path = output_sam_path
         blast_command_simi = [
-            'blastn', 
-            '-query', 
+            'blastn',
+            # default task is megablast (word_size 28), which misses short
+            # features such as terminators (e.g. the 47bp L3S3P11); use the
+            # blastn task (word_size 11) so small parts are still seeded.
+            '-task',
+            'blastn',
+            '-query',
             fasta_path,
             '-db',
             self.index_prefix,

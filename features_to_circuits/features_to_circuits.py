@@ -1,6 +1,7 @@
 import logging
 import argparse
 import os
+import re
 import sys
 
 from Bio.Seq import Seq
@@ -9,6 +10,12 @@ import sbol2
 from flashtext import KeywordProcessor
 from sequences_to_features import Feature
 from sequences_to_features import FeatureLibrary
+try:
+    # when run as a script from inside the package directory
+    from gate_assembler import GateAssembler, write_netlist, summarize
+except ImportError:
+    # when imported as a package module
+    from features_to_circuits.gate_assembler import GateAssembler, write_netlist, summarize
 
 def load_sbol(sbol_file):
     logger = logging.getLogger('synbict')
@@ -29,6 +36,40 @@ def load_sbol(sbol_file):
     logger.info('Finished loading %s', sbol_file)
 
     return doc
+
+
+def embed_referenced_definitions(target_doc, library_docs):
+    """Copy every referenced-but-missing ComponentDefinition (and its Sequences)
+    from the part libraries into target_doc, so the written circuit SBOL is
+    self-contained (no dangling `definition` URIs -> passes SBOL validation)."""
+    lib_cd, lib_seq = {}, {}
+    for lib in library_docs:
+        for cd in lib.componentDefinitions:
+            lib_cd.setdefault(cd.identity, cd)
+        for s in lib.sequences:
+            lib_seq.setdefault(s.identity, s)
+    for _ in range(5):
+        present = {cd.identity for cd in target_doc.componentDefinitions}
+        need = {c.definition for cd in target_doc.componentDefinitions
+                for c in cd.components
+                if c.definition and c.definition not in present}
+        need &= set(lib_cd)
+        if not need:
+            break
+        seq_present = {s.identity for s in target_doc.sequences}
+        for uri in need:
+            cd = lib_cd[uri]
+            try:
+                target_doc.add(cd.copy(target_doc))
+            except Exception:
+                continue
+            for su in cd.sequences:
+                if su in lib_seq and su not in seq_present:
+                    seq_present.add(su)
+                    try:
+                        target_doc.add(lib_seq[su].copy(target_doc))
+                    except Exception:
+                        pass
 
 # Set up the not found error for catching
 try:
@@ -1214,6 +1255,8 @@ def main(args=None):
     parser.add_argument('-f', '--flanking_length', nargs='?', default='200')
     parser.add_argument('-iv', '--infer_devices', action='store_true')
     parser.add_argument('-sp', '--strip_prefixes', nargs='*', default=[])
+    parser.add_argument('-gn', '--gate_netlist', action='store_true',
+                        help='also assemble the circuit into a logic-gate netlist (JSON)')
 
     # Sub-circuit library extension arguments
     parser.add_argument('-e', '--extend_sub_circuits', action='store_true')
@@ -1297,6 +1340,13 @@ def main(args=None):
                 if len(args.circuit_suffix) > 0:
                     circuit_ID = '_'.join([circuit_ID, args.circuit_suffix])
 
+            # SBOL displayIds must be alphanumeric/underscore and not start with a
+            # digit; sanitize so a hyphenated input filename (e.g. circuit-big)
+            # doesn't produce an invalid circuit displayId.
+            circuit_ID = re.sub(r'\W', '_', circuit_ID)
+            if circuit_ID and circuit_ID[0].isdigit():
+                circuit_ID = '_' + circuit_ID
+
             unique_ID = circuit_ID
 
             while unique_ID in circuit_memo:
@@ -1337,6 +1387,10 @@ def main(args=None):
                     else:
                         output_file = target_file_base + target_file_extension
 
+                # embed referenced library parts so the circuit SBOL is
+                # self-contained (no dangling definition URIs on validation)
+                embed_referenced_definitions(target_doc, circuit_docs)
+
                 if sbol2.Config.getOption('validate') == True:
                     logger.info('Validating and writing %s', output_file)
                 else:
@@ -1345,6 +1399,18 @@ def main(args=None):
                 target_doc.write(output_file)
 
                 logger.info('Finished writing %s', output_file)
+
+                if args.gate_netlist:
+                    # target_doc holds both the annotated construct (parts +
+                    # positions) and the circuit interactions, so it is a
+                    # self-contained input for gate assembly.
+                    try:
+                        netlist = GateAssembler(target_doc, library_docs=circuit_docs).assemble()
+                        netlist_file = os.path.splitext(output_file)[0] + '_netlist.json'
+                        write_netlist(netlist, netlist_file)
+                        summarize(netlist)
+                    except Exception as exc:
+                        logger.warning('Gate assembly failed for %s: %s', output_file, exc)
 
     logger.info('Finished curating')
 
