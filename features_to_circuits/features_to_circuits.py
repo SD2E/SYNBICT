@@ -71,6 +71,24 @@ def embed_referenced_definitions(target_doc, library_docs):
                     except Exception:
                         pass
 
+
+def sanitize_sbol_file(path):
+    """Post-write pass making local (http://examples.org/) identifiers SBOL-compliant:
+    displayIds must be alphanumeric/underscore and MUST NOT begin with a digit. A hex
+    circuit name like 0x01 (taken from the input filename) otherwise produces an invalid
+    displayId `0x01_annotated` (sbol-10204), and a hyphenated name (circuit-g42) an invalid
+    one too. Operates only on the local namespace; embedded library parts (other
+    namespaces) are left untouched. Done at the text level because the identifiers are
+    baked into compliant URIs that sbol2 will not rename in place."""
+    txt = open(path).read()
+    # local URIs: '-' -> '_', and prepend '_' when the object name starts with a digit
+    txt = re.sub(r'http://examples\.org/[^\s"\'<>]+',
+                 lambda m: m.group(0).replace('-', '_'), txt)
+    txt = re.sub(r'(http://examples\.org/)(\d)', r'\1_\2', txt)
+    # matching displayId literals (library parts never start with a digit, so this is safe)
+    txt = re.sub(r'(<sbol:displayId>)(\d[^<]*)(</sbol:displayId>)', r'\1_\2\3', txt)
+    open(path, 'w').write(txt)
+
 # Set up the not found error for catching
 try:
     # SBOLError is in the native python module
@@ -1388,7 +1406,10 @@ def main(args=None):
                         output_file = target_file_base + target_file_extension
 
                 # embed referenced library parts so the circuit SBOL is
-                # self-contained (no dangling definition URIs on validation)
+                # self-contained (no dangling definition URIs on validation).
+                # Viewers derive each part's glyph from the embedded definition via
+                # the SequenceAnnotation's component; do NOT also set roles on that
+                # annotation (SBOL 2.3 sbol-10909 forbids component + roles together).
                 embed_referenced_definitions(target_doc, circuit_docs)
 
                 if sbol2.Config.getOption('validate') == True:
@@ -1397,6 +1418,9 @@ def main(args=None):
                     logger.info('Writing %s', output_file)
 
                 target_doc.write(output_file)
+
+                # make local displayIds SBOL-compliant (hex/hyphen input names)
+                sanitize_sbol_file(output_file)
 
                 logger.info('Finished writing %s', output_file)
 
