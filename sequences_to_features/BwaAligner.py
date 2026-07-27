@@ -29,9 +29,14 @@ class BwaAligner(Aligner):
                     check=True
                 )
             else:
-                print(self.index_prefix, fasta_path)
+                # similar mode: same maximum-recall seeding as exact (-k 11 short
+                # seed, -D 0 keep nested chains, -W 10 recover short/RC parts). The
+                # aligner casts the same wide net in both modes; only the downstream
+                # filter differs (exact = 100% full length; similar = >=90% + NMS),
+                # so near-match variants (RiboJ*, BydvJ ...) are reported and kept.
                 subprocess.run(
-                   ['bwa', 'mem', '-a', '-T', '0', '-w', '1', self.index_prefix, fasta_path], # '-D', '0'
+                   ['bwa', 'mem', '-a', '-T', '0', '-k', '11', '-D', '0', '-W', '10',
+                    self.index_prefix, fasta_path],
                     stdout=out_sam,
                     stderr=err_log,
                     check=True

@@ -5,6 +5,12 @@ from .Aligner import Aligner
 
 
 class BlastAligner(Aligner):
+    # TODO: handle library parts shorter than ~14 bp. blastn (task=blastn) needs an
+    #       11 bp exact seed, so features below ~14 bp (e.g. the 4 bp assembly scars)
+    #       cannot be reliably seeded and are missed. For sub-14 bp references, fall
+    #       back to an exhaustive search (scan every occurrence of the short part's
+    #       sequence directly, e.g. exact/Smith-Waterman over the target) instead of
+    #       relying on blastn seeding.
     def __init__(self, index_prefix):
         super().__init__(index_prefix)
 
