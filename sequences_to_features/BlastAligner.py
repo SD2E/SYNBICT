@@ -26,9 +26,13 @@ class BlastAligner(Aligner):
             'blastn',
             # default task is megablast (word_size 28), which misses short
             # features such as terminators (e.g. the 47bp L3S3P11); use the
-            # blastn task (word_size 11) so small parts are still seeded.
+            # blastn task with an explicit word_size of 9 so small parts are
+            # still seeded (word_size 9 and 11 give identical exact results
+            # here; 9 is used to keep all aligners on the same seed size).
             '-task',
             'blastn',
+            '-word_size',
+            '9',
             '-query',
             fasta_path,
             '-db',
