@@ -2,3 +2,4 @@
 __version__ = '2.0.0'
 
 from sequences_to_features.sequences_to_features import *
+from sequences_to_features.ShortFeatureMatcher import ShortFeatureMatcher, merge_matches
