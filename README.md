@@ -266,6 +266,41 @@ python -m sequences_to_features \
     -blastn -cir -np -o 11508_out.xml
 ```
 
+##### Short-feature matching (9-13 bp) — on by default
+
+Seed-based aligners cannot report matches shorter than ~14 bp against a
+plasmid-length query. For every non-FlashText method (BWA, Minimap2, BLASTN),
+SYNBICT complements alignment with an exhaustive exact substring search (forward
+and reverse complement) over library features of 9-13 bp, merged into the same
+annotation pass so the two methods jointly cover the full part-length range. This
+runs automatically; pass `-nsf` / `--no_short_feature_matching` to turn it off.
+
+```bash
+python -m sequences_to_features \
+    -n http://mynamespace.org \
+    -f example/jet_libs/CIDAR_MoClo_*.xml \
+    -t 11508_addgene_out.xml \
+    -blastn -nsf -np -o 11508_out.xml     # short-feature pass disabled
+```
+
+##### Non-maximum suppression (NMS) — collapse overlaps to one part per locus
+
+By default SYNBICT reports every matching part, including a shorter part nested
+within a longer one. Pass `-nms` / `--nms` to collapse overlapping BLASTN hits to
+the single highest-scoring part at each locus: a hit that overlaps a
+higher-scoring one by >=50% is dropped, while non-overlapping and equal-scoring
+parts are kept. NMS is off by default and applies to the BLASTN (tabular) path
+only. Enable it when you need a clean, one-part-per-locus annotation, e.g. for
+downstream circuit reconstruction; leave it off for exhaustive annotation.
+
+```bash
+python -m sequences_to_features \
+    -n http://mynamespace.org \
+    -f example/jet_libs/CIDAR_MoClo_*.xml \
+    -t 11508_addgene_out.xml \
+    -blastn -nms -np -o 11508_out.xml
+```
+
 ---
 
 ### Protein Annotation (Prokka)

@@ -5,6 +5,12 @@ from .Aligner import Aligner
 
 
 class BlastAligner(Aligner):
+    # TODO: handle library parts shorter than ~14 bp. blastn (task=blastn) needs an
+    #       11 bp exact seed, so features below ~14 bp (e.g. the 4 bp assembly scars)
+    #       cannot be reliably seeded and are missed. For sub-14 bp references, fall
+    #       back to an exhaustive search (scan every occurrence of the short part's
+    #       sequence directly, e.g. exact/Smith-Waterman over the target) instead of
+    #       relying on blastn seeding.
     def __init__(self, index_prefix):
         super().__init__(index_prefix)
 
@@ -17,8 +23,17 @@ class BlastAligner(Aligner):
             fasta_file.write(f">query_sequence\n{seq}\n")
         output_path = output_sam_path
         blast_command_simi = [
-            'blastn', 
-            '-query', 
+            'blastn',
+            # default task is megablast (word_size 28), which misses short
+            # features such as terminators (e.g. the 47bp L3S3P11); use the
+            # blastn task with an explicit word_size of 9 so small parts are
+            # still seeded (word_size 9 and 11 give identical exact results
+            # here; 9 is used to keep all aligners on the same seed size).
+            '-task',
+            'blastn',
+            '-word_size',
+            '9',
+            '-query',
             fasta_path,
             '-db',
             self.index_prefix,
