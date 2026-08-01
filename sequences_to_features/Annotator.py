@@ -118,7 +118,7 @@ class TableFeatureMapper:
             return json.load(f)
 
     def extract_matches(self, min_feature_length=40, exact_match=True,
-                        pid_threshold=90.0, overlap_frac=0.5):
+                        pid_threshold=90.0, overlap_frac=0.5, apply_nms=False):
         """Parse the blast (or vsearch) tabular output and return the best-scoring,
         non-overlapping set of feature matches.
 
@@ -188,27 +188,33 @@ class TableFeatureMapper:
                     continue
                 candidates.append((score, start, end, ref_name, sstart, send))
 
-        # non-maximum suppression over query coordinates: sort by score (desc) and
-        # keep a hit only if it does not substantially overlap a higher-scoring one.
-        # Adjacent parts (promoter/RBS/CDS) barely overlap and all survive; competing
-        # annotations for one locus collapse to the single best-scoring reference.
-        candidates.sort(key=lambda c: -c[0])
-        kept = []
-        for cand in candidates:
-            cscore, s, e, _, _, _ = cand
-            conflict = False
-            for k in kept:
-                ov = min(e, k[2]) - max(s, k[1])
-                # suppress only against a STRICTLY higher-scoring overlap; keep
-                # tied hits (e.g. PJR1 62bp vs Plambda 58bp, identical bitscore) so
-                # the regulation-aware promoter collapse downstream picks the right
-                # one (the repressed promoter) instead of an arbitrary tie-break.
-                if ov > 0 and ov >= overlap_frac * min(e - s, k[2] - k[1]) \
-                        and k[0] > cscore:
-                    conflict = True
-                    break
-            if not conflict:
-                kept.append(cand)
+        # Optional non-maximum suppression (NMS) over query coordinates: sort by
+        # score (desc) and keep a hit only if it does not substantially overlap a
+        # higher-scoring one. Adjacent parts (promoter/RBS/CDS) barely overlap and
+        # all survive; competing annotations for one locus collapse to the single
+        # best-scoring reference. Off by default: NMS discards nested parts, which
+        # is wanted for circuit reconstruction but not for exhaustive annotation.
+        # Enabled from curate() via the --nms flag (BLASTN/tabular path only).
+        if apply_nms:
+            candidates.sort(key=lambda c: -c[0])
+            kept = []
+            for cand in candidates:
+                cscore, s, e, _, _, _ = cand
+                conflict = False
+                for k in kept:
+                    ov = min(e, k[2]) - max(s, k[1])
+                    # suppress only against a STRICTLY higher-scoring overlap; keep
+                    # tied hits (e.g. PJR1 62bp vs Plambda 58bp, identical bitscore)
+                    # so the regulation-aware promoter collapse downstream picks the
+                    # right one (the repressed promoter) instead of a coin-flip tie-break.
+                    if ov > 0 and ov >= overlap_frac * min(e - s, k[2] - k[1]) \
+                            and k[0] > cscore:
+                        conflict = True
+                        break
+                if not conflict:
+                    kept.append(cand)
+        else:
+            kept = candidates
 
         for score, start, end, ref_name, sstart, send in kept:
             feature = Feature(
