@@ -2,6 +2,39 @@ from .FeatureAnnotatorBase import FeatureAnnotatorSimple
 from .Feature import Feature
 import json, pysam, math
 import pandas as pd
+def apply_non_maximum_suppression(candidates, overlap_frac=0.5):
+    """Non-maximum suppression over query coordinates.
+
+    `candidates` is a sequence of tuples whose first three elements are
+    ``(score, start, end)``; anything after that is carried through untouched, so
+    every mapper can use its own payload. Sorts by score (desc) and keeps a hit
+    only if it does not substantially overlap a higher-scoring one. Adjacent
+    parts (promoter/RBS/CDS) barely overlap and all survive; competing
+    annotations for one locus collapse to the single best-scoring reference.
+
+    Suppression is only against a STRICTLY higher-scoring overlap. Tied hits
+    (e.g. PJR1 62bp vs Plambda 58bp, identical bitscore) are all kept so the
+    regulation-aware promoter collapse downstream picks the right one instead of
+    a coin-flip tie-break.
+
+    Off by default at every call site: NMS discards nested parts, which is wanted
+    for circuit reconstruction but not for exhaustive annotation.
+    """
+    ordered = sorted(candidates, key=lambda c: -c[0])
+    kept = []
+    for cand in ordered:
+        cscore, s, e = cand[0], cand[1], cand[2]
+        conflict = False
+        for k in kept:
+            ov = min(e, k[2]) - max(s, k[1])
+            if ov > 0 and ov >= overlap_frac * min(e - s, k[2] - k[1]) and k[0] > cscore:
+                conflict = True
+                break
+        if not conflict:
+            kept.append(cand)
+    return kept
+
+
 class ProkkaTableFeatureMapper:
     def __init__(self):
         self.inline_matches = []
@@ -118,7 +151,7 @@ class TableFeatureMapper:
             return json.load(f)
 
     def extract_matches(self, min_feature_length=40, exact_match=True,
-                        pid_threshold=90.0, overlap_frac=0.5, apply_nms=False):
+                        pid_threshold=95.0, overlap_frac=0.5, apply_nms=False):
         """Parse the blast (or vsearch) tabular output and return the best-scoring,
         non-overlapping set of feature matches.
 
@@ -188,33 +221,7 @@ class TableFeatureMapper:
                     continue
                 candidates.append((score, start, end, ref_name, sstart, send))
 
-        # Optional non-maximum suppression (NMS) over query coordinates: sort by
-        # score (desc) and keep a hit only if it does not substantially overlap a
-        # higher-scoring one. Adjacent parts (promoter/RBS/CDS) barely overlap and
-        # all survive; competing annotations for one locus collapse to the single
-        # best-scoring reference. Off by default: NMS discards nested parts, which
-        # is wanted for circuit reconstruction but not for exhaustive annotation.
-        # Enabled from curate() via the --nms flag (BLASTN/tabular path only).
-        if apply_nms:
-            candidates.sort(key=lambda c: -c[0])
-            kept = []
-            for cand in candidates:
-                cscore, s, e, _, _, _ = cand
-                conflict = False
-                for k in kept:
-                    ov = min(e, k[2]) - max(s, k[1])
-                    # suppress only against a STRICTLY higher-scoring overlap; keep
-                    # tied hits (e.g. PJR1 62bp vs Plambda 58bp, identical bitscore)
-                    # so the regulation-aware promoter collapse downstream picks the
-                    # right one (the repressed promoter) instead of a coin-flip tie-break.
-                    if ov > 0 and ov >= overlap_frac * min(e - s, k[2] - k[1]) \
-                            and k[0] > cscore:
-                        conflict = True
-                        break
-                if not conflict:
-                    kept.append(cand)
-        else:
-            kept = candidates
+        kept = apply_non_maximum_suppression(candidates, overlap_frac) if apply_nms else candidates
 
         for score, start, end, ref_name, sstart, send in kept:
             feature = Feature(
@@ -269,7 +276,16 @@ class SAMFeatureMapper:
 
         return read.reference_name, query_start, query_end
 
-    def extract_matches(self, min_feature_length=40, exact_match=True, is_bowtie2=False): # need change back
+    def extract_matches(self, min_feature_length=40, exact_match=True, is_bowtie2=False,
+                        pid_threshold=95.0, overlap_frac=0.5, apply_nms=False):
+        """Parse the SAM output and return the feature matches.
+
+        `pid_threshold` was previously hardcoded to 95.0 here, so the CLI/API knob
+        had no effect on the BWA and Minimap2 paths. `apply_nms` uses the same
+        suppression as the tabular path, ranked by number of identical bases
+        (by reference length for exact matches, where every hit is 100%).
+        """
+        candidates = []  # (score, start, end, ref_name, is_reverse)
         try:
             samfile = pysam.AlignmentFile(self.sam_path, "r")
             for aln in samfile.fetch(until_eof=True):
@@ -281,6 +297,10 @@ class SAMFeatureMapper:
                 # too); without it short RBS/terminator/promoter refs leak through.
                 if length < min_feature_length:
                     continue
+                # Ranking for optional NMS. Every exact hit is 100% identical,
+                # so those rank by reference length -- the longer part wins.
+                # Similar hits override this with their identical-base count.
+                score = length
                 if exact_match:
                     # Check for exact match AS = len(ref)
                     if is_bowtie2:
@@ -315,9 +335,11 @@ class SAMFeatureMapper:
                     aln_len = block + I + D
                     if aln_len == 0:
                         continue
-                    pident = 100.0 * matches / (length + I + D) 
-                    if pident < 95.0:
+                    pident = 100.0 * matches / (length + I + D)
+                    if pident < pid_threshold:
                         continue
+                    # Rank similar hits by number of identical bases.
+                    score = matches
 
                 reference_name, start, end = self.parse_cigar_for_query_coords(aln)
 
@@ -338,8 +360,13 @@ class SAMFeatureMapper:
                     #parent_identities=feature_pre.get('parent_identities', [])
                     )
                     
+                candidates.append((score, start, end, feature, aln.is_reverse))
+
+            kept = apply_non_maximum_suppression(candidates, overlap_frac) if apply_nms else candidates
+
+            for _score, start, end, feature, is_reverse in kept:
                 match = ([feature], start, end)
-                if aln.is_reverse:
+                if is_reverse:
                     self.rc_matches.append(match)
                 else:
                     self.inline_matches.append(match)

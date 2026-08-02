@@ -571,7 +571,7 @@ def curate(feature_library, target_library, output_library, output_files, extend
            no_pruning, deletion_roles, cover_offset, delete_flat, auto_swap, non_interactive, logger,
            complete_matches=False, strip_prefixes=[], flashtext_mapping=True, bwa_mapping=False, minimap2_mapping=False,
            blastn_mapping=False, prokka_mapping=False, prokka_mode='exact', exact_match=False, build_index=False, feature_annotater=None,
-           circular=False, short_feature_matching=True, nms=False):
+           circular=False, short_feature_matching=True, nms=False, pid_threshold=95.0):
     
     feature_curator = FeatureCurator(target_library, output_library)
 
@@ -641,21 +641,24 @@ def curate(feature_library, target_library, output_library, output_files, extend
                 output_sam_path = 'aligned.sam'
                 bwa.align(doc, output_sam_path, exact_match, query_seq=query_seq)
                 mapper = SAMFeatureMapper('aligned.sam')
-                inline_matches, rc_matches = mapper.extract_matches(exact_match=exact_match, min_feature_length=aligner_min_length, is_bowtie2=False)
+                inline_matches, rc_matches = mapper.extract_matches(exact_match=exact_match, min_feature_length=aligner_min_length,
+                                                                    is_bowtie2=False, pid_threshold=pid_threshold, apply_nms=nms)
 
             elif(minimap2_mapping):
                 minimap2 = Minimap2Aligner(index_prefix)
                 output_sam_path = 'aligned.sam'
                 minimap2.align(doc, output_sam_path, exact_match, query_seq=query_seq)
                 mapper = SAMFeatureMapper('aligned.sam')
-                inline_matches, rc_matches = mapper.extract_matches(exact_match=exact_match, min_feature_length=aligner_min_length, is_bowtie2=False)
+                inline_matches, rc_matches = mapper.extract_matches(exact_match=exact_match, min_feature_length=aligner_min_length,
+                                                                    is_bowtie2=False, pid_threshold=pid_threshold, apply_nms=nms)
 
             elif(blastn_mapping):
                 output_sam_path = 'aligned.txt'
                 blast = BlastAligner(index_prefix)
                 blast.align(doc, output_sam_path, exact_match, query_seq=query_seq)
                 mapper = TableFeatureMapper('aligned.txt')
-                inline_matches, rc_matches = mapper.extract_matches(exact_match=exact_match, min_feature_length=aligner_min_length, apply_nms=nms)
+                inline_matches, rc_matches = mapper.extract_matches(exact_match=exact_match, min_feature_length=aligner_min_length,
+                                                                     pid_threshold=pid_threshold, apply_nms=nms)
 
             if prokka_mapping:
                 prokka = ProkkaAligner(doc)
@@ -834,7 +837,10 @@ def main(args=None):
                         help='Disable exhaustive exact matching of short features (<14 bp) that seed-based aligners cannot report. On by default for every non-FlashText mapping method.')
 
     parser.add_argument('-nms', '--nms', action='store_true',
-                        help='Apply non-maximum suppression to overlapping BLASTN hits, keeping the highest-scoring part per locus (BLASTN/tabular path only). Off by default; enable for circuit reconstruction, where one clean part per locus is needed.')
+                        help='Apply non-maximum suppression to overlapping hits, keeping the highest-scoring part per locus. Applies to BWA, Minimap2 and BLASTN. Off by default; enable for circuit reconstruction, where one clean part per locus is needed.')
+
+    parser.add_argument('-pid', '--pid_threshold', nargs='?', type=float, default=95.0,
+                        help='Minimum coverage-weighted DNA identity (percent, identical bases / reference length) for a hit to be kept. Applies to BWA, Minimap2 and BLASTN. Only consulted for non-exact mapping, since an exact match is 100%% by definition. Default 95.')
 
     args = parser.parse_args(args)
 
@@ -1011,7 +1017,7 @@ def main(args=None):
                 float(args.extension_threshold), args.extension_suffix, args.in_place, args.minimal_output,
                 args.no_pruning, args.deletion_roles, int(args.cover_offset), args.delete_flat, args.auto_swap,
                 args.non_interactive, logger, args.complete_matches, args.strip_prefixes, args.flashText_mapping,
-                args.bwa_mapping, args.minimap2_mapping, args.blastn_mapping, args.prokka_mapping, args.prokka_mode, args.exact_mapping, args.build_index, feature_annotater, circular=args.circular, short_feature_matching=not args.no_short_feature_matching, nms=args.nms)
+                args.bwa_mapping, args.minimap2_mapping, args.blastn_mapping, args.prokka_mapping, args.prokka_mode, args.exact_mapping, args.build_index, feature_annotater, circular=args.circular, short_feature_matching=not args.no_short_feature_matching, nms=args.nms, pid_threshold=args.pid_threshold)
         else:
             for i in range(0, len(target_files)):
                 target_doc = load_target_file(target_files[i])
@@ -1031,7 +1037,7 @@ def main(args=None):
                         float(args.extension_threshold), args.extension_suffix, args.in_place, args.minimal_output,
                         args.no_pruning, args.deletion_roles, int(args.cover_offset), args.delete_flat, args.auto_swap,
                         args.non_interactive, logger, args.complete_matches, args.strip_prefixes, args.flashText_mapping,
-                        args.bwa_mapping, args.minimap2_mapping, args.blastn_mapping, args.prokka_mapping, args.prokka_mode, args.exact_mapping, args.build_index, feature_annotater, circular=args.circular, short_feature_matching=not args.no_short_feature_matching, nms=args.nms)
+                        args.bwa_mapping, args.minimap2_mapping, args.blastn_mapping, args.prokka_mapping, args.prokka_mode, args.exact_mapping, args.build_index, feature_annotater, circular=args.circular, short_feature_matching=not args.no_short_feature_matching, nms=args.nms, pid_threshold=args.pid_threshold)
 
             if synbiohub:
                 for target_URL in args.target_URLs:
@@ -1064,7 +1070,7 @@ def main(args=None):
                             float(args.extension_threshold), args.extension_suffix, args.in_place, args.minimal_output,
                             args.no_pruning, args.deletion_roles, int(args.cover_offset), args.delete_flat, args.auto_swap,
                             args.non_interactive, logger, args.complete_matches, args.strip_prefixes, args.flashText_mapping,
-                            args.bwa_mapping, args.minimap2_mapping, args.blastn_mapping, args.prokka_mapping, args.prokka_mode, args.exact_mapping, args.build_index, feature_annotater, circular=args.circular, short_feature_matching=not args.no_short_feature_matching, nms=args.nms)
+                            args.bwa_mapping, args.minimap2_mapping, args.blastn_mapping, args.prokka_mapping, args.prokka_mode, args.exact_mapping, args.build_index, feature_annotater, circular=args.circular, short_feature_matching=not args.no_short_feature_matching, nms=args.nms, pid_threshold=args.pid_threshold)
 
         logger.info('Finished curating')
 
