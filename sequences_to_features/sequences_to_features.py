@@ -13,7 +13,7 @@ from .Feature import Feature
 from .FeatureLibrary import FeatureLibrary 
 from .FeaturePruner import FeaturePruner
 from flashtext import KeywordProcessor
-from .Annotator import SAMFeatureMapper, TableFeatureMapper
+from .Annotator import SAMFeatureMapper, TableFeatureMapper, suppress_short_matches
 from .FeatureAnnotatorBase import FeatureAnnotatorSimple
 from .FeatureExtractor import FeatureExtractor
 from .BwaAligner import BwaAligner
@@ -636,13 +636,20 @@ def curate(feature_library, target_library, output_library, output_files, extend
                 logger.info('Annotating %s as circular (origin overlap %s bp)',
                             target_cd.displayId, overlap)
 
+            # NMS must compare hits on the circle, not on the extended query: an
+            # origin-spanning feature ends past target_length and would otherwise
+            # never overlap (and so never suppress) the short parts at the 5' end,
+            # even though it suppresses their equivalents at the 3' end.
+            nms_target_length = target_length if (is_circular and query_seq is not None) else None
+
             if(bwa_mapping):
                 bwa = BwaAligner(index_prefix)
                 output_sam_path = 'aligned.sam'
                 bwa.align(doc, output_sam_path, exact_match, query_seq=query_seq)
                 mapper = SAMFeatureMapper('aligned.sam')
                 inline_matches, rc_matches = mapper.extract_matches(exact_match=exact_match, min_feature_length=aligner_min_length,
-                                                                    is_bowtie2=False, pid_threshold=pid_threshold, apply_nms=nms)
+                                                                    is_bowtie2=False, pid_threshold=pid_threshold, apply_nms=nms,
+                                                                    target_length=nms_target_length)
 
             elif(minimap2_mapping):
                 minimap2 = Minimap2Aligner(index_prefix)
@@ -650,7 +657,8 @@ def curate(feature_library, target_library, output_library, output_files, extend
                 minimap2.align(doc, output_sam_path, exact_match, query_seq=query_seq)
                 mapper = SAMFeatureMapper('aligned.sam')
                 inline_matches, rc_matches = mapper.extract_matches(exact_match=exact_match, min_feature_length=aligner_min_length,
-                                                                    is_bowtie2=False, pid_threshold=pid_threshold, apply_nms=nms)
+                                                                    is_bowtie2=False, pid_threshold=pid_threshold, apply_nms=nms,
+                                                                    target_length=nms_target_length)
 
             elif(blastn_mapping):
                 output_sam_path = 'aligned.txt'
@@ -658,7 +666,8 @@ def curate(feature_library, target_library, output_library, output_files, extend
                 blast.align(doc, output_sam_path, exact_match, query_seq=query_seq)
                 mapper = TableFeatureMapper('aligned.txt')
                 inline_matches, rc_matches = mapper.extract_matches(exact_match=exact_match, min_feature_length=aligner_min_length,
-                                                                     pid_threshold=pid_threshold, apply_nms=nms)
+                                                                     pid_threshold=pid_threshold, apply_nms=nms,
+                                                                     target_length=nms_target_length)
 
             if prokka_mapping:
                 prokka = ProkkaAligner(doc)
@@ -697,6 +706,13 @@ def curate(feature_library, target_library, output_library, output_files, extend
                                                     max_length=13)
                 short_query = query_seq if query_seq is not None else target_seq
                 short_inline, short_rc = short_matcher.extract_matches(short_query)
+                if nms:
+                    # The mappers already ran NMS over their own candidates, so the
+                    # short hits have to be suppressed here or they would sit on top
+                    # of the longer parts NMS just collapsed.
+                    short_inline, short_rc = suppress_short_matches(
+                        inline_matches + rc_matches, short_inline, short_rc,
+                        target_length=nms_target_length)
                 inline_matches = inline_matches + short_inline
                 rc_matches = rc_matches + short_rc
 
