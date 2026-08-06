@@ -483,6 +483,7 @@ Argument | Short Arg | Type | Description | Example
 `--min_target_length` | `-m` | `Integer` | **Optional**. Minimum length that an annotated component must be to consider its features when inferring a genetic circuit. Default is 2000 bp. | 2000
 `--no_sensors` | `-ns` | `Boolean` | **Optional**. If included, do not add library sub-circuits for non-covalent interactions between small molecules and proteins to the inferred composite circuit. Default is to add these sub-circuits and attempt to abstract them by deriving stimulation and inhibition interactions from them in the composite circuit. | -ns
 `--tx_threshold` | `-d` | `Integer` | **Optional**. Maximum distance between an annotated promoter feature and an annotated CDS feature that is permitted to infer an interaction between them (an interaction not present in the sub-circuit library). Default is 200 bp. | 200
+`--gate_netlist` | `-gn` | `Boolean` | **Optional**. Also assemble the inferred circuit into a logic-gate netlist, written next to the output file as `<output_base>_netlist.json`. Default is to not assemble a netlist. See [Logic-gate layer](#logic-gate-layer-gate-netlist--truth-table). | -gn
 
 ### Sub-circuit library extension arguments for features\_to\_circuits.py
 
@@ -498,6 +499,60 @@ Argument | Short Arg | Type | Description | Example
 -n http://foo.bar -i bob
 -t ~/tmp/cpc/Cello_Parts_collection/Strain_3_MG1655_Genomic_IcaR_Gate_annotated.xml
 -c ~/tmp/cpc/Cello_Parts_collection/Cello_Parts_collection.xml
+
+## Logic-gate layer: gate netlist & truth table
+
+`features_to_circuits.py` produces a *molecular* interaction graph (production, repression,
+transcription). It does not say which parts form a gate, what type each gate is, or how the
+gates wire together, so the circuit's function cannot be read off it. Three scripts close
+that gap for Cello-style repressor circuits:
+
+```
+annotated SBOL ──features_to_circuits.py -gn──► circuit SBOL + *_circuit_netlist.json
+                                                          │
+                                     circuit_to_truth_table.py ──► truth table (Yosys)
+                                     netlist_to_graphml.py ─────► *.graphml (Cytoscape)
+```
+
+```bash
+# annotate -> circuit + gate netlist -> truth table
+python -m sequences_to_features -n http://examples.org -f example/jet_libs/cello_library.xml \
+    -t 0xEA.fasta -o 0xEA_annotated.xml -blastn -m 1000 -M 40 -np -ni
+
+python features_to_circuits/features_to_circuits.py -n http://examples.org \
+    -c example/jet_libs/cello_library.xml -t 0xEA_annotated.xml -o 0xEA_circuit.xml -m 1000 -gn
+
+python features_to_circuits/circuit_to_truth_table.py 0xEA_circuit_netlist.json --yosys $(which yosys)
+```
+
+```
+gates:
+  g1   NOR    inputs=['pBAD', 'pTet'] cds=SrpR -> output=pSrpR
+  g2   NOT    inputs=['pTac'] cds=AmtR -> output=pAmtR
+  g3   OUTPUT inputs=['pSrpR', 'pAmtR'] cds=YFP -> output=YFP
+wires: [['g1', 'g3'], ['g2', 'g3']]
+output bitstring: 0x37 (00110111)
+```
+
+A gate is one transcriptional unit — `[promoter(s)] [RBS] [repressor CDS] [terminator]` —
+whose inputs are the promoters in that unit and whose output is the promoter its repressor
+represses; gates wire when one gate's output promoter is another's input promoter.
+`circuit_to_truth_table.py` turns the netlist into structural Verilog and evaluates it with
+Yosys (requires `yosys` on `PATH`).
+
+Two things that will silently ruin the result:
+
+* **Terminators must be annotated** — transcriptional units are split at terminators only.
+  Run BLAST with `-task blastn` (the default megablast misses short terminators such as the
+  47 bp `L3S3P11`); otherwise units merge and the netlist develops combinational loops
+  whose truth table is undefined (`x`).
+* **Do not use `-nms` with a library that contains composite cassettes.** In the Cello
+  library, `engineered_region` parts such as `S3_SrpR` span RBS + ribozyme + CDS +
+  terminator; NMS keeps the cassette and suppresses the terminator inside it.
+
+Full documentation — gate model, netlist format, assumptions, troubleshooting:
+[features_to_circuits/README.md](features_to_circuits/README.md).
+Ready-to-run tests over 6 published Cello circuits: [test_bundle/TESTING.md](test_bundle/TESTING.md).
 
 ## circuit_visualization.py
 
