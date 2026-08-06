@@ -2,6 +2,140 @@ from .FeatureAnnotatorBase import FeatureAnnotatorSimple
 from .Feature import Feature
 import json, pysam, math
 import pandas as pd
+def canonical_intervals(start, end, target_length=None):
+    """Map a half-open query interval onto the target, as a list of intervals.
+
+    For a linear target this is just ``[(start, end)]``. For a circular target
+    the query was extended to ``seq + seq[:overlap]``, so a hit can sit in the
+    appended copy (``start >= target_length``) or straddle the origin
+    (``end > target_length``); both are folded back onto ``[0, target_length)``,
+    the second one as two intervals. A hit longer than the whole target covers
+    the entire circle.
+    """
+    if not target_length:
+        return [(start, end)]
+
+    span = end - start
+    if span >= target_length:
+        return [(0, target_length)]
+
+    s = start % target_length
+    e = s + span
+    if e <= target_length:
+        return [(s, e)]
+    return [(s, target_length), (0, e - target_length)]
+
+
+def intervals_overlap(a_intervals, b_intervals):
+    """Total number of positions covered by both interval lists."""
+    total = 0
+    for a_start, a_end in a_intervals:
+        for b_start, b_end in b_intervals:
+            ov = min(a_end, b_end) - max(a_start, b_start)
+            if ov > 0:
+                total += ov
+    return total
+
+
+def apply_non_maximum_suppression(candidates, overlap_frac=0.5, target_length=None):
+    """Non-maximum suppression over query coordinates.
+
+    `candidates` is a sequence of tuples whose first three elements are
+    ``(score, start, end)``; anything after that is carried through untouched, so
+    every mapper can use its own payload. Sorts by score (desc) and keeps a hit
+    only if it does not substantially overlap a higher-scoring one. Adjacent
+    parts (promoter/RBS/CDS) barely overlap and all survive; competing
+    annotations for one locus collapse to the single best-scoring reference.
+
+    Suppression is only against a STRICTLY higher-scoring overlap. Tied hits
+    (e.g. PJR1 62bp vs Plambda 58bp, identical bitscore) are all kept so the
+    regulation-aware promoter collapse downstream picks the right one instead of
+    a coin-flip tie-break.
+
+    `target_length` (the length of the ORIGINAL, un-extended target) switches
+    overlap testing to circular coordinates. Without it, a backbone feature that
+    spans the origin -- aligned as one block ending past `target_length` -- lies
+    entirely to the right of the short parts near the 5' end and so never
+    suppresses them, while the same feature does suppress their counterparts at
+    the 3' end. Folding both onto the circle first makes the two ends behave
+    identically. Duplicates from the appended origin overlap fold onto their
+    first-copy twins and score identically, so the tie rule keeps both;
+    normalize_circular_matches drops the appended copy afterwards.
+
+    Off by default at every call site: NMS discards nested parts, which is wanted
+    for circuit reconstruction but not for exhaustive annotation.
+    """
+    ordered = sorted(candidates, key=lambda c: -c[0])
+    kept = []
+    kept_spans = []  # (score, intervals, length) parallel to `kept`
+    for cand in ordered:
+        cscore, s, e = cand[0], cand[1], cand[2]
+        c_intervals = canonical_intervals(s, e, target_length)
+        c_length = e - s
+        conflict = False
+        for k_score, k_intervals, k_length in kept_spans:
+            ov = intervals_overlap(c_intervals, k_intervals)
+            if ov > 0 and ov >= overlap_frac * min(c_length, k_length) and k_score > cscore:
+                conflict = True
+                break
+        if not conflict:
+            kept.append(cand)
+            kept_spans.append((cscore, c_intervals, c_length))
+    return kept
+
+
+def suppress_short_matches(kept_matches, short_inline, short_rc, overlap_frac=0.5,
+                           target_length=None):
+    """Extend non-maximum suppression to the exhaustive short-feature matches.
+
+    The seed-based mappers run NMS over their own candidates before the
+    ShortFeatureMatcher (and Prokka) hits are merged in, so a short part nested
+    inside a longer aligner hit used to survive unconditionally -- NMS collapsed
+    the >=14 bp parts at a locus but left the <14 bp ones on top of them.
+
+    `kept_matches` (the aligner/Prokka matches, both strands, already resolved
+    among themselves) are fixed and act only as suppressors; they are never
+    dropped here. A short match is discarded when a strictly longer match --
+    aligner hit or another short hit -- covers at least `overlap_frac` of it.
+    Ties are kept, matching apply_non_maximum_suppression, so synonymous parts of
+    equal length all survive for the downstream collapse to arbitrate.
+
+    Matches use the shared ``(feature_list, start, end)`` tuple format; strands
+    are pooled for the overlap test (as in the mappers, where inline and rc
+    candidates compete in one list) and split again on return.
+
+    Returns (short_inline, short_rc) filtered, in their original order.
+    """
+    fixed_spans = [(canonical_intervals(m[1], m[2], target_length), m[2] - m[1])
+                   for m in kept_matches]
+
+    tagged = [(m, True) for m in short_inline] + [(m, False) for m in short_rc]
+    # Longest first: within the short set the longer part wins, as bitscore does
+    # for the aligner candidates.
+    tagged.sort(key=lambda t: -(t[0][2] - t[0][1]))
+
+    kept_inline_ids = set()
+    kept_rc_ids = set()
+    kept_spans = list(fixed_spans)
+    for match, is_inline in tagged:
+        c_intervals = canonical_intervals(match[1], match[2], target_length)
+        c_length = match[2] - match[1]
+        conflict = False
+        for k_intervals, k_length in kept_spans:
+            if k_length <= c_length:
+                continue  # only a STRICTLY longer match suppresses
+            ov = intervals_overlap(c_intervals, k_intervals)
+            if ov > 0 and ov >= overlap_frac * min(c_length, k_length):
+                conflict = True
+                break
+        if not conflict:
+            (kept_inline_ids if is_inline else kept_rc_ids).add(id(match))
+            kept_spans.append((c_intervals, c_length))
+
+    return ([m for m in short_inline if id(m) in kept_inline_ids],
+            [m for m in short_rc if id(m) in kept_rc_ids])
+
+
 class ProkkaTableFeatureMapper:
     def __init__(self):
         self.inline_matches = []
@@ -118,7 +252,8 @@ class TableFeatureMapper:
             return json.load(f)
 
     def extract_matches(self, min_feature_length=40, exact_match=True,
-                        pid_threshold=90.0, overlap_frac=0.5, apply_nms=False):
+                        pid_threshold=95.0, overlap_frac=0.5, apply_nms=False,
+                        target_length=None):
         """Parse the blast (or vsearch) tabular output and return the best-scoring,
         non-overlapping set of feature matches.
 
@@ -129,7 +264,9 @@ class TableFeatureMapper:
         which annotated a shorter partial part over the correct longer one when both
         passed threshold. Lower `min_feature_length` to recover short parts (RBS,
         short terminators); `pid_threshold` is coverage-weighted identity
-        (identical bases / reference length)."""
+        (identical bases / reference length). Pass `target_length` (the
+        un-extended target length) for circular targets so suppression happens in
+        circular coordinates."""
         blast_output = self.tab_path
         candidates = []  # (score, start, end, ref_name, sstart, send)
         with open(blast_output) as f:
@@ -188,33 +325,8 @@ class TableFeatureMapper:
                     continue
                 candidates.append((score, start, end, ref_name, sstart, send))
 
-        # Optional non-maximum suppression (NMS) over query coordinates: sort by
-        # score (desc) and keep a hit only if it does not substantially overlap a
-        # higher-scoring one. Adjacent parts (promoter/RBS/CDS) barely overlap and
-        # all survive; competing annotations for one locus collapse to the single
-        # best-scoring reference. Off by default: NMS discards nested parts, which
-        # is wanted for circuit reconstruction but not for exhaustive annotation.
-        # Enabled from curate() via the --nms flag (BLASTN/tabular path only).
-        if apply_nms:
-            candidates.sort(key=lambda c: -c[0])
-            kept = []
-            for cand in candidates:
-                cscore, s, e, _, _, _ = cand
-                conflict = False
-                for k in kept:
-                    ov = min(e, k[2]) - max(s, k[1])
-                    # suppress only against a STRICTLY higher-scoring overlap; keep
-                    # tied hits (e.g. PJR1 62bp vs Plambda 58bp, identical bitscore)
-                    # so the regulation-aware promoter collapse downstream picks the
-                    # right one (the repressed promoter) instead of a coin-flip tie-break.
-                    if ov > 0 and ov >= overlap_frac * min(e - s, k[2] - k[1]) \
-                            and k[0] > cscore:
-                        conflict = True
-                        break
-                if not conflict:
-                    kept.append(cand)
-        else:
-            kept = candidates
+        kept = (apply_non_maximum_suppression(candidates, overlap_frac, target_length)
+                if apply_nms else candidates)
 
         for score, start, end, ref_name, sstart, send in kept:
             feature = Feature(
@@ -269,7 +381,19 @@ class SAMFeatureMapper:
 
         return read.reference_name, query_start, query_end
 
-    def extract_matches(self, min_feature_length=40, exact_match=True, is_bowtie2=False): # need change back
+    def extract_matches(self, min_feature_length=40, exact_match=True, is_bowtie2=False,
+                        pid_threshold=95.0, overlap_frac=0.5, apply_nms=False,
+                        target_length=None):
+        """Parse the SAM output and return the feature matches.
+
+        `pid_threshold` was previously hardcoded to 95.0 here, so the CLI/API knob
+        had no effect on the BWA and Minimap2 paths. `apply_nms` uses the same
+        suppression as the tabular path, ranked by number of identical bases
+        (by reference length for exact matches, where every hit is 100%).
+        `target_length` (the un-extended target length) puts that suppression in
+        circular coordinates for circular targets.
+        """
+        candidates = []  # (score, start, end, ref_name, is_reverse)
         try:
             samfile = pysam.AlignmentFile(self.sam_path, "r")
             for aln in samfile.fetch(until_eof=True):
@@ -281,6 +405,10 @@ class SAMFeatureMapper:
                 # too); without it short RBS/terminator/promoter refs leak through.
                 if length < min_feature_length:
                     continue
+                # Ranking for optional NMS. Every exact hit is 100% identical,
+                # so those rank by reference length -- the longer part wins.
+                # Similar hits override this with their identical-base count.
+                score = length
                 if exact_match:
                     # Check for exact match AS = len(ref)
                     if is_bowtie2:
@@ -315,9 +443,11 @@ class SAMFeatureMapper:
                     aln_len = block + I + D
                     if aln_len == 0:
                         continue
-                    pident = 100.0 * matches / (length + I + D) 
-                    if pident < 95.0:
+                    pident = 100.0 * matches / (length + I + D)
+                    if pident < pid_threshold:
                         continue
+                    # Rank similar hits by number of identical bases.
+                    score = matches
 
                 reference_name, start, end = self.parse_cigar_for_query_coords(aln)
 
@@ -338,8 +468,14 @@ class SAMFeatureMapper:
                     #parent_identities=feature_pre.get('parent_identities', [])
                     )
                     
+                candidates.append((score, start, end, feature, aln.is_reverse))
+
+            kept = (apply_non_maximum_suppression(candidates, overlap_frac, target_length)
+                    if apply_nms else candidates)
+
+            for _score, start, end, feature, is_reverse in kept:
                 match = ([feature], start, end)
-                if aln.is_reverse:
+                if is_reverse:
                     self.rc_matches.append(match)
                 else:
                     self.inline_matches.append(match)

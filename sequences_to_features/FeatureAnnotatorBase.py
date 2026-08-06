@@ -305,20 +305,35 @@ class FeatureAnnotatorSimple:
                 num = _VARIANT_RE.search(variant_definition.displayId).group(1)
                 variant_definition.name = f'{feature_definition.name}_variant_{num}'
 
+                # A library part with no description would otherwise render the
+                # literal string "None" into the variant's description.
+                original_description = variant_definition.description
+
                 if identity_pct == -1:
                     variant_definition.description = (
-                        f'Variant of part with the following description: {variant_definition.description}'
+                        f'Variant of part with the following description: {original_description}'
+                        if original_description else 'Variant of part.'
                     )
                 elif protein_match:
-                    variant_definition.description = (
+                    lead = (
                         f'Synonymous codon substitutions were introduced into the part described as follows: '
-                        f'{variant_definition.description}. The resulting variant encodes a protein that is '
+                        f'{original_description}. '
+                        if original_description else
+                        'Synonymous codon substitutions were introduced into the part. '
+                    )
+                    variant_definition.description = (
+                        f'{lead}The resulting variant encodes a protein that is '
                         f'{identity_pct}% identical to the protein the original part coded for.'
                     )
                 else:
-                    variant_definition.description = (
+                    lead = (
                         f'Non-synonymous substitutions were introduced into the part described as follows: '
-                        f'{variant_definition.description}. The resulting variant encodes a protein that is '
+                        f'{original_description}. '
+                        if original_description else
+                        'Non-synonymous substitutions were introduced into the part. '
+                    )
+                    variant_definition.description = (
+                        f'{lead}The resulting variant encodes a protein that is '
                         f'{identity_pct}% identical to the protein the original part coded for.'
                     )
 

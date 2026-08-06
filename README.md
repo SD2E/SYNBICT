@@ -286,12 +286,16 @@ python -m sequences_to_features \
 ##### Non-maximum suppression (NMS) — collapse overlaps to one part per locus
 
 By default SYNBICT reports every matching part, including a shorter part nested
-within a longer one. Pass `-nms` / `--nms` to collapse overlapping BLASTN hits to
-the single highest-scoring part at each locus: a hit that overlaps a
-higher-scoring one by >=50% is dropped, while non-overlapping and equal-scoring
-parts are kept. NMS is off by default and applies to the BLASTN (tabular) path
-only. Enable it when you need a clean, one-part-per-locus annotation, e.g. for
-downstream circuit reconstruction; leave it off for exhaustive annotation.
+within a longer one, and including several different library parts that all match
+the same locus. Pass `-nms` / `--nms` to collapse overlapping hits to the single
+highest-scoring part at each locus: a hit that overlaps a higher-scoring one by
+>=50% is dropped, while non-overlapping and equal-scoring parts are kept.
+
+Hits are ranked by bitscore on the BLASTN path, and by number of identical bases
+(or reference length, for exact matching) on the BWA and Minimap2 paths. NMS is
+off by default and applies to **BWA, Minimap2 and BLASTN**. Enable it when you
+need a clean, one-part-per-locus annotation, e.g. for downstream circuit
+reconstruction; leave it off for exhaustive annotation.
 
 ```bash
 python -m sequences_to_features \
@@ -299,6 +303,28 @@ python -m sequences_to_features \
     -f example/jet_libs/CIDAR_MoClo_*.xml \
     -t 11508_addgene_out.xml \
     -blastn -nms -np -o 11508_out.xml
+```
+
+##### DNA identity threshold — how close a match has to be
+
+`-pid` / `--pid_threshold` sets the minimum **coverage-weighted** DNA identity a
+hit must reach to be kept, as a percentage. Coverage-weighted means
+identical bases divided by the *reference* (library part) length, not by the
+alignment length -- so a hit that matches perfectly over only half the part
+scores ~50%, not 100%. This keeps partial hits from passing as full-length parts.
+
+The default is `95`. Lower it to recover diverged or partially covered parts;
+raise it toward 100 to keep only near-exact matches. The threshold applies to
+**BWA, Minimap2 and BLASTN**, and **only for similar (non-exact) matching** --
+with `-exact` a hit must be 100% identical over the full reference length, so the
+threshold is not consulted.
+
+```bash
+python -m sequences_to_features \
+    -n http://mynamespace.org \
+    -f example/jet_libs/CIDAR_MoClo_*.xml \
+    -t 11508_addgene_out.xml \
+    -blastn -pid 95 -np -o 11508_out.xml     # keep only hits at >=95% identity
 ```
 
 ---
