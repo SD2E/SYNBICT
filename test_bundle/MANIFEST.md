@@ -62,6 +62,12 @@ scratch directory and is **not in the repo**; `sc_to_plasmids.json` and the refe
 are shipped so it can be rewritten. Per-plasmid netlist regression is what `check_results.py`
 covers today.
 
+**Six MD5 plasmids disagree with the recorded run** (`seq_002, 018, 051, 056, 060, 066`), all
+on the same ambiguity: `PLuxB` vs `PLux_u42_TA` are near-identical Lux sensor promoters
+matching one locus, and neither is a repressed promoter, so the regulation-aware same-locus
+collapse cannot choose between them. Logic is unaffected; the promoter name on a primary
+input is not. Open issue.
+
 **Name mapping.** `ANDv2`, `NANDv2`, `XORv2`, `Majority2..6` etc. are v2 builds whose Cello
 references are named `AND`, `NAND`, `XOR`, `majority`. `reference/name_map.tsv` records each
 mapping; the reference files are also copied under the sequence's own name so tooling can

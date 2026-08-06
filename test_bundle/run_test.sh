@@ -72,8 +72,11 @@ CELLO_LIB="$HERE/cello/library/cello_library.xml"
 MD5_LIB="$HERE/md5/library/Eco2C1G5T1_public_library.xml"
 # Cello circuits are linear constructs of >=1889 bp, parts >=40 bp.
 CELLO_ARGS=(cello "$CELLO_LIB" 1000 "-M 40")
-# MD5 plasmids are circular and carry parts down to 14 bp -- see MD5_validation_record.md
-MD5_ARGS=(md5 "$MD5_LIB" 2000 "-M 14 -cir")
+# MD5 plasmids are circular, carry parts down to 14 bp, and need the 90% identity
+# threshold the recorded run used: PJR1 is a 62 bp part that matches over 58 bp
+# (93.5% coverage-weighted), so the 95% default drops it and the locus is annotated
+# as the spurious constitutive Plambda instead. See MD5_validation_record.md.
+MD5_ARGS=(md5 "$MD5_LIB" 2000 "-M 14 -cir -pid 90")
 
 case "$MODE" in
     --quick) echo "### Cello, quick subset"

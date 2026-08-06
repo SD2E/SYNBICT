@@ -62,7 +62,11 @@ Each dataset gets its own annotation parameters (the script handles this):
 | | min target length | min feature length | extra |
 |---|---|---|---|
 | cello | `-m 1000` (shortest circuit is 1889 bp; the 2000 default drops it) | `-M 40` | — |
-| md5 | `-m 2000` | `-M 14` (parts go down to 14 bp) | `-cir` (plasmids are circular) |
+| md5 | `-m 2000` | `-M 14` (parts go down to 14 bp) | `-cir` (circular), `-pid 90` |
+
+`-pid 90` matters: `PJR1` is a 62 bp part that matches over 58 bp (93.5% coverage-weighted
+identity), so the 95% default drops it and that locus gets annotated as the spurious
+constitutive `Plambda` instead — two plasmids then assemble a different gate.
 
 ## 3. Expected result
 
@@ -94,7 +98,17 @@ Known non-PASS cases, expected:
 - **`0xB9` computes `0xF9`** — the published sequence is missing the 63 bp `pHlyIIR` promoter.
   `0xB9_fixed` (repaired sequence, also in the bundle) computes `0xB9`. Not a pipeline bug.
 - **`demultiplexer`** has one isolated gate — it is a 4-output circuit and the other output
-  branches are not on the published sequence.
+  branches are not on the published sequence. (Reported as `clean` because the Cello rules
+  tolerate it; the gate shows up in the netlist as an `OUTPUT` with no wires.)
+
+Current baseline on this code: **cello 65/66 PASS** (only `0xB9`), **md5 64/70 PASS**. The six
+MD5 differences are all the same ambiguity — `PLuxB` and `PLux_u42_TA` are near-identical
+quorum-sensing sensor promoters that both match the same locus, and since neither is a
+*repressed* promoter the regulation-aware collapse in `gate_assembler._construct_parts()`
+cannot tell them apart, so it keeps whichever sorts first. The recorded run picked the other
+one. Affected: `seq_002`, `seq_018`, `seq_051`, `seq_056`, `seq_060`, `seq_066`. This changes
+the promoter *name* on a primary input, not the logic — but it does matter when merging
+plasmids into a cell, because signals are matched across plasmids by promoter name.
 
 ## 4. Reading a result by hand
 

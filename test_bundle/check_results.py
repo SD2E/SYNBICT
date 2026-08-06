@@ -6,7 +6,9 @@ Checks per circuit:
   1. netlist  -- gates / wires / inputs / outputs vs <dataset>/expected/netlists/
   2. topology -- no broken edges: every input promoter is produced by some gate or is a
                  primary input, every produced promoter is consumed, no isolated gate,
-                 the reporter is driven
+                 the reporter is driven. The MD5 dataset relaxes the last three: its
+                 plasmids are PARTITIONS of one circuit spread across cells and wired by
+                 quorum-sensing signals, so an unwired fragment is the expected shape.
   3. truth table (Cello hex circuits only) -- the hex recomputed from the Yosys table
                  must equal the circuit name, which is the same string as OUTPUT_OR in
                  cello/reference/cello_logic/<C>_A000_*.txt
@@ -51,25 +53,27 @@ def hex_from_log(path):
     return f'0x{bits:02X}', None
 
 
-def topology_problems(net):
+def topology_problems(net, partitioned=False):
     gates, wires = net['gates'], net['wires']
     produced = {g['output'] for g in gates if not g.get('is_output')}
     consumed = {i for g in gates for i in g['inputs']}
     primary = set(net.get('primary_inputs', [])) | SENSORS
     touched = {x for w in wires for x in w}
     p = []
-    if not wires and len(gates) > 1:
+    if not wires and len(gates) > 1 and not partitioned:
         p.append('NO WIRES (discrete)')
     p += [f"gate output is not a promoter: {g['id']}:{g['cds']}"
           for g in gates if not g.get('is_output') and g['output'] == g['cds']]
     p += [f'input produced by nobody: {i}' for i in sorted(consumed - produced - primary)]
-    p += [f'produced but unconsumed: {o}' for o in sorted(produced - consumed)]
+    if not partitioned:
+        p += [f'produced but unconsumed: {o}' for o in sorted(produced - consumed)]
     # An isolated *reporter/output* gate is legitimate: an MD5 quorum-sensing output
     # gene driven straight off a sensor promoter has neither an in- nor an out-edge.
     # An isolated logic gate is not.
-    p += [f"isolated gate: {g['id']}:{g['cds']}"
-          for g in gates
-          if g['id'] not in touched and len(gates) > 1 and not g.get('is_output')]
+    if not partitioned:
+        p += [f"isolated gate: {g['id']}:{g['cds']}"
+              for g in gates
+              if g['id'] not in touched and len(gates) > 1 and not g.get('is_output')]
     return p
 
 
@@ -100,7 +104,7 @@ def main(out_dir, dataset):
         exp_p = os.path.join(exp_dir, f'{c}_circuit_netlist.json')
         net_ok = os.path.exists(exp_p) and norm(got) == norm(json.load(open(exp_p)))
         net_txt = 'match' if net_ok else ('DIFFERS' if os.path.exists(exp_p) else 'no ref')
-        probs = topology_problems(got)
+        probs = topology_problems(got, partitioned=(dataset == 'md5'))
         if HEX_NAME.match(c) or c.endswith('_fixed'):
             tt, why = hex_from_log(os.path.join(out_dir, f'{c}.log'))
             want = c.replace('_fixed', '')
