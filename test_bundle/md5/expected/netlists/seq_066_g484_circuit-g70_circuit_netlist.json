@@ -1,0 +1,64 @@
+{
+  "construct": "g484_circuit_g70_synthetic_circular_DNA_comp",
+  "gates": [
+    {
+      "id": "g1",
+      "cds": "jr1",
+      "inputs": [
+        "PLuxB"
+      ],
+      "output": "jr1",
+      "type": "OUTPUT",
+      "is_output": true
+    },
+    {
+      "id": "g2",
+      "cds": "jr7",
+      "inputs": [
+        "PJR9c"
+      ],
+      "output": "PJR7",
+      "type": "NOT",
+      "is_output": false
+    },
+    {
+      "id": "g3",
+      "cds": "jr11",
+      "inputs": [
+        "PJR7"
+      ],
+      "output": "jr11",
+      "type": "OUTPUT",
+      "is_output": true
+    },
+    {
+      "id": "g4",
+      "cds": "jr9",
+      "inputs": [
+        "Ptac"
+      ],
+      "output": "PJR9c",
+      "type": "NOT",
+      "is_output": false
+    }
+  ],
+  "wires": [
+    [
+      "g4",
+      "g2"
+    ],
+    [
+      "g2",
+      "g3"
+    ]
+  ],
+  "primary_inputs": [
+    "PLuxB",
+    "Ptac"
+  ],
+  "primary_outputs": [
+    "jr1",
+    "jr11"
+  ],
+  "gaps": []
+}

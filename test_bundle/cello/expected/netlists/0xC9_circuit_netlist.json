@@ -1,0 +1,132 @@
+{
+  "construct": "_0xC9_comp",
+  "gates": [
+    {
+      "id": "g1",
+      "cds": "PhlF",
+      "inputs": [
+        "pBAD"
+      ],
+      "output": "pPhlF",
+      "type": "NOT",
+      "is_output": false
+    },
+    {
+      "id": "g2",
+      "cds": "SrpR",
+      "inputs": [
+        "pBM3R1",
+        "pTet"
+      ],
+      "output": "pSrpR",
+      "type": "NOR",
+      "is_output": false
+    },
+    {
+      "id": "g3",
+      "cds": "BM3R1",
+      "inputs": [
+        "pPhlF",
+        "pHlyIIR"
+      ],
+      "output": "pBM3R1",
+      "type": "NOR",
+      "is_output": false
+    },
+    {
+      "id": "g4",
+      "cds": "BetI",
+      "inputs": [
+        "pAmtR",
+        "pAmeR"
+      ],
+      "output": "pBetI",
+      "type": "NOR",
+      "is_output": false
+    },
+    {
+      "id": "g5",
+      "cds": "AmeR",
+      "inputs": [
+        "pTet"
+      ],
+      "output": "pAmeR",
+      "type": "NOT",
+      "is_output": false
+    },
+    {
+      "id": "g6",
+      "cds": "HlyIIR",
+      "inputs": [
+        "pTac"
+      ],
+      "output": "pHlyIIR",
+      "type": "NOT",
+      "is_output": false
+    },
+    {
+      "id": "g7",
+      "cds": "AmtR",
+      "inputs": [
+        "pBM3R1"
+      ],
+      "output": "pAmtR",
+      "type": "NOT",
+      "is_output": false
+    },
+    {
+      "id": "g8",
+      "cds": "YFP",
+      "inputs": [
+        "pSrpR",
+        "pBetI"
+      ],
+      "output": "YFP",
+      "type": "OUTPUT",
+      "is_output": true
+    }
+  ],
+  "wires": [
+    [
+      "g3",
+      "g2"
+    ],
+    [
+      "g1",
+      "g3"
+    ],
+    [
+      "g6",
+      "g3"
+    ],
+    [
+      "g7",
+      "g4"
+    ],
+    [
+      "g5",
+      "g4"
+    ],
+    [
+      "g3",
+      "g7"
+    ],
+    [
+      "g2",
+      "g8"
+    ],
+    [
+      "g4",
+      "g8"
+    ]
+  ],
+  "primary_inputs": [
+    "pBAD",
+    "pTac",
+    "pTet"
+  ],
+  "primary_outputs": [
+    "YFP"
+  ],
+  "gaps": []
+}

@@ -1,0 +1,15 @@
+sequence	reference_circuit	note
+AIMPLYBv2	AIMPLYB	sequence is the v2/variant build of the same logic
+ANDv2	AND	sequence is the v2/variant build of the same logic
+ANIMPLYBv2	ANIMPLYB	sequence is the v2/variant build of the same logic
+BIMPLYAv2	BIMPLYA	sequence is the v2/variant build of the same logic
+BNIMPLYAv2	BNIMPLYA	sequence is the v2/variant build of the same logic
+NANDv2	NAND	sequence is the v2/variant build of the same logic
+XNORv2	XNOR	sequence is the v2/variant build of the same logic
+XORv2	XOR	sequence is the v2/variant build of the same logic
+Majority2	majority	sequence is the v2/variant build of the same logic
+Majority3	majority	sequence is the v2/variant build of the same logic
+Majority4	majority	sequence is the v2/variant build of the same logic
+Majority5	majority	sequence is the v2/variant build of the same logic
+Majority6	majority	sequence is the v2/variant build of the same logic
+0xB9_fixed	0xB9	source sequence repaired: 63bp pHlyIIR promoter re-inserted before pBAD

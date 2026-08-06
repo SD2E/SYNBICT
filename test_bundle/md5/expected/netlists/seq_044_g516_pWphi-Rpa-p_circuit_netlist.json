@@ -1,0 +1,45 @@
+{
+  "construct": "g516_pWphi_Rpa_p_derivative_of_pYJP066___has_oriT_added_and_modified_scars_comp",
+  "gates": [
+    {
+      "id": "g1",
+      "cds": "rpaI",
+      "inputs": [
+        "PJR11"
+      ],
+      "output": "rpaI",
+      "type": "OUTPUT",
+      "is_output": true
+    },
+    {
+      "id": "g2",
+      "cds": "rpaL",
+      "inputs": [
+        "PJR11"
+      ],
+      "output": "rpaL",
+      "type": "OUTPUT",
+      "is_output": true
+    },
+    {
+      "id": "g3",
+      "cds": "talS",
+      "inputs": [
+        "PJR11"
+      ],
+      "output": "talS",
+      "type": "OUTPUT",
+      "is_output": true
+    }
+  ],
+  "wires": [],
+  "primary_inputs": [
+    "PJR11"
+  ],
+  "primary_outputs": [
+    "rpaI",
+    "rpaL",
+    "talS"
+  ],
+  "gaps": []
+}

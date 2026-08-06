@@ -1,0 +1,64 @@
+{
+  "construct": "g494_circuit_g10_synthetic_circular_DNA_comp",
+  "gates": [
+    {
+      "id": "g1",
+      "cds": "jr8",
+      "inputs": [
+        "Ptet"
+      ],
+      "output": "PJR8",
+      "type": "NOT",
+      "is_output": false
+    },
+    {
+      "id": "g2",
+      "cds": "jr1",
+      "inputs": [
+        "PJR8"
+      ],
+      "output": "jr1",
+      "type": "OUTPUT",
+      "is_output": true
+    },
+    {
+      "id": "g3",
+      "cds": "jr7",
+      "inputs": [
+        "PJR1_v1"
+      ],
+      "output": "PJR7",
+      "type": "NOT",
+      "is_output": false
+    },
+    {
+      "id": "g4",
+      "cds": "jr11",
+      "inputs": [
+        "PJR7"
+      ],
+      "output": "jr11",
+      "type": "OUTPUT",
+      "is_output": true
+    }
+  ],
+  "wires": [
+    [
+      "g1",
+      "g2"
+    ],
+    [
+      "g3",
+      "g4"
+    ]
+  ],
+  "primary_inputs": [
+    "PJR1_v1",
+    "Ptet"
+  ],
+  "primary_outputs": [
+    "jr1",
+    "jr11"
+  ],
+  "gaps": []
+}

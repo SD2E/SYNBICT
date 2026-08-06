@@ -1,0 +1,50 @@
+{
+  "construct": "g493_circuit_g10_synthetic_circular_DNA_comp",
+  "gates": [
+    {
+      "id": "g1",
+      "cds": "jr11",
+      "inputs": [
+        "PLuxB"
+      ],
+      "output": "PJR11",
+      "type": "NOT",
+      "is_output": false
+    },
+    {
+      "id": "g2",
+      "cds": "jr1",
+      "inputs": [
+        "PCymRC"
+      ],
+      "output": "jr1",
+      "type": "OUTPUT",
+      "is_output": true
+    },
+    {
+      "id": "g3",
+      "cds": "yfp",
+      "inputs": [
+        "PJR11"
+      ],
+      "output": "yfp",
+      "type": "OUTPUT",
+      "is_output": true
+    }
+  ],
+  "wires": [
+    [
+      "g1",
+      "g3"
+    ]
+  ],
+  "primary_inputs": [
+    "PCymRC",
+    "PLuxB"
+  ],
+  "primary_outputs": [
+    "jr1",
+    "yfp"
+  ],
+  "gaps": []
+}

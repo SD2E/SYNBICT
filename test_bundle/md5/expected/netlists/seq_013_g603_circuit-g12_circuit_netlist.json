@@ -1,0 +1,62 @@
+{
+  "construct": "g603_circuit_g12_synthetic_circular_DNA_comp",
+  "gates": [
+    {
+      "id": "g1",
+      "cds": "jr1",
+      "inputs": [
+        "PCymRC"
+      ],
+      "output": "jr1",
+      "type": "OUTPUT",
+      "is_output": true
+    },
+    {
+      "id": "g2",
+      "cds": "jr11",
+      "inputs": [
+        "PJR1_v1"
+      ],
+      "output": "PJR11",
+      "type": "NOT",
+      "is_output": false
+    },
+    {
+      "id": "g3",
+      "cds": "yfp",
+      "inputs": [
+        "PJR11"
+      ],
+      "output": "yfp",
+      "type": "OUTPUT",
+      "is_output": true
+    },
+    {
+      "id": "g4",
+      "cds": "jr3",
+      "inputs": [
+        "Pcin"
+      ],
+      "output": "jr3",
+      "type": "OUTPUT",
+      "is_output": true
+    }
+  ],
+  "wires": [
+    [
+      "g2",
+      "g3"
+    ]
+  ],
+  "primary_inputs": [
+    "PCymRC",
+    "PJR1_v1",
+    "Pcin"
+  ],
+  "primary_outputs": [
+    "jr1",
+    "yfp",
+    "jr3"
+  ],
+  "gaps": []
+}

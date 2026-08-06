@@ -1,0 +1,601 @@
+#### seq_001_g667_sc5_att5_v2
+PJR1_v1 PJR7  |  luxI rpaI rpaL talS
+------------------------------------
+0 0  |  0 0 0 0
+1 0  |  1 0 0 0
+0 1  |  0 1 1 1
+1 1  |  1 1 1 1
+
+#### seq_002_g652_circuit-g42
+PLux_u42_TA  |  yfp
+-------------------
+0  |  1
+1  |  0
+
+output bitstring: 0x1 (01)
+
+#### seq_003_g650-g8-producti
+PJR11 PJR1_v1 PJR3b  |  luxI cinI rpaI rpaL talS
+------------------------------------------------
+0 0 0  |  0 0 0 0 0
+1 0 0  |  0 1 0 0 0
+0 1 0  |  1 0 0 0 0
+1 1 0  |  1 1 0 0 0
+0 0 1  |  0 0 1 1 1
+1 0 1  |  0 1 1 1 1
+0 1 1  |  1 0 1 1 1
+1 1 1  |  1 1 1 1 1
+
+#### seq_004_g628_circuit-g63
+PJR1_v1 PPhlF Ptac  |  jr1 jr7 jr11
+-----------------------------------
+0 0 0  |  0 0 1
+1 0 0  |  0 0 0
+0 1 0  |  0 1 1
+1 1 0  |  0 1 0
+0 0 1  |  1 0 1
+1 0 1  |  1 0 0
+0 1 1  |  1 1 1
+1 1 1  |  1 1 0
+
+#### seq_005_g627_circuit-g63
+PJR1_v1 PPhlF Ptac  |  jr2 jr1 yfp
+----------------------------------
+0 0 0  |  0 0 0
+1 0 0  |  0 0 1
+0 1 0  |  0 1 0
+1 1 0  |  0 1 1
+0 0 1  |  1 0 0
+1 0 1  |  1 0 1
+0 1 1  |  1 1 0
+1 1 1  |  1 1 1
+
+#### seq_006_g616_pRpa-pLux-p
+WARNING: netlist has gaps (incomplete input); truth table reflects only the assembled part:
+  - transcriptional unit with promoters ['pSC101'] has no annotated CDS
+
+PLuxB PRpa_u42_A  |  phlA phlC phlB phlD
+----------------------------------------
+0 0  |  0 0 0 0
+1 0  |  1 1 1 1
+0 1  |  1 1 1 1
+1 1  |  1 1 1 1
+
+#### seq_007_g615_pCym-pTet-p
+WARNING: netlist has gaps (incomplete input); truth table reflects only the assembled part:
+  - transcriptional unit with promoters ['pSC101'] has no annotated CDS
+
+PCymRC Ptet  |  phlA phlC phlB phlD
+-----------------------------------
+0 0  |  0 0 0 0
+1 0  |  1 1 1 1
+0 1  |  1 1 1 1
+1 1  |  1 1 1 1
+
+#### seq_008_g614_pWphi-phlAB
+WARNING: netlist has gaps (incomplete input); truth table reflects only the assembled part:
+  - transcriptional unit with promoters ['pSC101'] has no annotated CDS
+
+PJR11  |  phlA phlC phlB phlD
+-----------------------------
+0  |  0 0 0 0
+1  |  1 1 1 1
+
+#### seq_009_g612_circuit-g8-
+PJR7 PVanCC Ptet  |  jr1 PJR11 jr3
+----------------------------------
+0 0 0  |  0 1 0
+1 0 0  |  0 0 0
+0 1 0  |  1 1 0
+1 1 0  |  1 0 0
+0 0 1  |  0 1 1
+1 0 1  |  0 0 1
+0 1 1  |  1 1 1
+1 1 1  |  1 0 1
+
+#### seq_010_g611_circuit-g8-
+PJR3b Ptac  |  jr11 yfp
+-----------------------
+0 0  |  0 0
+1 0  |  1 0
+0 1  |  0 1
+1 1  |  1 1
+
+#### seq_011_g605_circuit-g11
+PPhlF Pcin  |  jr1 jr11
+-----------------------
+0 0  |  1 1
+1 0  |  1 0
+0 1  |  0 1
+1 1  |  0 0
+
+#### seq_012_g604_circuit-g12
+PLuxB Pcin  |  jr1 jr11
+-----------------------
+0 0  |  1 1
+1 0  |  1 0
+0 1  |  0 1
+1 1  |  0 0
+
+#### seq_013_g603_circuit-g12
+PCymRC PJR1_v1 Pcin  |  jr1 yfp jr3
+-----------------------------------
+0 0 0  |  0 1 0
+1 0 0  |  1 1 0
+0 1 0  |  0 0 0
+1 1 0  |  1 0 0
+0 0 1  |  0 1 1
+1 0 1  |  1 1 1
+0 1 1  |  0 0 1
+1 1 1  |  1 0 1
+
+#### seq_014_g573_pRpa-Cin-at
+PRpa_u42_A  |  cinI
+-------------------
+0  |  0
+1  |  1
+
+output bitstring: 0x2 (10)
+
+#### seq_015_g572_pPhlF-Lux-a
+PPhlF  |  luxI
+--------------
+0  |  0
+1  |  1
+
+output bitstring: 0x2 (10)
+
+#### seq_016_g571_pPhlF-Cin-a
+PPhlF  |  cinI
+--------------
+0  |  0
+1  |  1
+
+output bitstring: 0x2 (10)
+
+#### seq_017_g570_pCin-Lux-at
+Pcin  |  luxI
+-------------
+0  |  0
+1  |  1
+
+output bitstring: 0x2 (10)
+
+#### seq_018_g569_pLux-Cin-at
+PLuxB  |  cinI
+--------------
+0  |  0
+1  |  1
+
+output bitstring: 0x2 (10)
+
+#### seq_019_g568_pPhlF-Cin-a
+PPhlF  |  cinI
+--------------
+0  |  0
+1  |  1
+
+output bitstring: 0x2 (10)
+
+#### seq_020_g565_circuit-g9-
+Pcin Ptet  |  jr11 jr7
+----------------------
+0 0  |  0 0
+1 0  |  0 1
+0 1  |  1 0
+1 1  |  1 1
+
+#### seq_021_g564_circuit-g3-
+PRpa_u42_A Ptet  |  jr11 jr7
+----------------------------
+0 0  |  0 0
+1 0  |  0 1
+0 1  |  1 0
+1 1  |  1 1
+
+#### seq_022_g563_circuit-g3_
+PCymRC  |  yfp
+--------------
+0  |  0
+1  |  1
+
+output bitstring: 0x2 (10)
+
+#### seq_023_g562_circuit-g93
+PJR1_v1 Pcin  |  jr9 yfp
+------------------------
+0 0  |  0 1
+1 0  |  0 0
+0 1  |  1 1
+1 1  |  1 0
+
+#### seq_024_g561_circuit-g93
+Pcin Ptac  |  jr1 jr11 jr7
+--------------------------
+0 0  |  0 1 1
+1 0  |  1 1 1
+0 1  |  0 0 0
+1 1  |  1 0 0
+
+#### seq_025_g558_RpaR-pRpa-g
+PRpa_u42_A  |  yfp
+------------------
+0  |  0
+1  |  1
+
+output bitstring: 0x2 (10)
+
+#### seq_026_g551_circuit-g42
+PLuxB  |  yfp
+-------------
+0  |  1
+1  |  0
+
+output bitstring: 0x1 (01)
+
+#### seq_027_g550_circuit-g42
+PRpa_u42_A  |  jr11
+-------------------
+0  |  1
+1  |  0
+
+output bitstring: 0x1 (01)
+
+#### seq_028_g549_circuit-g34
+PPhlF  |  jr11
+--------------
+0  |  1
+1  |  0
+
+output bitstring: 0x1 (01)
+
+#### seq_029_g548_circuit-g30
+Pcin  |  jr11
+-------------
+0  |  1
+1  |  0
+
+output bitstring: 0x1 (01)
+
+#### seq_030_g547_circuit-g11
+PRpa_u42_A  |  yfp
+------------------
+0  |  1
+1  |  0
+
+output bitstring: 0x1 (01)
+
+#### seq_031_g546_circuit-g4-
+PPhlF  |  yfp
+-------------
+0  |  1
+1  |  0
+
+output bitstring: 0x1 (01)
+
+#### seq_032_g545_circuit-g4-
+Ptet  |  jr11
+-------------
+0  |  1
+1  |  0
+
+output bitstring: 0x1 (01)
+
+#### seq_033_g544_p933W-phlAB
+PJR7  |  phlA phlC phlB phlD
+----------------------------
+0  |  0 0 0 0
+1  |  1 1 1 1
+
+#### seq_034_g543_phlABCD_-Gm
+PCymRC Ptet1  |  phlA phlC phlB phlD
+------------------------------------
+0 0  |  0 0 0 0
+1 0  |  1 1 1 1
+0 1  |  1 1 1 1
+1 1  |  1 1 1 1
+
+#### seq_035_g539_pTP901-Lux-
+PJR3b  |  luxI
+--------------
+0  |  0
+1  |  1
+
+output bitstring: 0x2 (10)
+
+#### seq_036_g538_p933W-Cin-p
+PJR7  |  cinI
+-------------
+0  |  0
+1  |  1
+
+output bitstring: 0x2 (10)
+
+#### seq_037_g536_pP2hd-Lux_v
+PJR11 PJR8  |  luxI rpaI rpaL talS
+----------------------------------
+0 0  |  0 0 0 0
+1 0  |  0 1 1 1
+0 1  |  1 0 0 0
+1 1  |  1 1 1 1
+
+#### seq_038_g535_p933W-Cin-p
+PJR11 PJR7  |  cinI rpaI rpaL talS
+----------------------------------
+0 0  |  0 0 0 0
+1 0  |  0 1 1 1
+0 1  |  1 0 0 0
+1 1  |  1 1 1 1
+
+#### seq_039_g533_pP2hd-Lux_v
+PJR7 PLuxB  |  luxI cinI
+------------------------
+0 0  |  0 0
+1 0  |  0 1
+0 1  |  1 0
+1 1  |  1 1
+
+#### seq_040_g532_pWphi-Lux_v
+PJR11 PJR7  |  luxI cinI
+------------------------
+0 0  |  0 0
+1 0  |  1 0
+0 1  |  0 1
+1 1  |  1 1
+
+#### seq_041_g531_big-boy-cir
+PCymRC PJR7 Ptet  |  jr8 jr2 jr9 rfp
+------------------------------------
+0 0 0  |  1 1 1 0
+1 0 0  |  1 0 0 0
+0 1 0  |  1 1 1 1
+1 1 0  |  1 0 0 1
+0 0 1  |  0 1 1 0
+1 0 1  |  0 0 0 0
+0 1 1  |  0 1 1 1
+1 1 1  |  0 0 0 1
+
+#### seq_042_g530_circuit-big
+PJR4 PJR7  |  jr2 jr9 rfp
+-------------------------
+0 0  |  0 0 0
+1 0  |  1 1 0
+0 1  |  0 0 1
+1 1  |  1 1 1
+
+#### seq_043_g525_p933W-Lux-p
+PJR11 PJR7  |  luxI cinI
+------------------------
+0 0  |  0 0
+1 0  |  0 1
+0 1  |  1 0
+1 1  |  1 1
+
+#### seq_044_g516_pWphi-Rpa-p
+PJR11  |  rpaI rpaL talS
+------------------------
+0  |  0 0 0
+1  |  1 1 1
+
+#### seq_045_g515_pWphi-Lux-p
+PJR11  |  luxI
+--------------
+0  |  0
+1  |  1
+
+output bitstring: 0x2 (10)
+
+#### seq_046_g514_pWphi-Cin-p
+PJR11  |  cinI
+--------------
+0  |  0
+1  |  1
+
+output bitstring: 0x2 (10)
+
+#### seq_047_g513_J23100-Rpa-
+PRpa_u42_A  |  jr11
+-------------------
+0  |  0
+1  |  1
+
+output bitstring: 0x2 (10)
+
+#### seq_048_g512_pPhlF-Wphi-
+PPhlF  |  jr11
+--------------
+0  |  0
+1  |  1
+
+output bitstring: 0x2 (10)
+
+#### seq_049_g511_pLux-Wphi-a
+PLuxB  |  jr11
+--------------
+0  |  0
+1  |  1
+
+output bitstring: 0x2 (10)
+
+#### seq_050_g510_pWphi-YFP-p
+PPhlF  |  yfp
+-------------
+0  |  1
+1  |  0
+
+output bitstring: 0x1 (01)
+
+#### seq_051_g509_pWphi-YFP-p
+PLuxB  |  yfp
+-------------
+0  |  1
+1  |  0
+
+output bitstring: 0x1 (01)
+
+#### seq_052_g508_pWphi-YFP-p
+Pcin  |  yfp
+------------
+0  |  1
+1  |  0
+
+output bitstring: 0x1 (01)
+
+#### seq_053_g506_circuit-big
+PCymRC PJR3b  |  jr4 jr8
+------------------------
+0 0  |  0 0
+1 0  |  1 0
+0 1  |  0 1
+1 1  |  1 1
+
+#### seq_054_g505_circuit-big
+Ptet  |  jr3
+------------
+0  |  0
+1  |  1
+
+output bitstring: 0x2 (10)
+
+#### seq_055_g501_circuit-g12
+PLuxB PPhlF  |  jr9 yfp
+-----------------------
+0 0  |  1 1
+1 0  |  0 1
+0 1  |  1 0
+1 1  |  0 0
+
+#### seq_056_g500_circuit-g12
+PLuxB Pcin  |  jr1 jr11
+-----------------------
+0 0  |  0 0
+1 0  |  1 0
+0 1  |  0 1
+1 1  |  1 1
+
+#### seq_057_g496_circuit-g11
+PPhlF Ptet  |  jr11 jr7
+-----------------------
+0 0  |  0 0
+1 0  |  0 1
+0 1  |  1 0
+1 1  |  1 1
+
+#### seq_058_g495_circuit-g11
+PLuxB  |  yfp
+-------------
+0  |  0
+1  |  1
+
+output bitstring: 0x2 (10)
+
+#### seq_059_g494_circuit-g10
+PJR1_v1 Ptet  |  jr1 jr11
+-------------------------
+0 0  |  1 1
+1 0  |  1 0
+0 1  |  0 1
+1 1  |  0 0
+
+#### seq_060_g493_circuit-g10
+PCymRC PLuxB  |  jr1 yfp
+------------------------
+0 0  |  0 1
+1 0  |  1 1
+0 1  |  0 0
+1 1  |  1 0
+
+#### seq_061_g492_circuit-big
+PCymRC PJR3b Ptet  |  jr1 jr7 bfp
+---------------------------------
+0 0 0  |  1 1 0
+1 0 0  |  0 1 0
+0 1 0  |  1 1 1
+1 1 0  |  0 1 1
+0 0 1  |  1 0 0
+1 0 1  |  0 0 0
+0 1 1  |  1 0 1
+1 1 1  |  0 0 1
+
+#### seq_062_g488_circuit-g77
+PJR1_v1 PPhlF  |  jr9 yfp
+-------------------------
+0 0  |  0 1
+1 0  |  0 0
+0 1  |  1 1
+1 1  |  1 0
+
+#### seq_063_g487_circuit-g77
+PPhlF Ptac  |  jr1 jr11 jr7
+---------------------------
+0 0  |  0 1 1
+1 0  |  1 1 1
+0 1  |  0 0 0
+1 1  |  1 0 0
+
+#### seq_064_g486_circuit-g72
+PJR1_v1 Ptac Ptet  |  jr9 jr1 jr11
+----------------------------------
+0 0 0  |  0 1 0
+1 0 0  |  0 1 1
+0 1 0  |  1 1 0
+1 1 0  |  1 1 1
+0 0 1  |  0 0 0
+1 0 1  |  0 0 1
+0 1 1  |  1 0 0
+1 1 1  |  1 0 1
+
+#### seq_065_g485_circuit-g72
+Ptac Ptet  |  jr1 yfp
+---------------------
+0 0  |  0 1
+1 0  |  0 0
+0 1  |  1 1
+1 1  |  1 0
+
+#### seq_066_g484_circuit-g70
+PLuxB Ptac  |  jr1 jr11
+-----------------------
+0 0  |  0 0
+1 0  |  1 0
+0 1  |  0 1
+1 1  |  1 1
+
+#### seq_067_g483_circuit-g70
+PJR1_v1 PLuxB Ptac  |  jr1 jr7 yfp
+----------------------------------
+0 0 0  |  0 1 1
+1 0 0  |  0 1 0
+0 1 0  |  0 0 1
+1 1 0  |  0 0 0
+0 0 1  |  1 1 1
+1 0 1  |  1 1 0
+0 1 1  |  1 0 1
+1 1 1  |  1 0 0
+
+#### seq_068_g478_circuit-not
+Pbad  |  yfp
+------------
+0  |  1
+1  |  0
+
+output bitstring: 0x1 (01)
+
+#### seq_069_g477_circuit-not
+Ptac  |  jr11
+-------------
+0  |  1
+1  |  0
+
+output bitstring: 0x1 (01)
+
+#### seq_070_g242_Pr218-Wphi-
+Ptac Ptet  |  yfp
+-----------------
+0 0  |  1
+1 0  |  0
+0 1  |  0
+1 1  |  0
+
+output bitstring: 0x1 (0001)
+

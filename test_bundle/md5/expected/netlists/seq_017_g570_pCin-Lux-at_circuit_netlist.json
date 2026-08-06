@@ -1,0 +1,23 @@
+{
+  "construct": "g570_pCin_Lux_at_synthetic_circular_DNA_comp",
+  "gates": [
+    {
+      "id": "g1",
+      "cds": "luxI",
+      "inputs": [
+        "Pcin"
+      ],
+      "output": "luxI",
+      "type": "OUTPUT",
+      "is_output": true
+    }
+  ],
+  "wires": [],
+  "primary_inputs": [
+    "Pcin"
+  ],
+  "primary_outputs": [
+    "luxI"
+  ],
+  "gaps": []
+}

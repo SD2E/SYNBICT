@@ -1,0 +1,61 @@
+{
+  "construct": "g543_phlABCD__Gm_synthetic_circular_DNA_comp",
+  "gates": [
+    {
+      "id": "g1",
+      "cds": "phlA",
+      "inputs": [
+        "Ptet1",
+        "PCymRC"
+      ],
+      "output": "phlA",
+      "type": "OUTPUT",
+      "is_output": true
+    },
+    {
+      "id": "g2",
+      "cds": "phlC",
+      "inputs": [
+        "Ptet1",
+        "PCymRC"
+      ],
+      "output": "phlC",
+      "type": "OUTPUT",
+      "is_output": true
+    },
+    {
+      "id": "g3",
+      "cds": "phlB",
+      "inputs": [
+        "Ptet1",
+        "PCymRC"
+      ],
+      "output": "phlB",
+      "type": "OUTPUT",
+      "is_output": true
+    },
+    {
+      "id": "g4",
+      "cds": "phlD",
+      "inputs": [
+        "Ptet1",
+        "PCymRC"
+      ],
+      "output": "phlD",
+      "type": "OUTPUT",
+      "is_output": true
+    }
+  ],
+  "wires": [],
+  "primary_inputs": [
+    "PCymRC",
+    "Ptet1"
+  ],
+  "primary_outputs": [
+    "phlA",
+    "phlC",
+    "phlB",
+    "phlD"
+  ],
+  "gaps": []
+}

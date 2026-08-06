@@ -1,0 +1,57 @@
+{
+  "construct": "g535_p933W_Cin_p_derivative_of_pYJP066___has_oriT_added_and_modified_scars_comp",
+  "gates": [
+    {
+      "id": "g1",
+      "cds": "cinI",
+      "inputs": [
+        "PJR7"
+      ],
+      "output": "cinI",
+      "type": "OUTPUT",
+      "is_output": true
+    },
+    {
+      "id": "g2",
+      "cds": "rpaI",
+      "inputs": [
+        "PJR11"
+      ],
+      "output": "rpaI",
+      "type": "OUTPUT",
+      "is_output": true
+    },
+    {
+      "id": "g3",
+      "cds": "rpaL",
+      "inputs": [
+        "PJR11"
+      ],
+      "output": "rpaL",
+      "type": "OUTPUT",
+      "is_output": true
+    },
+    {
+      "id": "g4",
+      "cds": "talS",
+      "inputs": [
+        "PJR11"
+      ],
+      "output": "talS",
+      "type": "OUTPUT",
+      "is_output": true
+    }
+  ],
+  "wires": [],
+  "primary_inputs": [
+    "PJR11",
+    "PJR7"
+  ],
+  "primary_outputs": [
+    "cinI",
+    "rpaI",
+    "rpaL",
+    "talS"
+  ],
+  "gaps": []
+}

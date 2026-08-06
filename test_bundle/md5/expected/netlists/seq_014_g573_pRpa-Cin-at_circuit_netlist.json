@@ -1,0 +1,23 @@
+{
+  "construct": "g573_pRpa_Cin_at_synthetic_circular_DNA_comp",
+  "gates": [
+    {
+      "id": "g1",
+      "cds": "cinI",
+      "inputs": [
+        "PRpa_u42_A"
+      ],
+      "output": "cinI",
+      "type": "OUTPUT",
+      "is_output": true
+    }
+  ],
+  "wires": [],
+  "primary_inputs": [
+    "PRpa_u42_A"
+  ],
+  "primary_outputs": [
+    "cinI"
+  ],
+  "gaps": []
+}

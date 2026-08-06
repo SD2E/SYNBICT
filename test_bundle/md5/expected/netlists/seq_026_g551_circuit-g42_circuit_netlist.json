@@ -1,0 +1,38 @@
+{
+  "construct": "g551_circuit_g42_derivative_of_pYJP066___has_oriT_added_and_modified_scars_comp",
+  "gates": [
+    {
+      "id": "g1",
+      "cds": "jr11",
+      "inputs": [
+        "PLuxB"
+      ],
+      "output": "PJR11",
+      "type": "NOT",
+      "is_output": false
+    },
+    {
+      "id": "g2",
+      "cds": "yfp",
+      "inputs": [
+        "PJR11"
+      ],
+      "output": "yfp",
+      "type": "OUTPUT",
+      "is_output": true
+    }
+  ],
+  "wires": [
+    [
+      "g1",
+      "g2"
+    ]
+  ],
+  "primary_inputs": [
+    "PLuxB"
+  ],
+  "primary_outputs": [
+    "yfp"
+  ],
+  "gaps": []
+}

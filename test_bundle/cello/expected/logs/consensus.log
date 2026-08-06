@@ -1,0 +1,66 @@
+### consensus
+2026-08-04 12:19:40,016 ; INFO ; Loading example/jet_libs/cello_library.xml
+2026-08-04 12:19:40,667 ; INFO ; Finished loading example/jet_libs/cello_library.xml
+2026-08-04 12:19:40,667 ; INFO ; Loading features
+2026-08-04 12:19:40,690 ; INFO ; Loading circuits
+2026-08-04 12:19:40,691 ; WARNING ; https://synbiohub.programmingbiology.org/public/Cello_Parts/HSL_LuxR_protein_complex_formation/1 was not loaded since it contains no DNA features
+2026-08-04 12:19:40,691 ; WARNING ; https://synbiohub.programmingbiology.org/public/Cello_Parts/LmrA_protein_degradation/1 was not loaded since it contains no DNA features
+2026-08-04 12:19:40,692 ; WARNING ; https://synbiohub.programmingbiology.org/public/Cello_Parts/AraC_protein_degradation/1 was not loaded since it contains no DNA features
+2026-08-04 12:19:40,692 ; WARNING ; https://synbiohub.programmingbiology.org/public/Cello_Parts/Ara_AraC_protein_degradation/1 was not loaded since it contains no DNA features
+2026-08-04 12:19:40,692 ; WARNING ; https://synbiohub.programmingbiology.org/public/Cello_Parts/Ara_AraC_protein_complex_formation/1 was not loaded since it contains no DNA features
+2026-08-04 12:19:40,693 ; WARNING ; https://synbiohub.programmingbiology.org/public/Cello_Parts/LitR_protein_degradation/1 was not loaded since it contains no DNA features
+2026-08-04 12:19:40,693 ; WARNING ; https://synbiohub.programmingbiology.org/public/Cello_Parts/IPTG_LacI_protein_degradation/1 was not loaded since it contains no DNA features
+2026-08-04 12:19:40,693 ; WARNING ; https://synbiohub.programmingbiology.org/public/Cello_Parts/AmtR_protein_degradation/1 was not loaded since it contains no DNA features
+2026-08-04 12:19:40,693 ; WARNING ; https://synbiohub.programmingbiology.org/public/Cello_Parts/BetI_protein_degradation/1 was not loaded since it contains no DNA features
+2026-08-04 12:19:40,693 ; WARNING ; https://synbiohub.programmingbiology.org/public/Cello_Parts/aTc_TetR_protein_degradation/1 was not loaded since it contains no DNA features
+2026-08-04 12:19:40,693 ; WARNING ; https://synbiohub.programmingbiology.org/public/Cello_Parts/HSL_LuxR_protein_degradation/1 was not loaded since it contains no DNA features
+2026-08-04 12:19:40,693 ; WARNING ; https://synbiohub.programmingbiology.org/public/Cello_Parts/AmeR_protein_degradation/1 was not loaded since it contains no DNA features
+2026-08-04 12:19:40,693 ; WARNING ; https://synbiohub.programmingbiology.org/public/Cello_Parts/YFP_protein_degradation/1 was not loaded since it contains no DNA features
+2026-08-04 12:19:40,693 ; WARNING ; https://synbiohub.programmingbiology.org/public/Cello_Parts/PsrA_protein_degradation/1 was not loaded since it contains no DNA features
+2026-08-04 12:19:40,693 ; WARNING ; https://synbiohub.programmingbiology.org/public/Cello_Parts/QacR_protein_degradation/1 was not loaded since it contains no DNA features
+2026-08-04 12:19:40,693 ; WARNING ; https://synbiohub.programmingbiology.org/public/Cello_Parts/BM3R1_protein_degradation/1 was not loaded since it contains no DNA features
+2026-08-04 12:19:40,694 ; WARNING ; https://synbiohub.programmingbiology.org/public/Cello_Parts/LacI_protein_degradation/1 was not loaded since it contains no DNA features
+2026-08-04 12:19:40,694 ; WARNING ; https://synbiohub.programmingbiology.org/public/Cello_Parts/HlyIIR_protein_degradation/1 was not loaded since it contains no DNA features
+2026-08-04 12:19:40,694 ; WARNING ; https://synbiohub.programmingbiology.org/public/Cello_Parts/IcaRA_protein_degradation/1 was not loaded since it contains no DNA features
+2026-08-04 12:19:40,694 ; WARNING ; https://synbiohub.programmingbiology.org/public/Cello_Parts/aTc_TetR_protein_complex_formation/1 was not loaded since it contains no DNA features
+2026-08-04 12:19:40,695 ; WARNING ; https://synbiohub.programmingbiology.org/public/Cello_Parts/SrpR_protein_degradation/1 was not loaded since it contains no DNA features
+2026-08-04 12:19:40,695 ; WARNING ; https://synbiohub.programmingbiology.org/public/Cello_Parts/TetR_protein_degradation/1 was not loaded since it contains no DNA features
+2026-08-04 12:19:40,695 ; WARNING ; https://synbiohub.programmingbiology.org/public/Cello_Parts/PhlF_protein_degradation/1 was not loaded since it contains no DNA features
+2026-08-04 12:19:40,695 ; WARNING ; https://synbiohub.programmingbiology.org/public/Cello_Parts/IPTG_LacI_protein_complex_formation/1 was not loaded since it contains no DNA features
+2026-08-04 12:19:40,696 ; WARNING ; https://synbiohub.programmingbiology.org/public/Cello_Parts/LuxR_protein_degradation/1 was not loaded since it contains no DNA features
+2026-08-04 12:19:40,696 ; INFO ; Finished loading circuits
+2026-08-04 12:19:40,696 ; INFO ; Loading oxea_out_fix/consensus_annotated.xml
+2026-08-04 12:19:40,807 ; INFO ; Finished loading oxea_out_fix/consensus_annotated.xml
+2026-08-04 12:19:40,807 ; INFO ; Loading features
+2026-08-04 12:19:40,809 ; INFO ; Building http://examples.org/consensus_annotated/1
+2026-08-04 12:19:41,065 ; INFO ; Finished building http://examples.org/consensus_annotated/1
+2026-08-04 12:19:41,121 ; INFO ; Writing /tmp/claude-1000/-home-sophia-git-repo-SYNBICT/6e45cbc2-a454-4dbe-9402-a721373462a8/scratchpad/cello_rerun/consensus_circuit.xml
+2026-08-04 12:19:41,249 ; INFO ; Finished writing /tmp/claude-1000/-home-sophia-git-repo-SYNBICT/6e45cbc2-a454-4dbe-9402-a721373462a8/scratchpad/cello_rerun/consensus_circuit.xml
+2026-08-04 12:19:41,291 ; INFO ; Wrote gate netlist /tmp/claude-1000/-home-sophia-git-repo-SYNBICT/6e45cbc2-a454-4dbe-9402-a721373462a8/scratchpad/cello_rerun/consensus_circuit_netlist.json
+2026-08-04 12:19:41,291 ; INFO ; Finished curating
+construct: consensus_comp
+primary inputs : ['pBAD', 'pTac', 'pTet']
+primary outputs: ['YFP']
+gates:
+  g1   NOR    inputs=['pSrpR', 'pBetI'] cds=PhlF -> output=pPhlF
+  g2   NOR    inputs=['pTac', 'pTet'] cds=SrpR -> output=pSrpR
+  g3   NOR    inputs=['pPhlF', 'pHlyIIR'] cds=BM3R1 -> output=pBM3R1
+  g4   NOR    inputs=['pAmtR', 'pAmeR'] cds=BetI -> output=pBetI
+  g5   NOT    inputs=['pTet'] cds=AmeR -> output=pAmeR
+  g6   NOR    inputs=['pTac', 'pAmtR'] cds=HlyIIR -> output=pHlyIIR
+  g7   NOT    inputs=['pBAD'] cds=AmtR -> output=pAmtR
+  g8   OUTPUT inputs=['pBM3R1'] cds=YFP -> output=YFP
+wires: [['g2', 'g1'], ['g4', 'g1'], ['g1', 'g3'], ['g6', 'g3'], ['g7', 'g4'], ['g5', 'g4'], ['g7', 'g6'], ['g3', 'g8']]
+--- truth table ---
+pBAD pTac pTet  |  YFP
+----------------------
+0 0 0  |  1
+1 0 0  |  0
+0 1 0  |  0
+1 1 0  |  0
+0 0 1  |  0
+1 0 1  |  0
+0 1 1  |  0
+1 1 1  |  1
+
+output bitstring: 0x81 (10000001)

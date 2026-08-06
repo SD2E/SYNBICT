@@ -1,0 +1,57 @@
+{
+  "construct": "g667_sc5_att5_v2_synthetic_circular_DNA_comp",
+  "gates": [
+    {
+      "id": "g1",
+      "cds": "luxI",
+      "inputs": [
+        "PJR1_v1"
+      ],
+      "output": "luxI",
+      "type": "OUTPUT",
+      "is_output": true
+    },
+    {
+      "id": "g2",
+      "cds": "rpaI",
+      "inputs": [
+        "PJR7"
+      ],
+      "output": "rpaI",
+      "type": "OUTPUT",
+      "is_output": true
+    },
+    {
+      "id": "g3",
+      "cds": "rpaL",
+      "inputs": [
+        "PJR7"
+      ],
+      "output": "rpaL",
+      "type": "OUTPUT",
+      "is_output": true
+    },
+    {
+      "id": "g4",
+      "cds": "talS",
+      "inputs": [
+        "PJR7"
+      ],
+      "output": "talS",
+      "type": "OUTPUT",
+      "is_output": true
+    }
+  ],
+  "wires": [],
+  "primary_inputs": [
+    "PJR1_v1",
+    "PJR7"
+  ],
+  "primary_outputs": [
+    "luxI",
+    "rpaI",
+    "rpaL",
+    "talS"
+  ],
+  "gaps": []
+}

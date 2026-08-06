@@ -1,0 +1,23 @@
+{
+  "construct": "g569_pLux_Cin_at_synthetic_circular_DNA_comp",
+  "gates": [
+    {
+      "id": "g1",
+      "cds": "cinI",
+      "inputs": [
+        "PLuxB"
+      ],
+      "output": "cinI",
+      "type": "OUTPUT",
+      "is_output": true
+    }
+  ],
+  "wires": [],
+  "primary_inputs": [
+    "PLuxB"
+  ],
+  "primary_outputs": [
+    "cinI"
+  ],
+  "gaps": []
+}

@@ -1,0 +1,23 @@
+{
+  "construct": "g558_RpaR_pRpa_g_synthetic_circular_DNA_comp",
+  "gates": [
+    {
+      "id": "g1",
+      "cds": "yfp",
+      "inputs": [
+        "PRpa_u42_A"
+      ],
+      "output": "yfp",
+      "type": "OUTPUT",
+      "is_output": true
+    }
+  ],
+  "wires": [],
+  "primary_inputs": [
+    "PRpa_u42_A"
+  ],
+  "primary_outputs": [
+    "yfp"
+  ],
+  "gaps": []
+}

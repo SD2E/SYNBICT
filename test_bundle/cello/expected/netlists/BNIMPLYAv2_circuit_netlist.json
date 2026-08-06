@@ -1,0 +1,54 @@
+{
+  "construct": "BNIMPLYAv2_comp",
+  "gates": [
+    {
+      "id": "g1",
+      "cds": "BetI",
+      "inputs": [
+        "pTac",
+        "pAmtR"
+      ],
+      "output": "pBetI",
+      "type": "NOR",
+      "is_output": false
+    },
+    {
+      "id": "g2",
+      "cds": "AmtR",
+      "inputs": [
+        "pTet"
+      ],
+      "output": "pAmtR",
+      "type": "NOT",
+      "is_output": false
+    },
+    {
+      "id": "g3",
+      "cds": "YFP",
+      "inputs": [
+        "pBetI"
+      ],
+      "output": "YFP",
+      "type": "OUTPUT",
+      "is_output": true
+    }
+  ],
+  "wires": [
+    [
+      "g2",
+      "g1"
+    ],
+    [
+      "g1",
+      "g3"
+    ]
+  ],
+  "primary_inputs": [
+    "pTac",
+    "pTet"
+  ],
+  "primary_outputs": [
+    "YFP"
+  ],
+  "gaps": []
+}

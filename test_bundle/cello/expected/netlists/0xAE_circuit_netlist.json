@@ -1,0 +1,70 @@
+{
+  "construct": "_0xAE_comp",
+  "gates": [
+    {
+      "id": "g1",
+      "cds": "PhlF",
+      "inputs": [
+        "pSrpR",
+        "pTet"
+      ],
+      "output": "pPhlF",
+      "type": "NOR",
+      "is_output": false
+    },
+    {
+      "id": "g2",
+      "cds": "SrpR",
+      "inputs": [
+        "pBAD"
+      ],
+      "output": "pSrpR",
+      "type": "NOT",
+      "is_output": false
+    },
+    {
+      "id": "g3",
+      "cds": "AmtR",
+      "inputs": [
+        "pTac"
+      ],
+      "output": "pAmtR",
+      "type": "NOT",
+      "is_output": false
+    },
+    {
+      "id": "g4",
+      "cds": "YFP",
+      "inputs": [
+        "pPhlF",
+        "pAmtR"
+      ],
+      "output": "YFP",
+      "type": "OUTPUT",
+      "is_output": true
+    }
+  ],
+  "wires": [
+    [
+      "g2",
+      "g1"
+    ],
+    [
+      "g1",
+      "g4"
+    ],
+    [
+      "g3",
+      "g4"
+    ]
+  ],
+  "primary_inputs": [
+    "pBAD",
+    "pTac",
+    "pTet"
+  ],
+  "primary_outputs": [
+    "YFP"
+  ],
+  "gaps": []
+}

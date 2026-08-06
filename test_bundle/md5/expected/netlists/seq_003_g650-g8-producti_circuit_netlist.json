@@ -1,0 +1,69 @@
+{
+  "construct": "g650_g8_producti_synthetic_circular_DNA_comp",
+  "gates": [
+    {
+      "id": "g1",
+      "cds": "luxI",
+      "inputs": [
+        "PJR1_v1"
+      ],
+      "output": "luxI",
+      "type": "OUTPUT",
+      "is_output": true
+    },
+    {
+      "id": "g2",
+      "cds": "cinI",
+      "inputs": [
+        "PJR11"
+      ],
+      "output": "cinI",
+      "type": "OUTPUT",
+      "is_output": true
+    },
+    {
+      "id": "g3",
+      "cds": "rpaI",
+      "inputs": [
+        "PJR3b"
+      ],
+      "output": "rpaI",
+      "type": "OUTPUT",
+      "is_output": true
+    },
+    {
+      "id": "g4",
+      "cds": "rpaL",
+      "inputs": [
+        "PJR3b"
+      ],
+      "output": "rpaL",
+      "type": "OUTPUT",
+      "is_output": true
+    },
+    {
+      "id": "g5",
+      "cds": "talS",
+      "inputs": [
+        "PJR3b"
+      ],
+      "output": "talS",
+      "type": "OUTPUT",
+      "is_output": true
+    }
+  ],
+  "wires": [],
+  "primary_inputs": [
+    "PJR11",
+    "PJR1_v1",
+    "PJR3b"
+  ],
+  "primary_outputs": [
+    "luxI",
+    "cinI",
+    "rpaI",
+    "rpaL",
+    "talS"
+  ],
+  "gaps": []
+}

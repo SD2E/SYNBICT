@@ -1,0 +1,78 @@
+{
+  "construct": "g488_circuit_g77_synthetic_circular_DNA_comp",
+  "gates": [
+    {
+      "id": "g1",
+      "cds": "jr9",
+      "inputs": [
+        "PPhlF"
+      ],
+      "output": "jr9",
+      "type": "OUTPUT",
+      "is_output": true
+    },
+    {
+      "id": "g2",
+      "cds": "jr11",
+      "inputs": [
+        "PJR1_v1"
+      ],
+      "output": "PJR11",
+      "type": "NOT",
+      "is_output": false
+    },
+    {
+      "id": "g3",
+      "cds": "jr7",
+      "inputs": [
+        "PJR11"
+      ],
+      "output": "PJR7",
+      "type": "NOT",
+      "is_output": false
+    },
+    {
+      "id": "g4",
+      "cds": "jr8",
+      "inputs": [
+        "PJR7"
+      ],
+      "output": "PJR8",
+      "type": "NOT",
+      "is_output": false
+    },
+    {
+      "id": "g5",
+      "cds": "yfp",
+      "inputs": [
+        "PJR8"
+      ],
+      "output": "yfp",
+      "type": "OUTPUT",
+      "is_output": true
+    }
+  ],
+  "wires": [
+    [
+      "g2",
+      "g3"
+    ],
+    [
+      "g3",
+      "g4"
+    ],
+    [
+      "g4",
+      "g5"
+    ]
+  ],
+  "primary_inputs": [
+    "PJR1_v1",
+    "PPhlF"
+  ],
+  "primary_outputs": [
+    "jr9",
+    "yfp"
+  ],
+  "gaps": []
+}

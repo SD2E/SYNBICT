@@ -1,0 +1,56 @@
+{
+  "construct": "g544_p933W_phlAB_synthetic_circular_DNA_comp",
+  "gates": [
+    {
+      "id": "g1",
+      "cds": "phlA",
+      "inputs": [
+        "PJR7"
+      ],
+      "output": "phlA",
+      "type": "OUTPUT",
+      "is_output": true
+    },
+    {
+      "id": "g2",
+      "cds": "phlC",
+      "inputs": [
+        "PJR7"
+      ],
+      "output": "phlC",
+      "type": "OUTPUT",
+      "is_output": true
+    },
+    {
+      "id": "g3",
+      "cds": "phlB",
+      "inputs": [
+        "PJR7"
+      ],
+      "output": "phlB",
+      "type": "OUTPUT",
+      "is_output": true
+    },
+    {
+      "id": "g4",
+      "cds": "phlD",
+      "inputs": [
+        "PJR7"
+      ],
+      "output": "phlD",
+      "type": "OUTPUT",
+      "is_output": true
+    }
+  ],
+  "wires": [],
+  "primary_inputs": [
+    "PJR7"
+  ],
+  "primary_outputs": [
+    "phlA",
+    "phlC",
+    "phlB",
+    "phlD"
+  ],
+  "gaps": []
+}

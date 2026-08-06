@@ -1,0 +1,56 @@
+{
+  "construct": "_0x7F_comp",
+  "gates": [
+    {
+      "id": "g1",
+      "cds": "BM3R1",
+      "inputs": [
+        "pBAD",
+        "pTet"
+      ],
+      "output": "pBM3R1",
+      "type": "NOR",
+      "is_output": false
+    },
+    {
+      "id": "g2",
+      "cds": "AmtR",
+      "inputs": [
+        "pBM3R1"
+      ],
+      "output": "pAmtR",
+      "type": "NOT",
+      "is_output": false
+    },
+    {
+      "id": "g3",
+      "cds": "YFP",
+      "inputs": [
+        "pTac",
+        "pAmtR"
+      ],
+      "output": "YFP",
+      "type": "OUTPUT",
+      "is_output": true
+    }
+  ],
+  "wires": [
+    [
+      "g1",
+      "g2"
+    ],
+    [
+      "g2",
+      "g3"
+    ]
+  ],
+  "primary_inputs": [
+    "pBAD",
+    "pTac",
+    "pTet"
+  ],
+  "primary_outputs": [
+    "YFP"
+  ],
+  "gaps": []
+}

@@ -1,0 +1,23 @@
+{
+  "construct": "g515_pWphi_Lux_p_derivative_of_pYJP066___has_oriT_added_and_modified_scars_comp",
+  "gates": [
+    {
+      "id": "g1",
+      "cds": "luxI",
+      "inputs": [
+        "PJR11"
+      ],
+      "output": "luxI",
+      "type": "OUTPUT",
+      "is_output": true
+    }
+  ],
+  "wires": [],
+  "primary_inputs": [
+    "PJR11"
+  ],
+  "primary_outputs": [
+    "luxI"
+  ],
+  "gaps": []
+}

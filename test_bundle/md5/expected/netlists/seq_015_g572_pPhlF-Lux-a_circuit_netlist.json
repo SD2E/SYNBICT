@@ -1,0 +1,23 @@
+{
+  "construct": "g572_pPhlF_Lux_a_synthetic_circular_DNA_comp",
+  "gates": [
+    {
+      "id": "g1",
+      "cds": "luxI",
+      "inputs": [
+        "PPhlF"
+      ],
+      "output": "luxI",
+      "type": "OUTPUT",
+      "is_output": true
+    }
+  ],
+  "wires": [],
+  "primary_inputs": [
+    "PPhlF"
+  ],
+  "primary_outputs": [
+    "luxI"
+  ],
+  "gaps": []
+}

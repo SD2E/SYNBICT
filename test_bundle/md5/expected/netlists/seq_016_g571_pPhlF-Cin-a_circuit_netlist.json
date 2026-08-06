@@ -1,0 +1,23 @@
+{
+  "construct": "g571_pPhlF_Cin_a_synthetic_circular_DNA_comp",
+  "gates": [
+    {
+      "id": "g1",
+      "cds": "cinI",
+      "inputs": [
+        "PPhlF"
+      ],
+      "output": "cinI",
+      "type": "OUTPUT",
+      "is_output": true
+    }
+  ],
+  "wires": [],
+  "primary_inputs": [
+    "PPhlF"
+  ],
+  "primary_outputs": [
+    "cinI"
+  ],
+  "gaps": []
+}

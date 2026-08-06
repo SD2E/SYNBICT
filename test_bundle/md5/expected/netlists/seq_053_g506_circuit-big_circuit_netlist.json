@@ -1,0 +1,35 @@
+{
+  "construct": "g506_circuit_big_synthetic_circular_DNA_comp",
+  "gates": [
+    {
+      "id": "g1",
+      "cds": "jr4",
+      "inputs": [
+        "PCymRC"
+      ],
+      "output": "jr4",
+      "type": "OUTPUT",
+      "is_output": true
+    },
+    {
+      "id": "g2",
+      "cds": "jr8",
+      "inputs": [
+        "PJR3b"
+      ],
+      "output": "jr8",
+      "type": "OUTPUT",
+      "is_output": true
+    }
+  ],
+  "wires": [],
+  "primary_inputs": [
+    "PCymRC",
+    "PJR3b"
+  ],
+  "primary_outputs": [
+    "jr4",
+    "jr8"
+  ],
+  "gaps": []
+}

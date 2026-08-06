@@ -1,0 +1,35 @@
+{
+  "construct": "g564_circuit_g3__synthetic_circular_DNA_comp",
+  "gates": [
+    {
+      "id": "g1",
+      "cds": "jr11",
+      "inputs": [
+        "Ptet"
+      ],
+      "output": "jr11",
+      "type": "OUTPUT",
+      "is_output": true
+    },
+    {
+      "id": "g2",
+      "cds": "jr7",
+      "inputs": [
+        "PRpa_u42_A"
+      ],
+      "output": "jr7",
+      "type": "OUTPUT",
+      "is_output": true
+    }
+  ],
+  "wires": [],
+  "primary_inputs": [
+    "PRpa_u42_A",
+    "Ptet"
+  ],
+  "primary_outputs": [
+    "jr11",
+    "jr7"
+  ],
+  "gaps": []
+}

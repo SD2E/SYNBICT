@@ -1,0 +1,104 @@
+{
+  "construct": "g492_circuit_big_synthetic_circular_DNA_comp",
+  "gates": [
+    {
+      "id": "g1",
+      "cds": "jr8",
+      "inputs": [
+        "PCymRC"
+      ],
+      "output": "PJR8",
+      "type": "NOT",
+      "is_output": false
+    },
+    {
+      "id": "g2",
+      "cds": "jr2",
+      "inputs": [
+        "PJR3b"
+      ],
+      "output": "PJR2",
+      "type": "NOT",
+      "is_output": false
+    },
+    {
+      "id": "g3",
+      "cds": "jr9",
+      "inputs": [
+        "Ptet"
+      ],
+      "output": "PJR9c",
+      "type": "NOT",
+      "is_output": false
+    },
+    {
+      "id": "g4",
+      "cds": "jr1",
+      "inputs": [
+        "PJR8"
+      ],
+      "output": "jr1",
+      "type": "OUTPUT",
+      "is_output": true
+    },
+    {
+      "id": "g5",
+      "cds": "jr11",
+      "inputs": [
+        "PJR2"
+      ],
+      "output": "PJR11",
+      "type": "NOT",
+      "is_output": false
+    },
+    {
+      "id": "g6",
+      "cds": "jr7",
+      "inputs": [
+        "PJR9c"
+      ],
+      "output": "jr7",
+      "type": "OUTPUT",
+      "is_output": true
+    },
+    {
+      "id": "g7",
+      "cds": "bfp",
+      "inputs": [
+        "PJR11"
+      ],
+      "output": "bfp",
+      "type": "OUTPUT",
+      "is_output": true
+    }
+  ],
+  "wires": [
+    [
+      "g1",
+      "g4"
+    ],
+    [
+      "g2",
+      "g5"
+    ],
+    [
+      "g3",
+      "g6"
+    ],
+    [
+      "g5",
+      "g7"
+    ]
+  ],
+  "primary_inputs": [
+    "PCymRC",
+    "PJR3b",
+    "Ptet"
+  ],
+  "primary_outputs": [
+    "jr1",
+    "jr7",
+    "bfp"
+  ],
+  "gaps": []
+}

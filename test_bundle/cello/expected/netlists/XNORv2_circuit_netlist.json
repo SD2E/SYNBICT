@@ -1,0 +1,89 @@
+{
+  "construct": "XNORv2_comp",
+  "gates": [
+    {
+      "id": "g1",
+      "cds": "PhlF",
+      "inputs": [
+        "pTac",
+        "pHlyIIR"
+      ],
+      "output": "pPhlF",
+      "type": "NOR",
+      "is_output": false
+    },
+    {
+      "id": "g2",
+      "cds": "BM3R1",
+      "inputs": [
+        "pPhlF",
+        "pBetI"
+      ],
+      "output": "pBM3R1",
+      "type": "NOR",
+      "is_output": false
+    },
+    {
+      "id": "g3",
+      "cds": "BetI",
+      "inputs": [
+        "pTet",
+        "pHlyIIR"
+      ],
+      "output": "pBetI",
+      "type": "NOR",
+      "is_output": false
+    },
+    {
+      "id": "g4",
+      "cds": "HlyIIR",
+      "inputs": [
+        "pTac",
+        "pTet"
+      ],
+      "output": "pHlyIIR",
+      "type": "NOR",
+      "is_output": false
+    },
+    {
+      "id": "g5",
+      "cds": "YFP",
+      "inputs": [
+        "pBM3R1"
+      ],
+      "output": "YFP",
+      "type": "OUTPUT",
+      "is_output": true
+    }
+  ],
+  "wires": [
+    [
+      "g4",
+      "g1"
+    ],
+    [
+      "g1",
+      "g2"
+    ],
+    [
+      "g3",
+      "g2"
+    ],
+    [
+      "g4",
+      "g3"
+    ],
+    [
+      "g2",
+      "g5"
+    ]
+  ],
+  "primary_inputs": [
+    "pTac",
+    "pTet"
+  ],
+  "primary_outputs": [
+    "YFP"
+  ],
+  "gaps": []
+}

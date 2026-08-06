@@ -1,0 +1,62 @@
+{
+  "construct": "g486_circuit_g72_synthetic_circular_DNA_comp",
+  "gates": [
+    {
+      "id": "g1",
+      "cds": "jr7",
+      "inputs": [
+        "Ptet"
+      ],
+      "output": "PJR7",
+      "type": "NOT",
+      "is_output": false
+    },
+    {
+      "id": "g2",
+      "cds": "jr9",
+      "inputs": [
+        "Ptac"
+      ],
+      "output": "jr9",
+      "type": "OUTPUT",
+      "is_output": true
+    },
+    {
+      "id": "g3",
+      "cds": "jr1",
+      "inputs": [
+        "PJR7"
+      ],
+      "output": "jr1",
+      "type": "OUTPUT",
+      "is_output": true
+    },
+    {
+      "id": "g4",
+      "cds": "jr11",
+      "inputs": [
+        "PJR1_v1"
+      ],
+      "output": "jr11",
+      "type": "OUTPUT",
+      "is_output": true
+    }
+  ],
+  "wires": [
+    [
+      "g1",
+      "g3"
+    ]
+  ],
+  "primary_inputs": [
+    "PJR1_v1",
+    "Ptac",
+    "Ptet"
+  ],
+  "primary_outputs": [
+    "jr9",
+    "jr1",
+    "jr11"
+  ],
+  "gaps": []
+}

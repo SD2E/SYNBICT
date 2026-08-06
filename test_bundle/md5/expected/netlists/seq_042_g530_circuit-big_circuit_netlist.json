@@ -1,0 +1,46 @@
+{
+  "construct": "g530_circuit_big_synthetic_circular_DNA_comp",
+  "gates": [
+    {
+      "id": "g1",
+      "cds": "jr2",
+      "inputs": [
+        "PJR4"
+      ],
+      "output": "jr2",
+      "type": "OUTPUT",
+      "is_output": true
+    },
+    {
+      "id": "g2",
+      "cds": "jr9",
+      "inputs": [
+        "PJR4"
+      ],
+      "output": "jr9",
+      "type": "OUTPUT",
+      "is_output": true
+    },
+    {
+      "id": "g3",
+      "cds": "rfp",
+      "inputs": [
+        "PJR7"
+      ],
+      "output": "rfp",
+      "type": "OUTPUT",
+      "is_output": true
+    }
+  ],
+  "wires": [],
+  "primary_inputs": [
+    "PJR4",
+    "PJR7"
+  ],
+  "primary_outputs": [
+    "jr2",
+    "jr9",
+    "rfp"
+  ],
+  "gaps": []
+}

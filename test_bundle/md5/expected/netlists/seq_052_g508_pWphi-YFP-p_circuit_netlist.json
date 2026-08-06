@@ -1,0 +1,38 @@
+{
+  "construct": "g508_pWphi_YFP_p_synthetic_circular_DNA_comp",
+  "gates": [
+    {
+      "id": "g1",
+      "cds": "yfp",
+      "inputs": [
+        "PJR11"
+      ],
+      "output": "yfp",
+      "type": "OUTPUT",
+      "is_output": true
+    },
+    {
+      "id": "g2",
+      "cds": "jr11",
+      "inputs": [
+        "Pcin"
+      ],
+      "output": "PJR11",
+      "type": "NOT",
+      "is_output": false
+    }
+  ],
+  "wires": [
+    [
+      "g2",
+      "g1"
+    ]
+  ],
+  "primary_inputs": [
+    "Pcin"
+  ],
+  "primary_outputs": [
+    "yfp"
+  ],
+  "gaps": []
+}

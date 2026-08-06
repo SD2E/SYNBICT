@@ -1,0 +1,64 @@
+{
+  "construct": "g611_circuit_g8__synthetic_circular_DNA_comp",
+  "gates": [
+    {
+      "id": "g1",
+      "cds": "jr1",
+      "inputs": [
+        "PJR7"
+      ],
+      "output": "PJR1",
+      "type": "NOT",
+      "is_output": false
+    },
+    {
+      "id": "g2",
+      "cds": "jr11",
+      "inputs": [
+        "PJR3b"
+      ],
+      "output": "jr11",
+      "type": "OUTPUT",
+      "is_output": true
+    },
+    {
+      "id": "g3",
+      "cds": "yfp",
+      "inputs": [
+        "PJR1"
+      ],
+      "output": "yfp",
+      "type": "OUTPUT",
+      "is_output": true
+    },
+    {
+      "id": "g4",
+      "cds": "jr7",
+      "inputs": [
+        "Ptac"
+      ],
+      "output": "PJR7",
+      "type": "NOT",
+      "is_output": false
+    }
+  ],
+  "wires": [
+    [
+      "g4",
+      "g1"
+    ],
+    [
+      "g1",
+      "g3"
+    ]
+  ],
+  "primary_inputs": [
+    "PJR3b",
+    "Ptac"
+  ],
+  "primary_outputs": [
+    "jr11",
+    "yfp"
+  ],
+  "gaps": []
+}
