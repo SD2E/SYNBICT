@@ -93,6 +93,39 @@ Run it by **script path, not `python -m`** — the package has no `__main__`.
 |---|---|---|---|
 | `--gate_netlist` | `-gn` | Boolean | Also assemble the circuit into a logic-gate netlist, written next to the output file as `<output_base>_netlist.json`. Default off. |
 
+### `-tu` / `--tu_definitions` — transcriptional units as SBOL
+
+| Argument | Short | Type | Description |
+|---|---|---|---|
+| `--tu_definitions` | `-tu` | Boolean | Also write each transcriptional unit into the output SBOL as its own `ComponentDefinition`. Default off. |
+
+`_segment()` splits the construct into transcriptional units in memory and then throws the
+boundaries away — the netlist only preserves them implicitly, as each gate's `inputs` + `cds`.
+`-tu` writes them out instead. Per unit:
+
+* a `<construct>_TU<n>` ComponentDefinition — DNA, role `SO:0000804` (engineered_region);
+* its own `Sequence` (the unit's subsequence of the construct);
+* one `SequenceAnnotation` per part, in **TU-local coordinates** (the unit starts at 1), with a
+  `Component` pointing at the part's definition;
+* a `Component` + `SequenceAnnotation` on the construct placing the unit on the plasmid.
+
+Unlike the netlist, a unit keeps the parts a gate does not need — RBS, ribozyme, terminator —
+so it is the whole cassette.
+
+```
+_0xEA_comp_TU1  role=SO:0000804   on the construct at 5-1258 (1254 bp)
+      1-331   pBAD
+    332-405   pTet
+    406-484   RiboJ10
+    523-1164  SrpR
+   1165-1254  ECK120019600
+```
+
+Units are split at terminators, exactly as the gate netlist splits them, so the two views
+agree. The engineered_region role is not one `_kind()` maps to promoter/cds/terminator, so a
+later gate-assembly pass ignores the units and the netlist is unchanged; re-running `-tu` on a
+file that already has them is a no-op.
+
 ### Netlist format
 
 ```json

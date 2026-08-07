@@ -492,6 +492,7 @@ Argument | Short Arg | Type | Description | Example
 `--no_sensors` | `-ns` | `Boolean` | **Optional**. If included, do not add library sub-circuits for non-covalent interactions between small molecules and proteins to the inferred composite circuit. Default is to add these sub-circuits and attempt to abstract them by deriving stimulation and inhibition interactions from them in the composite circuit. | -ns
 `--tx_threshold` | `-d` | `Integer` | **Optional**. Maximum distance between an annotated promoter feature and an annotated CDS feature that is permitted to infer an interaction between them (an interaction not present in the sub-circuit library). Default is 200 bp. | 200
 `--gate_netlist` | `-gn` | `Boolean` | **Optional**. Also assemble the inferred circuit into a logic-gate netlist, written next to the output file as `<output_base>_netlist.json`. Default is to not assemble a netlist. See [Logic-gate layer](#logic-gate-layer-gate-netlist--truth-table). | -gn
+`--tu_definitions` | `-tu` | `Boolean` | **Optional**. Also write each transcriptional unit into the output SBOL as its own ComponentDefinition (DNA, `SO:0000804` engineered_region) with TU-local part annotations, placed on the construct. Units are split at terminators, the same way the gate netlist splits them. Default is to not write them. | -tu
 
 ### Sub-circuit library extension arguments for features\_to\_circuits.py
 

@@ -1276,6 +1276,12 @@ def main(args=None):
     parser.add_argument('-gn', '--gate_netlist', action='store_true',
                         help='also assemble the circuit into a logic-gate netlist (JSON)')
 
+    parser.add_argument('-tu', '--tu_definitions', action='store_true',
+                        help='also write each transcriptional unit into the output SBOL as its '
+                             'own ComponentDefinition (DNA, SO:0000804 engineered_region) with '
+                             'TU-local part annotations, placed on the construct. Units are split '
+                             'at terminators, the same way the gate netlist splits them.')
+
     # Sub-circuit library extension arguments
     parser.add_argument('-e', '--extend_sub_circuits', action='store_true')
     parser.add_argument('-xs', '--extension_suffix', nargs='?', default='')
@@ -1404,6 +1410,16 @@ def main(args=None):
                         output_file = '_'.join([target_file_base, args.output_suffix + target_file_extension])
                     else:
                         output_file = target_file_base + target_file_extension
+
+                # transcriptional units as first-class ComponentDefinitions. Must run
+                # BEFORE the write below, or the new definitions never reach the file.
+                if args.tu_definitions:
+                    try:
+                        n_tus = GateAssembler(target_doc,
+                                              library_docs=circuit_docs).emit_tu_definitions()
+                        logger.info('Added %s transcriptional-unit definitions', n_tus)
+                    except Exception as exc:
+                        logger.warning('TU inference failed for %s: %s', output_file, exc)
 
                 # embed referenced library parts so the circuit SBOL is
                 # self-contained (no dangling definition URIs on validation).

@@ -61,6 +61,7 @@ SO_PROMOTER = sbol2.SO_PROMOTER
 SO_CDS = sbol2.SO_CDS
 SO_TERMINATOR = getattr(sbol2, 'SO_TERMINATOR', 'http://identifiers.org/so/SO:0000141')
 SO_RBS = getattr(sbol2, 'SO_RBS', 'http://identifiers.org/so/SO:0000139')  # ribosome entry site
+SO_ENGINEERED_REGION = 'http://identifiers.org/so/SO:0000804'  # a transcriptional unit / cassette
 
 # SBO interaction types
 SBO_INHIBITION = sbol2.SBO_INHIBITION          # repression
@@ -306,6 +307,103 @@ class GateAssembler:
         if cur:
             tus.append(cur)
         return tus
+
+    # ------------------------------------------------- TUs as SBOL definitions
+    @staticmethod
+    def _segment_spans(parts):
+        """Same split as _segment(), but keeping every part and the TU's span.
+
+        _segment() throws away the RBS / ribozyme / terminator because a gate only
+        needs its promoters and CDS. A transcriptional unit as a *sequence feature*
+        is the whole cassette, so this variant keeps the parts it drops and reports
+        the span. The terminator that closes a unit belongs to it. Groups with
+        neither a promoter nor a CDS (leading assembly junk) are not units.
+        """
+        tus, cur = [], []
+        for p in parts:
+            cur.append(p)
+            if p['kind'] == 'terminator':
+                tus.append(cur)
+                cur = []
+        if cur:
+            tus.append(cur)
+        return [{'parts': t, 'start': min(q['start'] for q in t), 'end': max(q['end'] for q in t)}
+                for t in tus if any(q['kind'] in ('promoter', 'cds') for q in t)]
+
+    def emit_tu_definitions(self, role=SO_ENGINEERED_REGION):
+        """Write each transcriptional unit into the document as its own
+        ComponentDefinition, and hang it off the construct.
+
+        Per unit: a `<construct>_TU<n>` ComponentDefinition (DNA, engineered_region)
+        carrying its own Sequence and one SequenceAnnotation per part with
+        TU-LOCAL coordinates (the unit starts at 1), plus a Component +
+        SequenceAnnotation on the construct that places the unit on the plasmid.
+
+        Returns the number of units created. Re-running is a no-op: units already
+        present are skipped. The units carry the engineered_region role, which
+        _kind() does not map to promoter/cds/terminator, so a later gate assembly
+        pass ignores them and the netlist is unchanged.
+        """
+        construct, parts = self._construct_parts()
+        spans = self._segment_spans(parts)
+        if not spans:
+            return 0
+
+        elements = None
+        for seq_uri in construct.sequences:
+            try:
+                elements = self.doc.getSequence(seq_uri).elements
+                break
+            except Exception:
+                continue
+
+        created = 0
+        for i, tu in enumerate(spans):
+            tu_id = f'{construct.displayId}_TU{i + 1}'
+            if any(cd.displayId == tu_id for cd in self.doc.componentDefinitions):
+                continue  # already emitted on an earlier run
+
+            tu_def = sbol2.ComponentDefinition(tu_id, sbol2.BIOPAX_DNA)
+            tu_def.roles = [role]
+            tu_def.name = tu_id
+            self.doc.addComponentDefinition(tu_def)
+
+            if elements:
+                tu_seq = sbol2.Sequence(f'{tu_id}_seq',
+                                        elements[tu['start'] - 1:tu['end']],
+                                        sbol2.SBOL_ENCODING_IUPAC)
+                self.doc.addSequence(tu_seq)
+                tu_def.sequences = [tu_seq.identity]
+
+            # the unit's parts, in coordinates local to the unit
+            for j, p in enumerate(tu['parts']):
+                anno = tu_def.sequenceAnnotations.create(f'{tu_id}_part{j + 1}')
+                anno.name = p['name']
+                rng = anno.locations.createRange(f'{tu_id}_part{j + 1}_loc')
+                rng.orientation = sbol2.SBOL_ORIENTATION_INLINE
+                rng.start = p['start'] - tu['start'] + 1
+                rng.end = p['end'] - tu['start'] + 1
+                if p['definition']:
+                    # sbol-10909: an annotation may carry a component OR roles, not both
+                    comp = tu_def.components.create(f'{tu_id}_comp{j + 1}')
+                    comp.definition = p['definition']
+                    anno.component = comp.identity
+
+            # place the unit on the construct
+            tu_comp = construct.components.create(f'{tu_id}_comp')
+            tu_comp.definition = tu_def.identity
+            tu_anno = construct.sequenceAnnotations.create(f'{tu_id}_anno')
+            tu_anno.name = tu_id
+            tu_anno.component = tu_comp.identity
+            loc = tu_anno.locations.createRange(f'{tu_id}_anno_loc')
+            loc.orientation = sbol2.SBOL_ORIENTATION_INLINE
+            loc.start = tu['start']
+            loc.end = tu['end']
+            created += 1
+
+        logger.info('Emitted %s transcriptional-unit definitions for %s',
+                    created, construct.displayId)
+        return created
 
     # --------------------------------------------------------------- assemble
     def assemble(self):
