@@ -70,7 +70,7 @@ positional co-membership in a TU. This is what makes terminator annotation criti
 # 1. circuit SBOL + gate netlist   (-gn is what triggers the gate layer)
 python features_to_circuits/features_to_circuits.py \
     -n http://examples.org \
-    -c example/jet_libs/cello_library.xml \
+    -c test_bundle/cello/library/cello_library.xml \
     -t 0xEA_annotated.xml \
     -o 0xEA_circuit.xml \
     -m 1000 -gn
@@ -165,7 +165,7 @@ Documented in the `gate_assembler.py` docstring; the practical ones:
 | Symptom | Cause | Fix |
 |---|---|---|
 | Truth table is all `x`, netlist has a loop | a terminator was not annotated, so two TUs merged and the downstream CDS inherited the upstream promoters | check the annotation: BLAST must run `-task blastn` (megablast's word_size 28 misses the 47 bp `L3S3P11`) |
-| One giant gate, `wires: []`, all promoters as inputs | same merge, extreme case — usually **`-nms` was used with a library containing composite cassettes** (`engineered_region` parts such as `S3_SrpR` swallow their own terminator) | drop `-nms` from the annotation step |
+| One giant gate, `wires: []`, all promoters as inputs | same merge, extreme case — usually **`-nms` was passed** with a library containing composite cassettes (`engineered_region` parts such as `S3_SrpR` contain their own terminator, and NMS keeps the cassette and drops what is nested inside it) | remove `-nms`; it is off by default, so simply do not pass it |
 | Every gate is an isolated `OUTPUT` with `wires: []` | `cds_to_protein` is empty — the production Interaction's template role URI was not recognised | `parse_regulation()` accepts `SBO:0000645`, `SBO:0000010` and `http://sbols.org/v2#template`; check which one your converter emits |
 | `SBOL_ERROR_URI_NOT_UNIQUE` | re-running on a file that already contains proteins/interactions | re-annotate from FASTA first |
 | A repressor CDS shows up as `OUTPUT` | the promoter it represses is not on this sequence, or the library has no inhibition Interaction for it | expected for multi-output circuits; otherwise check the library |

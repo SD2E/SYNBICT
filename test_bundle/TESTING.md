@@ -149,7 +149,8 @@ did this in the recorded run is **not in the repo** — see `MANIFEST.md`.
 
 ## 5. Known traps
 
-**Do not add `-nms` to the annotation step for these libraries.** The Cello library contains
+**Leave NMS off.** It is off by default (`-nms` is the switch that turns it *on*; there is no
+flag to turn it off), so this only matters if you add it yourself. The Cello library contains
 21 `engineered_region` parts that are whole gate *cassettes* (`S3_SrpR` = RBS + ribozyme + CDS
 + terminator). NMS keeps the highest-scoring hit per locus — the cassette — and suppresses
 everything nested inside it, **including the terminators**. `gate_assembler` splits

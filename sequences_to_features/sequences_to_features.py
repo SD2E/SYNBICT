@@ -853,7 +853,7 @@ def main(args=None):
                         help='Disable exhaustive exact matching of short features (<14 bp) that seed-based aligners cannot report. On by default for every non-FlashText mapping method.')
 
     parser.add_argument('-nms', '--nms', action='store_true',
-                        help='Apply non-maximum suppression to overlapping hits, keeping the highest-scoring part per locus. Applies to BWA, Minimap2 and BLASTN. Off by default; enable for circuit reconstruction, where one clean part per locus is needed.')
+                        help='Apply non-maximum suppression to overlapping hits, keeping the highest-scoring part per locus. Applies to BWA, Minimap2 and BLASTN. OFF by default -- this flag turns it on, there is no flag to turn it off. Note that NMS also drops a part nested inside a higher-scoring one, so with a library of composite cassettes (e.g. the Cello engineered_region parts) it deletes the RBS/CDS/terminator inside the cassette; do not enable it when the constituent parts are needed, as in circuit reconstruction.')
 
     parser.add_argument('-pid', '--pid_threshold', nargs='?', type=float, default=95.0,
                         help='Minimum coverage-weighted DNA identity (percent, identical bases / reference length) for a hit to be kept. Applies to BWA, Minimap2 and BLASTN. Only consulted for non-exact mapping, since an exact match is 100%% by definition. Default 95.')

@@ -292,10 +292,18 @@ highest-scoring part at each locus: a hit that overlaps a higher-scoring one by
 `>=50%` is dropped, while non-overlapping and equal-scoring parts are kept.
 
 Hits are ranked by bitscore on the BLASTN path, and by number of identical bases
-(or reference length, for exact matching) on the BWA and Minimap2 paths. NMS is
-off by default and applies to **BWA, Minimap2 and BLASTN**. Enable it when you
-need a clean, one-part-per-locus annotation, e.g. for downstream circuit
-reconstruction; leave it off for exhaustive annotation.
+(or reference length, for exact matching) on the BWA and Minimap2 paths.
+
+**NMS is off by default** — `-nms` is a switch that turns it *on*, there is no flag
+to turn it off. Enable it when you want a clean, one-part-per-locus annotation;
+leave it off (the default) for exhaustive annotation.
+
+⚠️ NMS suppresses a hit that is *nested* inside a higher-scoring one, so it removes
+the constituent parts of any composite entry in your library. If the library
+contains whole cassettes (the Cello library has 21 `engineered_region` parts such as
+`S3_SrpR` = RBS + ribozyme + CDS + terminator), NMS keeps the cassette and drops the
+RBS, CDS and **terminator** inside it. That makes it unusable for circuit
+reconstruction with such a library — see [Logic-gate layer](#logic-gate-layer-gate-netlist--truth-table).
 
 ```bash
 python -m sequences_to_features \
@@ -552,9 +560,11 @@ Two things that will silently ruin the result:
   Run BLAST with `-task blastn` (the default megablast misses short terminators such as the
   47 bp `L3S3P11`); otherwise units merge and the netlist develops combinational loops
   whose truth table is undefined (`x`).
-* **Do not use `-nms` with a library that contains composite cassettes.** In the Cello
-  library, `engineered_region` parts such as `S3_SrpR` span RBS + ribozyme + CDS +
-  terminator; NMS keeps the cassette and suppresses the terminator inside it.
+* **Leave NMS off** — it is off by default, so just do not pass `-nms`. NMS drops any hit
+  nested inside a higher-scoring one, and the Cello library's 21 `engineered_region` parts
+  are whole cassettes (`S3_SrpR` = RBS + ribozyme + CDS + terminator), so NMS keeps the
+  cassette and deletes the terminator inside it. On `0xEA`: 19 annotations → 3 gates and the
+  right truth table without `-nms`; 9 annotations → 1 gate and a meaningless table with it.
 
 Full documentation — gate model, netlist format, assumptions, troubleshooting:
 [features_to_circuits/README.md](features_to_circuits/README.md).
