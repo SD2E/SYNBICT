@@ -1,0 +1,747 @@
+<?xml version="1.0" ?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:sbh="http://wiki.synbiohub.org/wiki/Terms/synbiohub#" xmlns:sbol="http://sbols.org/v2#" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:ns0="http://purl.obolibrary.org/obo/" xmlns:prov="http://www.w3.org/ns/prov#" xmlns:ns1="https://wiki.synbiohub.org/wiki/Terms/synbiohub#" xmlns:om="http://www.ontology-of-units-of-measure.org/resource/om-2/" xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <sbol:Collection rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/CIDAR_MoClo_Toolkit_Densmore_Lab_collection/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/CIDAR_MoClo_Toolkit_Densmore_Lab_collection"/>
+    <sbol:displayId>CIDAR_MoClo_Toolkit_Densmore_Lab_collection</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <dcterms:title>CIDAR MoClo Toolkit (Densmore Lab)</dcterms:title>
+    <dcterms:description>CIDAR MoClo Toolkit (Densmore Lab)</dcterms:description>
+    <dc:creator>Jet</dc:creator>
+    <dcterms:created>2021-06-19T10:39:18.728Z</dcterms:created>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/CIDAR_MoClo_Toolkit_Densmore_Lab_collection/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/R0010/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23116_sequence/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23107_sequence/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/C0062/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/B0015/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/C0040/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/I13453/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23106/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/B0032m_sequence/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23100_sequence/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/BCD8_sequence/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/R0040/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/B0034m/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/R0040_sequence/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/cre_sequence/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/BCD12/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/E1010m_sequence/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/C0080_sequence/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/E0030/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/B0033m/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/BCD2/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23103_sequence/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23100/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/C0012m_sequence/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/R0063_sequence/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/B0034m_sequence/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/B0032m/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/eBFP2/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23103/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/B0033m_sequence/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/E0040m/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/C0040_sequence/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/R0010_sequence/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/BCD2_sequence/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/E0040m_sequence/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23102_sequence/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23106_sequence/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/R0063/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/C0080/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23116/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/I13453_sequence/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/BCD12_sequence/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/cre/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/B0015_sequence/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/E0030_sequence/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/C0012m/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/C0062_sequence/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/eBFP2_sequence/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23102/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23107/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/BCD8/1"/>
+    <sbol:member rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/E1010m/1"/>
+  </sbol:Collection>
+  <sbol:ComponentDefinition rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/R0040/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/R0040"/>
+    <sbol:displayId>R0040</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <prov:wasDerivedFrom rdf:resource="https://pubmed.ncbi.nlm.nih.gov/26479688"/>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.org/public/Excel2SBOL/cut_out_of_plasmid/1"/>
+    <dcterms:title>R0040</dcterms:title>
+    <dcterms:description>tetR repressible promoter (Ptet)</dcterms:description>
+    <ns0:OBI_0001617>26479688</ns0:OBI_0001617>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/R0040/1"/>
+    <ns1:targetOrganism rdf:resource="https://identifiers.org/taxonomy:562"/>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000167"/>
+    <sbol:sequence rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/R0040_sequence/1"/>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/B0015/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/B0015"/>
+    <sbol:displayId>B0015</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <prov:wasDerivedFrom rdf:resource="https://pubmed.ncbi.nlm.nih.gov/26479688"/>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.org/public/Excel2SBOL/cut_out_of_plasmid/1"/>
+    <dcterms:title>B0015</dcterms:title>
+    <dcterms:description>Double terminator, rrnBT1-T7TE</dcterms:description>
+    <ns0:OBI_0001617>26479688</ns0:OBI_0001617>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/B0015/1"/>
+    <ns1:targetOrganism rdf:resource="https://identifiers.org/taxonomy:562"/>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000141"/>
+    <sbol:sequence rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/B0015_sequence/1"/>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/B0033m/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/B0033m"/>
+    <sbol:displayId>B0033m</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <prov:wasDerivedFrom rdf:resource="https://pubmed.ncbi.nlm.nih.gov/26479688"/>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.org/public/Excel2SBOL/cut_out_of_plasmid/1"/>
+    <dcterms:title>B0033m</dcterms:title>
+    <dcterms:description>Weak RBS</dcterms:description>
+    <ns0:OBI_0001617>26479688</ns0:OBI_0001617>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/B0033m/1"/>
+    <ns1:designNotes>4bp upstream / 5bp downstream added to mimic BioBrick scar</ns1:designNotes>
+    <ns1:targetOrganism rdf:resource="https://identifiers.org/taxonomy:562"/>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000139"/>
+    <sbol:sequence rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/B0033m_sequence/1"/>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/I13453/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/I13453"/>
+    <sbol:displayId>I13453</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <prov:wasDerivedFrom rdf:resource="https://pubmed.ncbi.nlm.nih.gov/26479688"/>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.org/public/Excel2SBOL/cut_out_of_plasmid/1"/>
+    <dcterms:title>I13453</dcterms:title>
+    <dcterms:description>Pbad promoter</dcterms:description>
+    <ns0:OBI_0001617>26479688</ns0:OBI_0001617>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/I13453/1"/>
+    <ns1:targetOrganism rdf:resource="https://identifiers.org/taxonomy:562"/>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000167"/>
+    <sbol:sequence rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/I13453_sequence/1"/>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/BCD2/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/BCD2"/>
+    <sbol:displayId>BCD2</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <prov:wasDerivedFrom rdf:resource="https://pubmed.ncbi.nlm.nih.gov/26479688"/>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.org/public/Excel2SBOL/cut_out_of_plasmid/1"/>
+    <dcterms:title>BCD2</dcterms:title>
+    <dcterms:description>Bicistronic RBS design, strong</dcterms:description>
+    <ns0:OBI_0001617>26479688</ns0:OBI_0001617>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/BCD2/1"/>
+    <ns1:targetOrganism rdf:resource="https://identifiers.org/taxonomy:562"/>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000139"/>
+    <sbol:sequence rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/BCD2_sequence/1"/>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/cre/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/cre"/>
+    <sbol:displayId>cre</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <prov:wasDerivedFrom rdf:resource="https://pubmed.ncbi.nlm.nih.gov/26479688"/>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.org/public/Excel2SBOL/cut_out_of_plasmid/1"/>
+    <dcterms:title>cre</dcterms:title>
+    <dcterms:description>Cre recombinase</dcterms:description>
+    <ns0:OBI_0001617>26479688</ns0:OBI_0001617>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/cre/1"/>
+    <ns1:targetOrganism rdf:resource="https://identifiers.org/taxonomy:562"/>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000316"/>
+    <sbol:sequence rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/cre_sequence/1"/>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/BCD8/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/BCD8"/>
+    <sbol:displayId>BCD8</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <prov:wasDerivedFrom rdf:resource="https://pubmed.ncbi.nlm.nih.gov/26479688"/>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.org/public/Excel2SBOL/cut_out_of_plasmid/1"/>
+    <dcterms:title>BCD8</dcterms:title>
+    <dcterms:description>Bicistronic RBS design, weak</dcterms:description>
+    <ns0:OBI_0001617>26479688</ns0:OBI_0001617>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/BCD8/1"/>
+    <ns1:targetOrganism rdf:resource="https://identifiers.org/taxonomy:562"/>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000139"/>
+    <sbol:sequence rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/BCD8_sequence/1"/>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23103/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23103"/>
+    <sbol:displayId>J23103</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <prov:wasDerivedFrom rdf:resource="https://pubmed.ncbi.nlm.nih.gov/26479688"/>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.org/public/Excel2SBOL/cut_out_of_plasmid/1"/>
+    <dcterms:title>J23103</dcterms:title>
+    <dcterms:description>Constitutive promoter, part of Anderson series</dcterms:description>
+    <ns0:OBI_0001617>26479688</ns0:OBI_0001617>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23103/1"/>
+    <ns1:targetOrganism rdf:resource="https://identifiers.org/taxonomy:562"/>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000167"/>
+    <sbol:sequence rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23103_sequence/1"/>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/E1010m/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/E1010m"/>
+    <sbol:displayId>E1010m</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <prov:wasDerivedFrom rdf:resource="https://pubmed.ncbi.nlm.nih.gov/26479688"/>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.org/public/Excel2SBOL/cut_out_of_plasmid/1"/>
+    <dcterms:title>E1010m</dcterms:title>
+    <dcterms:description>Red fluorescent protein</dcterms:description>
+    <ns0:OBI_0001617>26479688</ns0:OBI_0001617>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/E1010m/1"/>
+    <ns1:targetOrganism rdf:resource="https://identifiers.org/taxonomy:562"/>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000316"/>
+    <sbol:sequence rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/E1010m_sequence/1"/>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/eBFP2/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/eBFP2"/>
+    <sbol:displayId>eBFP2</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <prov:wasDerivedFrom rdf:resource="https://pubmed.ncbi.nlm.nih.gov/26479688"/>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.org/public/Excel2SBOL/cut_out_of_plasmid/1"/>
+    <dcterms:title>eBFP2</dcterms:title>
+    <dcterms:description>Blue fluorescent protein</dcterms:description>
+    <ns0:OBI_0001617>26479688</ns0:OBI_0001617>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/eBFP2/1"/>
+    <ns1:targetOrganism rdf:resource="https://identifiers.org/taxonomy:562"/>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000316"/>
+    <sbol:sequence rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/eBFP2_sequence/1"/>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/C0062/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/C0062"/>
+    <sbol:displayId>C0062</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <prov:wasDerivedFrom rdf:resource="https://pubmed.ncbi.nlm.nih.gov/26479688"/>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.org/public/Excel2SBOL/cut_out_of_plasmid/1"/>
+    <dcterms:title>C0062</dcterms:title>
+    <dcterms:description>luxR repressor/activator</dcterms:description>
+    <ns0:OBI_0001617>26479688</ns0:OBI_0001617>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/C0062/1"/>
+    <ns1:targetOrganism rdf:resource="https://identifiers.org/taxonomy:562"/>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000316"/>
+    <sbol:sequence rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/C0062_sequence/1"/>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/E0040m/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/E0040m"/>
+    <sbol:displayId>E0040m</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <prov:wasDerivedFrom rdf:resource="https://pubmed.ncbi.nlm.nih.gov/26479688"/>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.org/public/Excel2SBOL/cut_out_of_plasmid/1"/>
+    <dcterms:title>E0040m</dcterms:title>
+    <dcterms:description>Green fluorescent protein</dcterms:description>
+    <ns0:OBI_0001617>26479688</ns0:OBI_0001617>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/E0040m/1"/>
+    <ns1:targetOrganism rdf:resource="https://identifiers.org/taxonomy:562"/>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000316"/>
+    <sbol:sequence rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/E0040m_sequence/1"/>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/C0012m/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/C0012m"/>
+    <sbol:displayId>C0012m</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <prov:wasDerivedFrom rdf:resource="https://pubmed.ncbi.nlm.nih.gov/26479688"/>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.org/public/Excel2SBOL/cut_out_of_plasmid/1"/>
+    <dcterms:title>C0012m</dcterms:title>
+    <dcterms:description>lacI repressor with LVA degradation tag</dcterms:description>
+    <ns0:OBI_0001617>26479688</ns0:OBI_0001617>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/C0012m/1"/>
+    <ns1:sourceOrganism rdf:resource="https://identifiers.org/taxonomy:562"/>
+    <ns1:targetOrganism rdf:resource="https://identifiers.org/taxonomy:562"/>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000316"/>
+    <sbol:sequence rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/C0012m_sequence/1"/>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23116/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23116"/>
+    <sbol:displayId>J23116</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <prov:wasDerivedFrom rdf:resource="https://pubmed.ncbi.nlm.nih.gov/26479688"/>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.org/public/Excel2SBOL/cut_out_of_plasmid/1"/>
+    <dcterms:title>J23116</dcterms:title>
+    <dcterms:description>Constitutive promoter, part of Anderson series</dcterms:description>
+    <ns0:OBI_0001617>26479688</ns0:OBI_0001617>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23116/1"/>
+    <ns1:targetOrganism rdf:resource="https://identifiers.org/taxonomy:562"/>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000167"/>
+    <sbol:sequence rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23116_sequence/1"/>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23102/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23102"/>
+    <sbol:displayId>J23102</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <prov:wasDerivedFrom rdf:resource="https://pubmed.ncbi.nlm.nih.gov/26479688"/>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.org/public/Excel2SBOL/cut_out_of_plasmid/1"/>
+    <dcterms:title>J23102</dcterms:title>
+    <dcterms:description>Constitutive promoter, part of Anderson series</dcterms:description>
+    <ns0:OBI_0001617>26479688</ns0:OBI_0001617>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23102/1"/>
+    <ns1:targetOrganism rdf:resource="https://identifiers.org/taxonomy:562"/>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000167"/>
+    <sbol:sequence rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23102_sequence/1"/>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23106/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23106"/>
+    <sbol:displayId>J23106</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <prov:wasDerivedFrom rdf:resource="https://pubmed.ncbi.nlm.nih.gov/26479688"/>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.org/public/Excel2SBOL/cut_out_of_plasmid/1"/>
+    <dcterms:title>J23106</dcterms:title>
+    <dcterms:description>Constitutive promoter, part of Anderson series</dcterms:description>
+    <ns0:OBI_0001617>26479688</ns0:OBI_0001617>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23106/1"/>
+    <ns1:targetOrganism rdf:resource="https://identifiers.org/taxonomy:562"/>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000167"/>
+    <sbol:sequence rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23106_sequence/1"/>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/E0030/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/E0030"/>
+    <sbol:displayId>E0030</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <prov:wasDerivedFrom rdf:resource="https://pubmed.ncbi.nlm.nih.gov/26479688"/>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.org/public/Excel2SBOL/cut_out_of_plasmid/1"/>
+    <dcterms:title>E0030</dcterms:title>
+    <dcterms:description>Enhanced yellow fluorescent protein</dcterms:description>
+    <ns0:OBI_0001617>26479688</ns0:OBI_0001617>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/E0030/1"/>
+    <ns1:targetOrganism rdf:resource="https://identifiers.org/taxonomy:562"/>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000316"/>
+    <sbol:sequence rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/E0030_sequence/1"/>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/C0080/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/C0080"/>
+    <sbol:displayId>C0080</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <prov:wasDerivedFrom rdf:resource="https://pubmed.ncbi.nlm.nih.gov/26479688"/>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.org/public/Excel2SBOL/cut_out_of_plasmid/1"/>
+    <dcterms:title>C0080</dcterms:title>
+    <dcterms:description>araC regulatory protein with LVA degradation tag</dcterms:description>
+    <ns0:OBI_0001617>26479688</ns0:OBI_0001617>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/C0080/1"/>
+    <ns1:sourceOrganism rdf:resource="https://identifiers.org/taxonomy:562"/>
+    <ns1:targetOrganism rdf:resource="https://identifiers.org/taxonomy:562"/>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000316"/>
+    <sbol:sequence rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/C0080_sequence/1"/>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/R0010/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/R0010"/>
+    <sbol:displayId>R0010</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <prov:wasDerivedFrom rdf:resource="https://pubmed.ncbi.nlm.nih.gov/26479688"/>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.org/public/Excel2SBOL/cut_out_of_plasmid/1"/>
+    <dcterms:title>R0010</dcterms:title>
+    <dcterms:description>lacI regulated promoter (Plac)</dcterms:description>
+    <ns0:OBI_0001617>26479688</ns0:OBI_0001617>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/R0010/1"/>
+    <ns1:targetOrganism rdf:resource="https://identifiers.org/taxonomy:562"/>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000167"/>
+    <sbol:sequence rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/R0010_sequence/1"/>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23107/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23107"/>
+    <sbol:displayId>J23107</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <prov:wasDerivedFrom rdf:resource="https://pubmed.ncbi.nlm.nih.gov/26479688"/>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.org/public/Excel2SBOL/cut_out_of_plasmid/1"/>
+    <dcterms:title>J23107</dcterms:title>
+    <dcterms:description>Constitutive promoter, part of Anderson series</dcterms:description>
+    <ns0:OBI_0001617>26479688</ns0:OBI_0001617>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23107/1"/>
+    <ns1:targetOrganism rdf:resource="https://identifiers.org/taxonomy:562"/>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000167"/>
+    <sbol:sequence rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23107_sequence/1"/>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/B0034m/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/B0034m"/>
+    <sbol:displayId>B0034m</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <prov:wasDerivedFrom rdf:resource="https://pubmed.ncbi.nlm.nih.gov/26479688"/>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.org/public/Excel2SBOL/cut_out_of_plasmid/1"/>
+    <dcterms:title>B0034m</dcterms:title>
+    <dcterms:description>Strong RBS</dcterms:description>
+    <ns0:OBI_0001617>26479688</ns0:OBI_0001617>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/B0034m/1"/>
+    <ns1:designNotes>4bp upstream / 5bp downstream added to mimic BioBrick scar</ns1:designNotes>
+    <ns1:targetOrganism rdf:resource="https://identifiers.org/taxonomy:562"/>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000139"/>
+    <sbol:sequence rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/B0034m_sequence/1"/>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23100/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23100"/>
+    <sbol:displayId>J23100</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <prov:wasDerivedFrom rdf:resource="https://pubmed.ncbi.nlm.nih.gov/26479688"/>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.org/public/Excel2SBOL/cut_out_of_plasmid/1"/>
+    <dcterms:title>J23100</dcterms:title>
+    <dcterms:description>Constitutive promoter, part of Anderson series</dcterms:description>
+    <ns0:OBI_0001617>26479688</ns0:OBI_0001617>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23100/1"/>
+    <ns1:targetOrganism rdf:resource="https://identifiers.org/taxonomy:562"/>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000167"/>
+    <sbol:sequence rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23100_sequence/1"/>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/B0032m/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/B0032m"/>
+    <sbol:displayId>B0032m</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <prov:wasDerivedFrom rdf:resource="https://pubmed.ncbi.nlm.nih.gov/26479688"/>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.org/public/Excel2SBOL/cut_out_of_plasmid/1"/>
+    <dcterms:title>B0032m</dcterms:title>
+    <dcterms:description>Medium RBS</dcterms:description>
+    <ns0:OBI_0001617>26479688</ns0:OBI_0001617>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/B0032m/1"/>
+    <ns1:designNotes>4bp upstream / 5bp downstream added to mimic BioBrick scar</ns1:designNotes>
+    <ns1:targetOrganism rdf:resource="https://identifiers.org/taxonomy:562"/>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000139"/>
+    <sbol:sequence rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/B0032m_sequence/1"/>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/BCD12/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/BCD12"/>
+    <sbol:displayId>BCD12</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <prov:wasDerivedFrom rdf:resource="https://pubmed.ncbi.nlm.nih.gov/26479688"/>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.org/public/Excel2SBOL/cut_out_of_plasmid/1"/>
+    <dcterms:title>BCD12</dcterms:title>
+    <dcterms:description>Bicistronic RBS design, medium strength</dcterms:description>
+    <ns0:OBI_0001617>26479688</ns0:OBI_0001617>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/BCD12/1"/>
+    <ns1:targetOrganism rdf:resource="https://identifiers.org/taxonomy:562"/>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000139"/>
+    <sbol:sequence rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/BCD12_sequence/1"/>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/C0040/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/C0040"/>
+    <sbol:displayId>C0040</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <prov:wasDerivedFrom rdf:resource="https://pubmed.ncbi.nlm.nih.gov/26479688"/>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.org/public/Excel2SBOL/cut_out_of_plasmid/1"/>
+    <dcterms:title>C0040</dcterms:title>
+    <dcterms:description>tetR protein with LVA degradation tag</dcterms:description>
+    <ns0:OBI_0001617>26479688</ns0:OBI_0001617>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/C0040/1"/>
+    <ns1:targetOrganism rdf:resource="https://identifiers.org/taxonomy:562"/>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000316"/>
+    <sbol:sequence rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/C0040_sequence/1"/>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/R0063/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/R0063"/>
+    <sbol:displayId>R0063</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <prov:wasDerivedFrom rdf:resource="https://pubmed.ncbi.nlm.nih.gov/26479688"/>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.org/public/Excel2SBOL/cut_out_of_plasmid/1"/>
+    <dcterms:title>R0063</dcterms:title>
+    <dcterms:description>luxR/HSL regulated promoter (PluxR-pL)</dcterms:description>
+    <ns0:OBI_0001617>26479688</ns0:OBI_0001617>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/R0063/1"/>
+    <ns1:targetOrganism rdf:resource="https://identifiers.org/taxonomy:562"/>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000167"/>
+    <sbol:sequence rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/R0063_sequence/1"/>
+  </sbol:ComponentDefinition>
+  <sbol:Sequence rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23103_sequence/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23103_sequence"/>
+    <sbol:displayId>J23103_sequence</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <dcterms:title>J23103 Sequence</dcterms:title>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23103_sequence/1"/>
+    <sbol:elements>ctgatagctagctcagtcctagggattatgctagc</sbol:elements>
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/BCD2_sequence/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/BCD2_sequence"/>
+    <sbol:displayId>BCD2_sequence</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <dcterms:title>BCD2 Sequence</dcterms:title>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/BCD2_sequence/1"/>
+    <sbol:elements>gggcccaagttcacttaaaaaggagatcaacaatgaaagcaattttcgtactgaaacatcttaatcatgctaaggaggttttct</sbol:elements>
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/B0015_sequence/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/B0015_sequence"/>
+    <sbol:displayId>B0015_sequence</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <dcterms:title>B0015 Sequence</dcterms:title>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/B0015_sequence/1"/>
+    <sbol:elements>ccaggcatcaaataaaacgaaaggctcagtcgaaagactgggcctttcgttttatctgttgtttgtcggtgaacgctctctactagagtcacactggctcaccttcgggtgggcctttctgcgtttata</sbol:elements>
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/B0034m_sequence/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/B0034m_sequence"/>
+    <sbol:displayId>B0034m_sequence</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <dcterms:title>B0034m Sequence</dcterms:title>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/B0034m_sequence/1"/>
+    <sbol:elements>agagaaagaggagaaatacta</sbol:elements>
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/R0010_sequence/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/R0010_sequence"/>
+    <sbol:displayId>R0010_sequence</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <dcterms:title>R0010 Sequence</dcterms:title>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/R0010_sequence/1"/>
+    <sbol:elements>caatacgcaaaccgcctctccccgcgcgttggccgattcattaatgcagctggcacgacaggtttcccgactggaaagcgggcagtgagcgcaacgcaattaatgtgagttagctcactcattaggcaccccaggctttacactttatgcttccggctcgtatgttgtgtggaattgtgagcggataacaatttcacaca</sbol:elements>
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23102_sequence/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23102_sequence"/>
+    <sbol:displayId>J23102_sequence</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <dcterms:title>J23102 Sequence</dcterms:title>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23102_sequence/1"/>
+    <sbol:elements>ttgacagctagctcagtcctaggtactgtgctagc</sbol:elements>
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23100_sequence/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23100_sequence"/>
+    <sbol:displayId>J23100_sequence</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <dcterms:title>J23100 Sequence</dcterms:title>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23100_sequence/1"/>
+    <sbol:elements>ttgacggctagctcagtcctaggtacagtgctagc</sbol:elements>
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/BCD8_sequence/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/BCD8_sequence"/>
+    <sbol:displayId>BCD8_sequence</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <dcterms:title>BCD8 Sequence</dcterms:title>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/BCD8_sequence/1"/>
+    <sbol:elements>gggcccaagttcacttaaaaaggagatcaacaatgaaagcaattttcgtactgaaacatcttaatcatgcatcggaccgtttct</sbol:elements>
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/BCD12_sequence/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/BCD12_sequence"/>
+    <sbol:displayId>BCD12_sequence</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <dcterms:title>BCD12 Sequence</dcterms:title>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/BCD12_sequence/1"/>
+    <sbol:elements>gggcccaagttcacttaaaaaggagatcaacaatgaaagcaattttcgtactgaaacatcttaatcatgctgcggagggtttct</sbol:elements>
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/I13453_sequence/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/I13453_sequence"/>
+    <sbol:displayId>I13453_sequence</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <dcterms:title>I13453 Sequence</dcterms:title>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/I13453_sequence/1"/>
+    <sbol:elements>acattgattatttgcacggcgtcacactttgctatgccatagcatttttatccataagattagcggatcctacctgacgctttttatcgcaactctctactgtttctccataccgtttttttgggctagc</sbol:elements>
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23116_sequence/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23116_sequence"/>
+    <sbol:displayId>J23116_sequence</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <dcterms:title>J23116 Sequence</dcterms:title>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23116_sequence/1"/>
+    <sbol:elements>ttgacagctagctcagtcctagggactatgctagc</sbol:elements>
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/E1010m_sequence/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/E1010m_sequence"/>
+    <sbol:displayId>E1010m_sequence</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <dcterms:title>E1010m Sequence</dcterms:title>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/E1010m_sequence/1"/>
+    <sbol:elements>atggcttcctccgaggatgttatcaaagagttcatgcgtttcaaagttcgtatggaaggttccgttaacggtcacgagttcgaaatcgaaggtgaaggtgaaggtcgtccgtacgaaggtacccagaccgctaaactgaaagttaccaaaggtggtccgctgccgttcgcttgggacatcctgtccccgcagttccagtacggttccaaagcttacgttaaacacccggctgacatcccggactacctgaaactgtccttcccggaaggtttcaaatgggaacgtgttatgaacttcgaagatggtggtgttgttaccgttacccaggactcctccctgcaagacggtgagttcatctacaaagttaaactgcgtggtaccaacttcccgtccgacggtccggttatgcagaaaaaaaccatgggttgggaagcttccaccgaacgtatgtacccggaggatggtgctctgaaaggtgaaatcaaaatgcgtctgaaactgaaagacggtggtcactacgacgctgaagttaaaaccacctacatggctaaaaaaccggttcagctgccgggtgcttacaaaaccgacatcaaactggacatcacctcccacaacgaggactacaccatcgttgaacagtacgaacgtgctgaaggtcgtcactccaccggtgcttaataa</sbol:elements>
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23106_sequence/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23106_sequence"/>
+    <sbol:displayId>J23106_sequence</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <dcterms:title>J23106 Sequence</dcterms:title>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23106_sequence/1"/>
+    <sbol:elements>tttacggctagctcagtcctaggtatagtgctagc</sbol:elements>
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/E0040m_sequence/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/E0040m_sequence"/>
+    <sbol:displayId>E0040m_sequence</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <dcterms:title>E0040m Sequence</dcterms:title>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/E0040m_sequence/1"/>
+    <sbol:elements>atgcgtaaaggagaagaacttttcactggagttgtcccaattcttgttgaattagatggtgatgttaatgggcacaaattttctgtcagtggagagggtgaaggtgatgcaacatacggaaaacttacccttaaatttatttgcactactggaaaactacctgttccatggccaacacttgtcactactttcggttatggtgttcaatgctttgcgagatacccagatcatatgaaacagcatgactttttcaagagtgccatgcccgaaggttatgtacaggaaagaactatatttttcaaagatgacgggaactacaagacacgtgctgaagtcaagtttgaaggtgatacccttgttaatagaatcgagttaaaaggtattgattttaaagaagatggaaacattcttggacacaaattggaatacaactataactcacacaatgtatacatcatggcagacaaacaaaagaatggaatcaaagttaacttcaaaattagacacaacattgaagatggaagcgttcaactagcagaccattatcaacaaaatactccaattggcgatggccctgtccttttaccagacaaccattacctgtccacacaatctgccctttcgaaagatcccaacgaaaagagagatcacatggtccttcttgagtttgtaacagctgctgggattacacatggcatggatgaactatacaaataataa</sbol:elements>
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/R0040_sequence/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/R0040_sequence"/>
+    <sbol:displayId>R0040_sequence</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <dcterms:title>R0040 Sequence</dcterms:title>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/R0040_sequence/1"/>
+    <sbol:elements>tccctatcagtgatagagattgacatccctatcagtgatagagatactgagcac</sbol:elements>
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/R0063_sequence/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/R0063_sequence"/>
+    <sbol:displayId>R0063_sequence</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <dcterms:title>R0063 Sequence</dcterms:title>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/R0063_sequence/1"/>
+    <sbol:elements>acctgtacgatcctacaggtgcttatgttaagtaattgtattcccagcgatacaatagtgtgacaaaaatccaatttattagaatcaaatgtcaatccattaccgttttaatgatatataacacgcaaaacttgcgacaaacaataggtaa</sbol:elements>
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/C0040_sequence/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/C0040_sequence"/>
+    <sbol:displayId>C0040_sequence</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <dcterms:title>C0040 Sequence</dcterms:title>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/C0040_sequence/1"/>
+    <sbol:elements>tccagattagataaaagtaaagtgattaacagcgcattagagctgcttaatgaggtcggaatcgaaggtttaacaacccgtaaactcgcccagaagctaggtgtagagcagcctacattgtattggcatgtaaaaaataagcgggctttgctcgacgccttagccattgagatgttagataggcaccatactcacttttgccctttagaaggggaaagctggcaagattttttacgtaataacgctaaaagttttagatgtgctttactaagtcatcgcgatggagcaaaagtacatttaggtacacggcctacagaaaaacagtatgaaactctcgaaaatcaattagcctttttatgccaacaaggtttttcactagagaatgcattatatgcactcagcgctgtggggcattttactttaggttgcgtattggaagatcaagagcatcaagtcgctaaagaagaaagggaaacacctactactgatagtatgccgccattattacgacaagctatcgaattatttgatcaccaaggtgcagagccagccttcttattcggccttgaattgatcatatgcggattagaaaaacaacttaaatgtgaaagtgggtccgctgcaaacgacgaaaactacgctttagtagcttaataa</sbol:elements>
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/C0062_sequence/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/C0062_sequence"/>
+    <sbol:displayId>C0062_sequence</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <dcterms:title>C0062 Sequence</dcterms:title>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/C0062_sequence/1"/>
+    <sbol:elements>atgaaaaacataaatgccgacgacacatacagaataattaataaaattaaagcttgtagaagcaataatgatattaatcaatgcttatctgatatgactaaaatggtacattgtgaatattatttactcgcgatcatttatcctcattctatggttaaatctgatatttcaatcctagataattaccctaaaaaatggaggcaatattatgatgacgctaatttaataaaatatgatcctatagtagattattctaactccaatcattcaccaattaattggaatatatttgaaaacaatgctgtaaataaaaaatctccaaatgtaattaaagaagcgaaaacatcaggtcttatcactgggtttagtttccctattcatacggctaacaatggcttcggaatgcttagttttgcacattcagaaaaagacaactatatagatagtttatttttacatgcgtgtatgaacataccattaattgttccttctctagttgataattatcgaaaaataaatatagcaaataataaatcaaacaacgatttaaccaaaagagaaaaagaatgtttagcgtgggcatgcgaaggaaaaagctcttgggatatttcaaaaatattaggttgcagtgagcgtactgtcactttccatttaaccaatgcgcaaatgaaactcaatacaacaaaccgctgccaaagtatttctaaagcaattttaacaggagcaattgattgcccatactttaaaaattaataa</sbol:elements>
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/E0030_sequence/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/E0030_sequence"/>
+    <sbol:displayId>E0030_sequence</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <dcterms:title>E0030 Sequence</dcterms:title>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/E0030_sequence/1"/>
+    <sbol:elements>atggtgagcaagggcgaggagctgttcaccggggtggtgcccatcctggtcgagctggacggcgacgtaaacggccacaagttcagcgtgtccggcgagggcgagggcgatgccacctacggcaagctgaccctgaagttcatctgcaccaccggcaagctgcccgtgccctggcccaccctcgtgaccaccttcggctacggcctgcaatgcttcgcccgctaccccgaccacatgaagctgcacgacttcttcaagtccgccatgcccgaaggctacgtccaggagcgcaccatcttcttcaaggacgacggcaactacaagacccgcgccgaggtgaagttcgagggcgacaccctggtgaaccgcatcgagctgaagggcatcgacttcaaggaggacggcaacatcctggggcacaagctggagtacaactacaacagccacaacgtctatatcatggccgacaagcagaagaacggcatcaaggtgaacttcaagatccgccacaacatcgaggacggcagcgtgcagctcgccgaccactaccagcagaacacccccatcggcgacggccccgtgctgctgcccgacaaccactacctgagctaccagtccgccctgagcaaagaccccaacgagaagcgcgatcacatggtcctgctggagttcgtgaccgccgccgggatcactctcggcatggacgagctgtacaagtaataa</sbol:elements>
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/B0032m_sequence/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/B0032m_sequence"/>
+    <sbol:displayId>B0032m_sequence</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <dcterms:title>B0032m Sequence</dcterms:title>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/B0032m_sequence/1"/>
+    <sbol:elements>agagtcacacaggaaagtacta</sbol:elements>
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/C0012m_sequence/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/C0012m_sequence"/>
+    <sbol:displayId>C0012m_sequence</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <dcterms:title>C0012m Sequence</dcterms:title>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/C0012m_sequence/1"/>
+    <sbol:elements>atggtgaatgtgaaaccagtaacgttatacgatgtcgcagagtatgccggtgtctcttatcagaccgtttcccgcgtggtgaaccaggccagccacgtttctgcgaaaacgcgggaaaaagtggaagcggcgatggcggagctgaattacattcccaaccgcgtggcacaacaactggcgggcaaacagtcgttgctgattggcgttgccacctccagtctggccctgcacgcgccgtcgcaaattgtcgcggcgattaaatctcgcgccgatcaactgggtgccagcgtggtggtgtcgatggtagaacgaagcggcgtcgaagcctgtaaagcggcggtgcacaatcttctcgcgcaacgcgtcagtgggctgatcattaactatccgctggatgaccaggatgccattgctgtggaagctgcctgcactaatgttccggcgttatttcttgatgtctctgaccagacacccatcaacagtattattttctcccatgaggacggtacgcgactgggcgtggagcatctggtcgcattgggtcaccagcaaatcgcgctgttagcgggcccattaagttctgtctcggcgcgtctgcgtctggctggctggcataaatatctcactcgcaatcaaattcagccgatagcggaacgggaaggcgactggagtgccatgtccggttttcaacaaaccatgcaaatgctgaatgagggcatcgttcccactgcgatgctggttgccaacgatcagatggcgctgggcgcaatgcgcgccattaccgagtccgggctgcgcgttggtgcggatatctcggtagtgggatacgacgataccgaagatagctcatgttatatcccgccgttaaccaccatcaaacaggattttcgcctgctggggcaaaccagcgtggaccgcttgctgcaactctctcagggccaggcggtgaagggcaatcagctgttgcccgtctcactggtgaaaagaaaaaccaccctggcgcccaatacgcaaaccgcctctccccgcgcgttggccgattcattaatgcagctggcacgacaggtttcccgactggaaagcgggcaggctgcaaacgacgaaaactacgctttagtagcttaataactctgatagtgctagtgtagatctc</sbol:elements>
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/B0033m_sequence/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/B0033m_sequence"/>
+    <sbol:displayId>B0033m_sequence</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <dcterms:title>B0033m Sequence</dcterms:title>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/B0033m_sequence/1"/>
+    <sbol:elements>agagtcacacaggactacta</sbol:elements>
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/cre_sequence/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/cre_sequence"/>
+    <sbol:displayId>cre_sequence</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <dcterms:title>cre Sequence</dcterms:title>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/cre_sequence/1"/>
+    <sbol:elements>atgtccaatttactgaccgtacaccaaaatttgcctgcattaccggtcgatgcaacgagtgatgaggttcgcaagaacctgatggacatgttcagggatcgccaggcgttttctgagcatacctggaaaatgcttctgtccgtttgccggtcgtgggcggcatggtgcaagttgaataaccggaaatggtttcccgcagaacctgaagatgttcgcgattatcttctatatcttcaggcgcgcggtctggcagtaaaaactatccagcaacatttgggccagctaaacatgcttcatcgtcggtccgggctgccacgaccaagtgacagcaatgctgtttcactggttatgcggcgaatccgaaaagaaaacgttgatgccggtgaacgtgcaaaacaggctctagcgttcgaacgcactgatttcgaccaggttcgttcactcatggaaaatagcgatcgctgccaggatatacgtaatctggcatttctggggattgcttataacaccctgttacgtatagccgaaattgccaggatcagggttaaagatatctcacgtactgacggtgggagaatgttaatccatattggcagaacgaaaacgctggttagcaccgcaggtgtagagaaggcacttagcctgggggtaactaaactggtcgagcgatggatttccgtctctggtgtagctgatgatccgaataactacctgttttgccgggtcagaaaaaatggtgttgccgcgccatctgccaccagccagctatcaactcgcgccctggaagggatttttgaagcaactcatcgattgatttacggcgctaaggatgactctggtcagagatacctggcctggtctggacacagtgcccgtgtcggagccgcgcgagatatggcccgcgctggagtttcaataccggagatcatgcaagctggtggctggaccaatgtaaatattgtcatgaactatatccgtaacctggatagtgaaacaggggcaatggtgcgcctgctggaagatggcgattag</sbol:elements>
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23107_sequence/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23107_sequence"/>
+    <sbol:displayId>J23107_sequence</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <dcterms:title>J23107 Sequence</dcterms:title>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/J23107_sequence/1"/>
+    <sbol:elements>tttacggctagctcagccctaggtattatgctagc</sbol:elements>
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/C0080_sequence/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/C0080_sequence"/>
+    <sbol:displayId>C0080_sequence</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <dcterms:title>C0080 Sequence</dcterms:title>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/C0080_sequence/1"/>
+    <sbol:elements>atggctgaagcgcaaaatgatcccctgctgccgggatactcgtttaacgcccatctggtggcgggtttaacgccgattgaggccaatggttatctcgatttttttatcgaccgaccgctgggaatgaaaggttatattctcaatctcaccattcgcggtcagggggtggtgaaaaatcagggacgagaatttgtctgccgaccgggtgatattttgctgttcccgccaggagagattcatcactacggtcgtcatccggaggctcgcgaatggtatcaccagtgggtttactttcgtccgcgcgcctactggcatgaatggcttaactggccgtcaatatttgccaatacgggtttctttcgcccggatgaagcgcaccagccgcatttcagcgacctgtttgggcaaatcattaacgccgggcaaggggaagggcgctattcggagctgctggcgataaatctgcttgagcaattgttactgcggcgcatggaagcgattaacgagtcgctccatccaccgatggataatcgggtacgcgaggcttgtcagtacatcagcgatcacctggcagacagcaattttgatatcgccagcgtcgcacagcatgtttgcctgtcgccgtcgcgtctgtcacatcttttccgccagcagttagggattagcgtcttaagctggcgcgaggaccaacgcatcagccaggcgaagctgcttttgagcactacccggatgcctatcgccaccgtcggtcgcaatgttggttttgacgatcaactctatttctcgcgagtatttaaaaaatgcaccggggccagcccgagcgagttccgtgccggttgtgaagaaaaagtgaatgatgtagccgtcaagttgtcagctgcaaacgacgaaaactacgctttagtagcttaataa</sbol:elements>
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/eBFP2_sequence/1">
+    <sbol:persistentIdentity rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/eBFP2_sequence"/>
+    <sbol:displayId>eBFP2_sequence</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <dcterms:title>eBFP2 Sequence</dcterms:title>
+    <sbh:ownedBy rdf:resource="https://synbioks.org/user/jet"/>
+    <sbh:topLevel rdf:resource="https://synbioks.org/public/CIDAR_MoClo_Toolkit_Densmore_Lab/eBFP2_sequence/1"/>
+    <sbol:elements>atggtgagcaagggcgaggagctgttcaccggggtggtgcccatcctggtcgagctggacggcgacgtaaacggccacaagttcagcgtgaggggcgagggcgagggcgatgccaccaacggcaagctgaccctgaagttcatctgcaccaccggcaagctgcccgtgccctggcccaccctcgtgaccaccctgagccacggcgtgcagtgcttcgcccgctaccccgaccacatgaagcagcacgacttcttcaagtccgccatgcccgaaggctacgtccaggagcgcaccatcttcttcaaggacgacggcacctacaagacccgcgccgaggtgaagttcgagggcgacaccctggtgaaccgcatcgagctgaagggcgtcgacttcaaggaggacggcaacatcctggggcacaagctggagtacaacttcaacagccacaacatctatatcatggccgtcaagcagaagaacggcatcaaggtgaacttcaagatccgccacaacgtggaggacggcagcgtgcagctcgccgaccactaccagcagaacacccccatcggcgacggccccgtgctgctgcccgacagccactacctgagcacccagtccgtgctgagcaaagaccccaacgagaagcgcgatcacatggtcctgctggagttccgcaccgccgccgggatcactctcggcatggacgagctgtacaagtaa</sbol:elements>
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+  </sbol:Sequence>
+</rdf:RDF>
