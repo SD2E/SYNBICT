@@ -570,6 +570,89 @@ Full documentation — gate model, netlist format, assumptions, troubleshooting:
 [features_to_circuits/README.md](features_to_circuits/README.md).
 Ready-to-run tests over 6 published Cello circuits: [test_bundle/TESTING.md](test_bundle/TESTING.md).
 
+## circuit\_to\_truth\_table.py
+
+Computes a circuit's truth table from a gate netlist. The netlist is emitted as structural
+Verilog and evaluated by **Yosys** over all 2^n assignments of the primary inputs; a
+pure-Python evaluation runs alongside and is cross-checked against it (Yosys is the
+authority, the Python pass catches a broken Yosys call).
+
+Gate semantics — Cello repressor logic:
+
+```
+NOT / NOR gate : output_promoter = ~(OR of input promoters)
+OUTPUT gate    : reporter        =  (OR of input promoters)
+```
+
+```bash
+python features_to_circuits/circuit_to_truth_table.py 0xEA_circuit_netlist.json \
+    --yosys $(which yosys) --verilog 0xEA.v
+```
+
+```
+pBAD pTac pTet  |  YFP
+----------------------
+0 0 0  |  0
+1 0 0  |  1
+...
+output bitstring: 0x37 (00110111)
+```
+
+### Arguments for circuit\_to\_truth\_table.py
+
+Argument | Short Arg | Type | Description | Example
+--- | --- | --- | --- | ---
+`netlist` | | `String` | **Required**, positional. Gate netlist JSON produced by `features_to_circuits.py -gn`. | 0xEA_circuit_netlist.json
+`--yosys` | | `String` | **Optional**. Path to the `yosys` binary. Default is to find it on `PATH`. | /usr/bin/yosys
+`--verilog` | | `String` | **Optional**. Also write the generated structural Verilog to this path, for inspection or for comparing against a reference Verilog. Default is to keep it in a temporary file. | 0xEA.v
+
+Requires `yosys` (`conda install -c conda-forge yosys`).
+
+Notes:
+
+* An `x` in the table means Yosys could not resolve that value. This is almost always a
+  **combinational loop** from a mis-segmented netlist (an unannotated terminator merged two
+  transcriptional units), not a Yosys problem — check the annotation first.
+* `output bitstring` is in the tool's own input order. To compare against a published Cello
+  circuit *name*, the sensor inputs have to be mapped to the paper's convention (all inputs
+  active-low, bit index `j = 4*(1-pBAD) + 2*(1-pTet) + 1*(1-pTac)`);
+  [test_bundle/check_results.py](test_bundle/check_results.py) does this and reproduces the
+  published name for 43 of the 44 hex circuits.
+
+## netlist\_to\_graphml.py — Cytoscape visualization
+
+Renders the **gate-level** graph — primary inputs → gates → primary outputs — as GraphML for
+Cytoscape. This is the connected logic view; for the molecular view (CDS → protein →
+promoter) use `circuit_visualization.py` below.
+
+```bash
+python features_to_circuits/netlist_to_graphml.py 0xEA_circuit_netlist.json -o 0xEA_gates.graphml
+```
+
+In Cytoscape: **File → Import → Network from File…**, then style by the attributes below.
+
+### Arguments for netlist\_to\_graphml.py
+
+Argument | Short Arg | Type | Description | Example
+--- | --- | --- | --- | ---
+`netlist` | | `String` | **Required**, positional. Gate netlist JSON produced by `features_to_circuits.py -gn`. | 0xEA_circuit_netlist.json
+`--out` | `-o` | `String` | **Required**. Output `.graphml` path. | 0xEA_gates.graphml
+
+### Attributes to style by
+
+| | Attribute | Values |
+|---|---|---|
+| Node | `kind` | `input` (sensor promoter) / `gate` / `output` (reporter) |
+| Node | `gate_type` | `NOR` / `NOT` / `OUTPUT` — colour or shape the gates by this |
+| Node | `cds` | the repressor CDS in that gate (`SrpR`, `AmtR`, …) |
+| Node | `label` | e.g. `g1: SrpR (NOR)` |
+| Edge | `signal` | the promoter flowing along the edge (`pSrpR`, `pTet`, …) — use as edge label |
+| Edge | `relation` | `input` (primary input → gate) / `wire` (gate → gate) / `output` (gate → reporter) |
+
+A circuit that reads correctly looks like a tree from the three input nodes down to one
+output node. **A cycle in this view means the netlist has a combinational loop** — the same
+defect that shows up as `x` in the truth table, and the quickest way to see it.
+
 ## circuit_visualization.py
 
 ### Arguments
