@@ -289,7 +289,7 @@ By default SYNBICT reports every matching part, including a shorter part nested
 within a longer one, and including several different library parts that all match
 the same locus. Pass `-nms` / `--nms` to collapse overlapping hits to the single
 highest-scoring part at each locus: a hit that overlaps a higher-scoring one by
->=50% is dropped, while non-overlapping and equal-scoring parts are kept.
+`>=50%` is dropped, while non-overlapping and equal-scoring parts are kept.
 
 Hits are ranked by bitscore on the BLASTN path, and by number of identical bases
 (or reference length, for exact matching) on the BWA and Minimap2 paths. NMS is
@@ -514,13 +514,19 @@ annotated SBOL ──features_to_circuits.py -gn──► circuit SBOL + *_circu
                                      netlist_to_graphml.py ─────► *.graphml (Cytoscape)
 ```
 
+The library and sequences used below ship with the repo in [test_bundle/](test_bundle/), so
+this runs as-is from the SYNBICT root:
+
 ```bash
+LIB=test_bundle/cello/library/cello_library.xml
+
 # annotate -> circuit + gate netlist -> truth table
-python -m sequences_to_features -n http://examples.org -f example/jet_libs/cello_library.xml \
-    -t 0xEA.fasta -o 0xEA_annotated.xml -blastn -m 1000 -M 40 -np -ni
+python -m sequences_to_features -n http://examples.org -f $LIB \
+    -t test_bundle/cello/sequences/0xEA.fasta -o 0xEA_annotated.xml \
+    -blastn -m 1000 -M 40 -np -ni
 
 python features_to_circuits/features_to_circuits.py -n http://examples.org \
-    -c example/jet_libs/cello_library.xml -t 0xEA_annotated.xml -o 0xEA_circuit.xml -m 1000 -gn
+    -c $LIB -t 0xEA_annotated.xml -o 0xEA_circuit.xml -m 1000 -gn
 
 python features_to_circuits/circuit_to_truth_table.py 0xEA_circuit_netlist.json --yosys $(which yosys)
 ```
