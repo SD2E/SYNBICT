@@ -101,20 +101,33 @@ Three independent checks per circuit:
   the expected shape. Note there is no separate "the reporter is driven" rule — a reporter
   with a dangling input is caught by the first rule, but a reporter wired straight to a sensor
   promoter is accepted.
-- **truth table** — for the `0x..` circuits only: the hex recomputed from the Yosys table must
-  equal the circuit name, which is the same string as `OUTPUT_OR` in
-  `cello/reference/cello_logic/<C>_A000_*.txt`. Circuits whose name is not a truth table are
-  marked `n/a` and checked on the first two only.
+- **truth table** — our Yosys table is compared **row by row** against Cello's own table in
+  `cello/reference/cello_logic/<C>_A000_*.txt`, matching rows by the input promoters' states.
+  Nothing about the input convention is hard-coded: the reference file's `INPUT` rows give each
+  sensor promoter's waveform and its `OUTPUT` rows give each reporter's, column by column, so a
+  column *is* an input state. That matters because the column order is **not** constant — across
+  the 56 reference files the three sensors appear in 6 different orders, and only 12 of 32 hex
+  circuits have an `OUTPUT_OR` string that reads as the circuit's own name. Matching by state
+  sidesteps all of it, and covers the 2-input circuits and the multi-output ones (whose reporter
+  row is selected by the reporter gene our netlist annotates). Circuits with no reference file
+  are marked `n/a` and checked on the first two only.
 
 Known non-PASS cases, expected:
 
-- **`0xB9` computes `0xF9`** — the published sequence is missing the 63 bp `pHlyIIR` promoter.
-  `0xB9_fixed` (repaired sequence, also in the bundle) computes `0xB9`. Not a pipeline bug.
-- **`demultiplexer`** has one isolated gate — it is a 4-output circuit and the other output
-  branches are not on the published sequence. (Reported as `clean` because the Cello rules
-  tolerate it; the gate shows up in the netlist as an `OUTPUT` with no wires.)
+- **`0xB9`** — 7/8 rows. The published sequence is missing the 63 bp `pHlyIIR` promoter, so the
+  AmtR gate reads as `NOT(pBAD)` instead of `NOR(pHlyIIR, pBAD)`. `0xB9_fixed` (repaired
+  sequence, also in the bundle) matches 8/8. A source defect, not a pipeline bug.
+- **`demultiplexer` (1/4 rows) and `priority_detector` (6/8 rows)** — multi-output circuits.
+  Cello drives their four/three reporters from separate branches (its `output_YFP` comes from
+  the `F1_AmeR` gate alone), but only the YFP branch is on the published sequence, so the other
+  branches' promoters end up in the annotated YFP transcriptional unit and YFP reads as an OR of
+  two branches. This is limitation 6 in `features_to_circuits/README.md` — now measured instead
+  of assumed. Both were invisible before the checker started comparing against the reference.
 
-Current baseline on this code: **cello 65/66 PASS** (only `0xB9`), **md5 64/70 PASS**. The six
+Current baseline on this code: **cello 63/66 PASS** (the three above), **md5 64/70 PASS**.
+Of the 66 Cello circuits, **56 are compared against a published table** (10 have no reference
+file: `ANDv2`/`NANDv2`/`XORv2`/… whose Cello entries ship only a `.v`, plus `majority_alt` and
+`multiplexer_alt`). The previous checker verified only the 32 hex circuits that had one. The six
 MD5 differences are all the same ambiguity — `PLuxB` and `PLux_u42_TA` are near-identical
 quorum-sensing sensor promoters that both match the same locus, and since neither is a
 *repressed* promoter the regulation-aware collapse in `gate_assembler._construct_parts()`
@@ -149,10 +162,13 @@ INPUT       01010101   input_pTac   5
 Same three gates, same types, same wiring. `S3_SrpR` / `A1_AmtR` are Cello's names for the
 whole gate cassette; SYNBICT names the gate after the repressor CDS inside it.
 
-**Input convention.** Yosys drives the three sensor promoters directly and every input is
-active-low, so the hex bit index is `j = 4*(1-pBAD) + 2*(1-pTet) + 1*(1-pTac)` — bit 0 is "no
-inducer added". `check_results.py` does this conversion; it reproduces the published name for
-43 of the 44 hex circuits.
+**Input convention.** The `INPUT` rows above are the convention, per circuit: column 3 of
+`input_pTet` / `input_pBAD` / `input_pTac` together with column 3 of `OUTPUT_OR` is one row of
+the truth table. `check_results.py` reads them straight from this file, so it never has to
+assume a bit order or a polarity. (For the record, the order the circuit *names* are written in
+is `j = 4*(1-pBAD) + 2*(1-pTet) + 1*(1-pTac)`; re-indexing every reference table that way
+reproduces all 32 names, which is how the convention was confirmed — but the checker does not
+depend on it.)
 
 For MD5, compare a *cell* (not a plasmid) against `md5/reference/verilog/scNN.v`: look up the
 cell's plasmids in `md5/expected/sc_to_plasmids.json`, merge their gates by repressor CDS
