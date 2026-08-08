@@ -726,7 +726,14 @@ def curate(feature_library, target_library, output_library, output_files, extend
 
             simple = FeatureAnnotatorSimple(feature_library, inline_matches, rc_matches)
             # this is a different annnotate function, belong to FeatureAnnotatorSimple class
-            simple.annotate(inline_matches, rc_matches, target_library, min_feature_length, in_place=True, output_library=output_library, output_matches=False)#True, in_place=True
+            # in_place must be threaded through, not pinned to True: annotate() derives
+            # copy_definitions from it, and with in_place the matched library parts are
+            # never embedded in the document that gets written -- every SequenceAnnotation
+            # then points at a definition URI that is not in the file, which readers such
+            # as SBOLCanvas follow to get the part's role and glyph. The FlashText path
+            # already honours -p/--in_place; this makes the aligner paths agree with it.
+            simple.annotate(inline_matches, rc_matches, target_library, min_feature_length,
+                            in_place=in_place, output_library=output_library, output_matches=False)
         else:
             (annotated_features, annotating_features) = feature_curator.annotate_features(feature_annotater,
                                                                                         min_target_length,

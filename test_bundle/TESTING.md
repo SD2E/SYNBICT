@@ -124,17 +124,24 @@ Known non-PASS cases, expected:
   two branches. This is limitation 6 in `features_to_circuits/README.md` — now measured instead
   of assumed. Both were invisible before the checker started comparing against the reference.
 
-Current baseline on this code: **cello 63/66 PASS** (the three above), **md5 64/70 PASS**.
+Current baseline on this code: **cello 63/66 PASS** (the three above), **md5 63/70 PASS**.
 Of the 66 Cello circuits, **56 are compared against a published table** (10 have no reference
 file: `ANDv2`/`NANDv2`/`XORv2`/… whose Cello entries ship only a `.v`, plus `majority_alt` and
-`multiplexer_alt`). The previous checker verified only the 32 hex circuits that had one. The six
+`multiplexer_alt`). The previous checker verified only the 32 hex circuits that had one. The seven
 MD5 differences are all the same ambiguity — `PLuxB` and `PLux_u42_TA` are near-identical
 quorum-sensing sensor promoters that both match the same locus, and since neither is a
 *repressed* promoter the regulation-aware collapse in `gate_assembler._construct_parts()`
 cannot tell them apart, so it keeps whichever sorts first. The recorded run picked the other
-one. Affected: `seq_002`, `seq_018`, `seq_051`, `seq_056`, `seq_060`, `seq_066`. This changes
-the promoter *name* on a primary input, not the logic — but it does matter when merging
-plasmids into a cell, because signals are matched across plasmids by promoter name.
+one. Affected: `seq_002`, `seq_012`, `seq_051`, `seq_055`, `seq_060`, `seq_066`, `seq_067`.
+This changes the promoter *name* on a primary input, not the logic — but it does matter when
+merging plasmids into a cell, because signals are matched across plasmids by promoter name.
+
+Because the tie is unresolved, **which** plasmids land on which side is not stable: making the
+annotated SBOL self-contained (so the aligner paths embed the library definitions they
+reference) shuffled the set from six to seven without changing anything about the logic —
+`seq_018` and `seq_056` started matching, `seq_012`, `seq_055` and `seq_067` stopped. Any
+change that perturbs annotation order can move this boundary. Giving the collapse a
+deterministic tie-break is the open issue.
 
 ## 4. Reading a result by hand
 

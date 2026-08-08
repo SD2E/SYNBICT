@@ -1,0 +1,1405 @@
+<rdf:RDF xmlns:brick="https://brickschema.org/schema/Brick#" xmlns:csvw="http://www.w3.org/ns/csvw#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcat="http://www.w3.org/ns/dcat#" xmlns:dcmitype="http://purl.org/dc/dcmitype/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcam="http://purl.org/dc/dcam/" xmlns:doap="http://usefulinc.com/ns/doap#" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:geo="http://www.opengis.net/ont/geosparql#" xmlns:odrl="http://www.w3.org/ns/odrl/2/" xmlns:org="http://www.w3.org/ns/org#" xmlns:prof="http://www.w3.org/ns/dx/prof/" xmlns:prov="http://www.w3.org/ns/prov#" xmlns:qb="http://purl.org/linked-data/cube#" xmlns:schema="https://schema.org/" xmlns:sh="http://www.w3.org/ns/shacl#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:sosa="http://www.w3.org/ns/sosa/" xmlns:ssn="http://www.w3.org/ns/ssn/" xmlns:time="http://www.w3.org/2006/time#" xmlns:vann="http://purl.org/vocab/vann/" xmlns:void="http://rdfs.org/ns/void#" xmlns:wgs="https://www.w3.org/2003/01/geo/wgs84_pos#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#" xmlns:sbol="http://sbols.org/v2#" xmlns:om="http://www.ontology-of-units-of-measure.org/resource/om-2/" xmlns:igem="http://wiki.synbiohub.org/wiki/Terms/igem#" xmlns:sbh="http://wiki.synbiohub.org/wiki/Terms/synbiohub#" xmlns:cello="http://cellocad.org/Terms/cello#">
+  <sbol:Sequence rdf:about="http://examples.org/_0xEA/1">
+    <sbol:displayId>_0xEA</sbol:displayId>
+    <sbol:elements>GCTTACTTTTCATACTCCCGCCATTCAGAGAAGAAACCAATTGTCCATATTGCATCAGACATTGCCGTCACTGCGTCTTTTACTGGCTCTTCTCGCTAACCAAACCGGTAACCCCGCTTATTAAAAGCATTCTGTAACAAAGCGGGACCAAAGCCATGACAAAAACGCGTAACAAAAGTGTCTATAATCACGGCAGAAAAGTCCACATTGATTATTTGCACGGCGTCACACTTTGCTATGCCATAGCATTTTTATCCATAAGATTAGCGGATCCTACCTGACGCTTTTTATCGCAACTCTCTACTGTTTCTCCATACCCGTTTTTTTGGGCTAGCTACTCCACCGTTGGCTTTTTTCCCTATCAGTGATAGAGATTGACATCCCTATCAGTGATAGAGATAATGAGCACCTGAAGCGCTCAACGGGTGTGCTTCCCGTTCTGATGAGTCCGTGAGGACGAAAGCGCCTCTACAAATAATTTTGTTTAAGAGTCTATGGACTATGTTTTCACAAAGGAAGTACCAGGATGGCACGTAAAACCGCAGCAGAAGCAGAAGAAACCCGTCAGCGTATTATTGATGCAGCACTGGAAGTTTTTGTTGCACAGGGTGTTAGTGATGCAACCCTGGATCAGATTGCACGTAAAGCCGGTGTTACCCGTGGTGCAGTTTATTGGCATTTTAATGGTAAACTGGAAGTTCTGCAGGCAGTTCTGGCAAGCCGTCAGCATCCGCTGGAACTGGATTTTACACCGGATCTGGGTATTGAACGTAGCTGGGAAGCAGTTGTTGTTGCAATGCTGGATGCAGTTCATAGTCCGCAGAGCAAACAGTTTAGCGAAATTCTGATTTATCAGGGTCTGGATGAAAGCGGTCTGATTCATAATCGTATGGTTCAGGCAAGCGATCGTTTTCTGCAGTATATTCATCAGGTTCTGCGTCATGCAGTTACCCAGGGTGAACTGCCGATTAATCTGGATCTGCAGACCAGCATTGGTGTTTTTAAAGGTCTGATTACCGGTCTGCTGTATGAAGGTCTGCGTAGCAAAGATCAGCAGGCACAGATTATCAAAGTTGCACTGGGTAGCTTTTGGGCACTGCTGCGTGAACCGCCTCGTTTTCTGCTGTGTGAAGAAGCACAGATTAAACAGGTGAAATCCTTCGAATAATTCAGCCAAAAAACTTAAGACCGCCGGTCTTGTCCACTACCTTGCAGTAATGCGGTGGACAGGATCGGCGGTTTTCTTTTCTCTTCTCAAAGGTAACGATCGTTGGCTGTGTTGACAATTAATCATCGGCTCGTATAATGTGTGGAATTGTGAGCGCTCACAATTCTGAAGGGTGTCTCAAGGTGCGTACCTTGACTGATGAGTCCGAAAGGACGAAACACCCCTCTACAAATAATTTTGTTTAAAATGTTCCCTAATAATCAGCAAAGAGGTTACTAGATGGCAGGCGCAGTTGGTCGTCCGCGTCGTAGTGCACCGCGTCGTGCAGGTAAAAATCCGCGTGAAGAAATTCTGGATGCAAGCGCAGAACTGTTTACCCGTCAGGGTTTTGCAACCACCAGTACCCATCAGATTGCAGATGCAGTTGGTATTCGTCAGGCAAGCCTGTATTATCATTTTCCGAGCAAAACCGAAATCTTTCTGACCCTGCTGAAAAGCACCGTTGAACCGAGCACCGTTCTGGCAGAAGATCTGAGCACCCTGGATGCAGGTCCGGAAATGCGTCTGTGGGCAATTGTTGCAAGCGAAGTTCGTCTGCTGCTGAGCACCAAATGGAATGTTGGTCGTCTGTATCAGCTGCCGATTGTTGGTAGCGAAGAATTTGCAGAATATCATAGCCAGCGTGAAGCACTGACCAATGTTTTTCGTGATCTGGCAACCGAAATTGTTGGTGATGATCCGCGTGCAGAACTGCCGTTTCATATTACCATGAGCGTTATTGAAATGCGTCGCAATGATGGTAAAATTCCGAGTCCGCTGAGCGCAGATAGCCTGCCGGAAACCGCAATTATGCTGGCAGATGCAAGCCTGGCAGTTCTGGGTGCACCGCTGCCTGCAGATCGTGTTGAAAAAACCCTGGAACTGATTAAACAGGCAGATGCAAAATAACTCGGTACCAAAGACGAACAATAAGACGCTGAAAAGCGTCTTTTTTCGTTTTGGTCCAATGGCTTTCTATGATTGGTCCAGATTCGTTACCAATTGACAGCTAGCTCAGTCCTAGGTATATACATACATGCTTGTTTGTTTGTAAACCTTGTCCAACCAAATGATTCGTTACCAATTGACAGTTTCTATCGATCTATAGATAATGCTAGCCTGAAGCTGTCACCGGATGTGCTTTCCGGTCTGATGAGTCCGTGAGGACGAAACAGCCTCTACAAATAATTTTGTTTAATACTAGAGAAAGAGGGGAAATACTAGATGGTGAGCAAGGGCGAGGAGCTGTTCACCGGGGTGGTGCCCATCCTGGTCGAGCTGGACGGCGACGTAAACGGCCACAAGTTCAGCGTGTCCGGCGAGGGCGAGGGCGATGCCACCTACGGCAAGCTGACCCTGAAGTTCATCTGCACCACAGGCAAGCTGCCCGTGCCCTGGCCCACCCTCGTGACCACCTTCGGCTACGGCCTGCAATGCTTCGCCCGCTACCCCGACCACATGAAGCTGCACGACTTCTTCAAGTCCGCCATGCCCGAAGGCTACGTCCAGGAGCGCACCATCTTCTTCAAGGACGACGGCAACTACAAGACCCGCGCCGAGGTGAAGTTCGAGGGCGACACCCTGGTGAACCGCATCGAGCTGAAGGGCATCGACTTCAAGGAGGACGGCAACATCCTGGGGCACAAGCTGGAGTACAACTACAACAGCCACAACGTCTATATCATGGCCGACAAGCAGAAGAACGGCATCAAGGTGAACTTCAAGATCCGCCACAACATCGAGGACGGCAGCGTGCAGCTCGCCGACCACTACCAGCAGAACACCCCAATCGGCGACGGCCCCGTGCTGCTGCCCGACAACCACTACCTTAGCTACCAGTCCGCCCTGAGCAAAGACCCCAACGAGAAGCGCGATCACATGGTCCTGCTGGAGTTCGTGACCGCCGCCGGGATCACTCTCGGCATGGACGAGCTGTACAAGTAAAATG</sbol:elements>
+    <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA"/>
+    <sbol:version>1</sbol:version>
+    <dcterms:description>0xEA</dcterms:description>
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR_sequence/1">
+    <sbol:displayId>S3_SrpR_sequence</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+    <dcterms:title>S3_SrpR_sequence</dcterms:title>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/CelloUCF2sbol_Activity/1"/>
+    <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR_sequence/1"/>
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+    <sbol:elements>CTGAAGCGCTCAACGGGTGTGCTTCCCGTTCTGATGAGTCCGTGAGGACGAAAGCGCCTCTACAAATAATTTTGTTTAAGAGTCTATGGACTATGTTTTCACAAAGGAAGTACCAGGATGGCACGTAAAACCGCAGCAGAAGCAGAAGAAACCCGTCAGCGTATTATTGATGCAGCACTGGAAGTTTTTGTTGCACAGGGTGTTAGTGATGCAACCCTGGATCAGATTGCACGTAAAGCCGGTGTTACCCGTGGTGCAGTTTATTGGCATTTTAATGGTAAACTGGAAGTTCTGCAGGCAGTTCTGGCAAGCCGTCAGCATCCGCTGGAACTGGATTTTACACCGGATCTGGGTATTGAACGTAGCTGGGAAGCAGTTGTTGTTGCAATGCTGGATGCAGTTCATAGTCCGCAGAGCAAACAGTTTAGCGAAATTCTGATTTATCAGGGTCTGGATGAAAGCGGTCTGATTCATAATCGTATGGTTCAGGCAAGCGATCGTTTTCTGCAGTATATTCATCAGGTTCTGCGTCATGCAGTTACCCAGGGTGAACTGCCGATTAATCTGGATCTGCAGACCAGCATTGGTGTTTTTAAAGGTCTGATTACCGGTCTGCTGTATGAAGGTCTGCGTAGCAAAGATCAGCAGGCACAGATTATCAAAGTTGCACTGGGTAGCTTTTGGGCACTGCTGCGTGAACCGCCTCGTTTTCTGCTGTGTGAAGAAGCACAGATTAAACAGGTGAAATCCTTCGAATAATTCAGCCAAAAAACTTAAGACCGCCGGTCTTGTCCACTACCTTGCAGTAATGCGGTGGACAGGATCGGCGGTTTTCTTTTCTCTTCTCAA</sbol:elements>
+    <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR_sequence"/>
+    <dcterms:created>2018-05-09T19:41:51.056Z</dcterms:created>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/SrpR_sequence/1">
+    <dcterms:created>2018-05-09T19:41:51.056Z</dcterms:created>
+    <sbol:version>1</sbol:version>
+    <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+    <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/SrpR_sequence/1"/>
+    <sbol:displayId>SrpR_sequence</sbol:displayId>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/CelloUCF2sbol_Activity/1"/>
+    <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/SrpR_sequence"/>
+    <dcterms:title>SrpR_sequence</dcterms:title>
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+    <sbol:elements>ATGGCACGTAAAACCGCAGCAGAAGCAGAAGAAACCCGTCAGCGTATTATTGATGCAGCACTGGAAGTTTTTGTTGCACAGGGTGTTAGTGATGCAACCCTGGATCAGATTGCACGTAAAGCCGGTGTTACCCGTGGTGCAGTTTATTGGCATTTTAATGGTAAACTGGAAGTTCTGCAGGCAGTTCTGGCAAGCCGTCAGCATCCGCTGGAACTGGATTTTACACCGGATCTGGGTATTGAACGTAGCTGGGAAGCAGTTGTTGTTGCAATGCTGGATGCAGTTCATAGTCCGCAGAGCAAACAGTTTAGCGAAATTCTGATTTATCAGGGTCTGGATGAAAGCGGTCTGATTCATAATCGTATGGTTCAGGCAAGCGATCGTTTTCTGCAGTATATTCATCAGGTTCTGCGTCATGCAGTTACCCAGGGTGAACTGCCGATTAATCTGGATCTGCAGACCAGCATTGGTGTTTTTAAAGGTCTGATTACCGGTCTGCTGTATGAAGGTCTGCGTAGCAAAGATCAGCAGGCACAGATTATCAAAGTTGCACTGGGTAGCTTTTGGGCACTGCTGCGTGAACCGCCTCGTTTTCTGCTGTGTGAAGAAGCACAGATTAAACAGGTGAAATCCTTCGAATAA</sbol:elements>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/ECK120029600_sequence/1">
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/CelloUCF2sbol_Activity/1"/>
+    <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+    <dcterms:created>2018-05-09T19:41:51.056Z</dcterms:created>
+    <sbol:elements>TTCAGCCAAAAAACTTAAGACCGCCGGTCTTGTCCACTACCTTGCAGTAATGCGGTGGACAGGATCGGCGGTTTTCTTTTCTCTTCTCAA</sbol:elements>
+    <sbol:version>1</sbol:version>
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+    <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/ECK120029600_sequence/1"/>
+    <sbol:displayId>ECK120029600_sequence</sbol:displayId>
+    <dcterms:title>ECK120029600_sequence</dcterms:title>
+    <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/ECK120029600_sequence"/>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/RiboJ10_sequence/1">
+    <sbol:version>1</sbol:version>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/CelloUCF2sbol_Activity/1"/>
+    <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/RiboJ10_sequence/1"/>
+    <sbol:displayId>RiboJ10_sequence</sbol:displayId>
+    <sbol:elements>CTGAAGCGCTCAACGGGTGTGCTTCCCGTTCTGATGAGTCCGTGAGGACGAAAGCGCCTCTACAAATAATTTTGTTTAA</sbol:elements>
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+    <dcterms:title>RiboJ10_sequence</dcterms:title>
+    <dcterms:created>2018-05-09T19:41:51.056Z</dcterms:created>
+    <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+    <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/RiboJ10_sequence"/>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_sequence/1">
+    <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_sequence"/>
+    <sbol:displayId>S3_sequence</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/CelloUCF2sbol_Activity/1"/>
+    <sbol:elements>GAGTCTATGGACTATGTTTTCACAAAGGAAGTACCAGG</sbol:elements>
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+    <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+    <dcterms:title>S3_sequence</dcterms:title>
+    <dcterms:created>2018-05-09T19:41:51.056Z</dcterms:created>
+    <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_sequence/1"/>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="http://examples.org/S1_SrpR_v1/1">
+    <sbol:version>1</sbol:version>
+    <prov:wasDerivedFrom rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S1_SrpR_sequence/1"/>
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+    <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S1_SrpR_sequence/1"/>
+    <sbol:persistentIdentity rdf:resource="http://examples.org/S1_SrpR_v1"/>
+    <prov:wasDerivedFrom rdf:resource="http://examples.org/_0xEA/1"/>
+    <dcterms:title>S1_SrpR_v1</dcterms:title>
+    <sbol:displayId>S1_SrpR_v1</sbol:displayId>
+    <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+    <sbol:elements>CTGAAGCGCTCAACGGGTGTGCTTCCCGTTCTGATGAGTCCGTGAGGACGAAAGCGCCTCTACAAATAATTTTGTTTAAGAGTCTATGGACTATGTTTTCACAAAGGAAGTACCAGGATGGCACGTAAAACCGCAGCAGAAGCAGAAGAAACCCGTCAGCGTATTATTGATGCAGCACTGGAAGTTTTTGTTGCACAGGGTGTTAGTGATGCAACCCTGGATCAGATTGCACGTAAAGCCGGTGTTACCCGTGGTGCAGTTTATTGGCATTTTAATGGTAAACTGGAAGTTCTGCAGGCAGTTCTGGCAAGCCGTCAGCATCCGCTGGAACTGGATTTTACACCGGATCTGGGTATTGAACGTAGCTGGGAAGCAGTTGTTGTTGCAATGCTGGATGCAGTTCATAGTCCGCAGAGCAAACAGTTTAGCGAAATTCTGATTTATCAGGGTCTGGATGAAAGCGGTCTGATTCATAATCGTATGGTTCAGGCAAGCGATCGTTTTCTGCAGTATATTCATCAGGTTCTGCGTCATGCAGTTACCCAGGGTGAACTGCCGATTAATCTGGATCTGCAGACCAGCATTGGTGTTTTTAAAGGTCTGATTACCGGTCTGCTGTATGAAGGTCTGCGTAGCAAAGATCAGCAGGCACAGATTATCAAAGTTGCACTGGGTAGCTTTTGGGCACTGCTGCGTGAACCGCCTCGTTTTCTGCTGTGTGAAGAAGCACAGATTAAACAGGTGAAATCCTTCGAATAATTCAGCCAAAAAACTTAAGACCGCCGGTCTTGTCCACTACCTTGCAGTAATGCGGTGGACAGGATCGGCGGTTTTCTTTTCTCTTCTCAA</sbol:elements>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR_sequence/1">
+    <dcterms:created>2018-05-09T19:41:51.056Z</dcterms:created>
+    <dcterms:title>A1_AmtR_sequence</dcterms:title>
+    <sbol:version>1</sbol:version>
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+    <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR_sequence/1"/>
+    <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR_sequence"/>
+    <sbol:displayId>A1_AmtR_sequence</sbol:displayId>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/CelloUCF2sbol_Activity/1"/>
+    <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+    <sbol:elements>CTGAagGGTGTCTCAAGGTGCGTACCTTGACTGATGAGTCCGAAAGGACGAAACACCcctctacaaataattttgtttaaAATGTTCCCTAATAATCAGCAAAGAGGTTACTAGATGGCAGGCGCAGTTGGTCGTCCGCGTCGTAGTGCACCGCGTCGTGCAGGTAAAAATCCGCGTGAAGAAATTCTGGATGCAAGCGCAGAACTGTTTACCCGTCAGGGTTTTGCAACCACCAGTACCCATCAGATTGCAGATGCAGTTGGTATTCGTCAGGCAAGCCTGTATTATCATTTTCCGAGCAAAACCGAAATCTTTCTGACCCTGCTGAAAAGCACCGTTGAACCGAGCACCGTTCTGGCAGAAGATCTGAGCACCCTGGATGCAGGTCCGGAAATGCGTCTGTGGGCAATTGTTGCAAGCGAAGTTCGTCTGCTGCTGAGCACCAAATGGAATGTTGGTCGTCTGTATCAGCTGCCGATTGTTGGTAGCGAAGAATTTGCAGAATATCATAGCCAGCGTGAAGCACTGACCAATGTTTTTCGTGATCTGGCAACCGAAATTGTTGGTGATGATCCGCGTGCAGAACTGCCGTTTCATATTACCATGAGCGTTATTGAAATGCGTCGCAATGATGGTAAAATTCCGAGTCCGCTGAGCGCAGATAGCCTGCCGGAAACCGCAATTATGCTGGCAGATGCAAGCCTGGCAGTTCTGGGTGCACCGCTGCCTGCAGATCGTGTTGAAAAAACCCTGGAACTGATTAAACAGGCAGATGCAAAATAACTCGGTACCAAAGACGAACAATAAGACGCTGAAAAGCGTCTTTTTTCGTTTTGGTCC</sbol:elements>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_sequence/1">
+    <sbol:displayId>A1_sequence</sbol:displayId>
+    <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_sequence/1"/>
+    <sbol:elements>AATGTTCCCTAATAATCAGCAAAGAGGTTACTAG</sbol:elements>
+    <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_sequence"/>
+    <sbol:version>1</sbol:version>
+    <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+    <dcterms:title>A1_sequence</dcterms:title>
+    <dcterms:created>2018-05-09T19:41:51.056Z</dcterms:created>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/CelloUCF2sbol_Activity/1"/>
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/L3S2P55_sequence/1">
+    <dcterms:created>2018-05-09T19:41:51.056Z</dcterms:created>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/CelloUCF2sbol_Activity/1"/>
+    <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+    <dcterms:title>L3S2P55_sequence</dcterms:title>
+    <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/L3S2P55_sequence"/>
+    <sbol:elements>CTCGGTACCAAAGACGAACAATAAGACGCTGAAAAGCGTCTTTTTTCGTTTTGGTCC</sbol:elements>
+    <sbol:version>1</sbol:version>
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+    <sbol:displayId>L3S2P55_sequence</sbol:displayId>
+    <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/L3S2P55_sequence/1"/>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/AmtR_sequence/1">
+    <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+    <sbol:elements>ATGGCAGGCGCAGTTGGTCGTCCGCGTCGTAGTGCACCGCGTCGTGCAGGTAAAAATCCGCGTGAAGAAATTCTGGATGCAAGCGCAGAACTGTTTACCCGTCAGGGTTTTGCAACCACCAGTACCCATCAGATTGCAGATGCAGTTGGTATTCGTCAGGCAAGCCTGTATTATCATTTTCCGAGCAAAACCGAAATCTTTCTGACCCTGCTGAAAAGCACCGTTGAACCGAGCACCGTTCTGGCAGAAGATCTGAGCACCCTGGATGCAGGTCCGGAAATGCGTCTGTGGGCAATTGTTGCAAGCGAAGTTCGTCTGCTGCTGAGCACCAAATGGAATGTTGGTCGTCTGTATCAGCTGCCGATTGTTGGTAGCGAAGAATTTGCAGAATATCATAGCCAGCGTGAAGCACTGACCAATGTTTTTCGTGATCTGGCAACCGAAATTGTTGGTGATGATCCGCGTGCAGAACTGCCGTTTCATATTACCATGAGCGTTATTGAAATGCGTCGCAATGATGGTAAAATTCCGAGTCCGCTGAGCGCAGATAGCCTGCCGGAAACCGCAATTATGCTGGCAGATGCAAGCCTGGCAGTTCTGGGTGCACCGCTGCCTGCAGATCGTGTTGAAAAAACCCTGGAACTGATTAAACAGGCAGATGCAAAATAA</sbol:elements>
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+    <dcterms:title>AmtR_sequence</dcterms:title>
+    <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/AmtR_sequence"/>
+    <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/AmtR_sequence/1"/>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/CelloUCF2sbol_Activity/1"/>
+    <sbol:displayId>AmtR_sequence</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <dcterms:created>2018-05-09T19:41:51.056Z</dcterms:created>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/BydvJ_sequence/1">
+    <sbol:elements>CTGAagGGTGTCTCAAGGTGCGTACCTTGACTGATGAGTCCGAAAGGACGAAACACCcctctacaaataattttgtttaa</sbol:elements>
+    <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/BydvJ_sequence"/>
+    <dcterms:created>2018-05-09T19:41:51.056Z</dcterms:created>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/CelloUCF2sbol_Activity/1"/>
+    <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+    <dcterms:title>BydvJ_sequence</dcterms:title>
+    <sbol:displayId>BydvJ_sequence</sbol:displayId>
+    <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/BydvJ_sequence/1"/>
+    <sbol:version>1</sbol:version>
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="http://examples.org/S2_SrpR_v1/1">
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+    <prov:wasDerivedFrom rdf:resource="http://examples.org/_0xEA/1"/>
+    <sbol:elements>CTGAAGCGCTCAACGGGTGTGCTTCCCGTTCTGATGAGTCCGTGAGGACGAAAGCGCCTCTACAAATAATTTTGTTTAAGAGTCTATGGACTATGTTTTCACAAAGGAAGTACCAGGATGGCACGTAAAACCGCAGCAGAAGCAGAAGAAACCCGTCAGCGTATTATTGATGCAGCACTGGAAGTTTTTGTTGCACAGGGTGTTAGTGATGCAACCCTGGATCAGATTGCACGTAAAGCCGGTGTTACCCGTGGTGCAGTTTATTGGCATTTTAATGGTAAACTGGAAGTTCTGCAGGCAGTTCTGGCAAGCCGTCAGCATCCGCTGGAACTGGATTTTACACCGGATCTGGGTATTGAACGTAGCTGGGAAGCAGTTGTTGTTGCAATGCTGGATGCAGTTCATAGTCCGCAGAGCAAACAGTTTAGCGAAATTCTGATTTATCAGGGTCTGGATGAAAGCGGTCTGATTCATAATCGTATGGTTCAGGCAAGCGATCGTTTTCTGCAGTATATTCATCAGGTTCTGCGTCATGCAGTTACCCAGGGTGAACTGCCGATTAATCTGGATCTGCAGACCAGCATTGGTGTTTTTAAAGGTCTGATTACCGGTCTGCTGTATGAAGGTCTGCGTAGCAAAGATCAGCAGGCACAGATTATCAAAGTTGCACTGGGTAGCTTTTGGGCACTGCTGCGTGAACCGCCTCGTTTTCTGCTGTGTGAAGAAGCACAGATTAAACAGGTGAAATCCTTCGAATAATTCAGCCAAAAAACTTAAGACCGCCGGTCTTGTCCACTACCTTGCAGTAATGCGGTGGACAGGATCGGCGGTTTTCTTTTCTCTTCTCAA</sbol:elements>
+    <sbol:displayId>S2_SrpR_v1</sbol:displayId>
+    <dcterms:title>S2_SrpR_v1</dcterms:title>
+    <prov:wasDerivedFrom rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S2_SrpR_sequence/1"/>
+    <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+    <sbol:version>1</sbol:version>
+    <sbol:persistentIdentity rdf:resource="http://examples.org/S2_SrpR_v1"/>
+    <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S2_SrpR_sequence/1"/>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="http://examples.org/S4_SrpR_v1/1">
+    <prov:wasDerivedFrom rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S4_SrpR_sequence/1"/>
+    <sbol:persistentIdentity rdf:resource="http://examples.org/S4_SrpR_v1"/>
+    <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S4_SrpR_sequence/1"/>
+    <prov:wasDerivedFrom rdf:resource="http://examples.org/_0xEA/1"/>
+    <sbol:displayId>S4_SrpR_v1</sbol:displayId>
+    <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+    <sbol:elements>CTGAAGCGCTCAACGGGTGTGCTTCCCGTTCTGATGAGTCCGTGAGGACGAAAGCGCCTCTACAAATAATTTTGTTTAAGAGTCTATGGACTATGTTTTCACAAAGGAAGTACCAGGATGGCACGTAAAACCGCAGCAGAAGCAGAAGAAACCCGTCAGCGTATTATTGATGCAGCACTGGAAGTTTTTGTTGCACAGGGTGTTAGTGATGCAACCCTGGATCAGATTGCACGTAAAGCCGGTGTTACCCGTGGTGCAGTTTATTGGCATTTTAATGGTAAACTGGAAGTTCTGCAGGCAGTTCTGGCAAGCCGTCAGCATCCGCTGGAACTGGATTTTACACCGGATCTGGGTATTGAACGTAGCTGGGAAGCAGTTGTTGTTGCAATGCTGGATGCAGTTCATAGTCCGCAGAGCAAACAGTTTAGCGAAATTCTGATTTATCAGGGTCTGGATGAAAGCGGTCTGATTCATAATCGTATGGTTCAGGCAAGCGATCGTTTTCTGCAGTATATTCATCAGGTTCTGCGTCATGCAGTTACCCAGGGTGAACTGCCGATTAATCTGGATCTGCAGACCAGCATTGGTGTTTTTAAAGGTCTGATTACCGGTCTGCTGTATGAAGGTCTGCGTAGCAAAGATCAGCAGGCACAGATTATCAAAGTTGCACTGGGTAGCTTTTGGGCACTGCTGCGTGAACCGCCTCGTTTTCTGCTGTGTGAAGAAGCACAGATTAAACAGGTGAAATCCTTCGAATAATTCAGCCAAAAAACTTAAGACCGCCGGTCTTGTCCACTACCTTGCAGTAATGCGGTGGACAGGATCGGCGGTTTTCTTTTCTCTTCTCAA</sbol:elements>
+    <dcterms:title>S4_SrpR_v1</dcterms:title>
+    <sbol:version>1</sbol:version>
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/YFP_protein_sequence/1">
+    <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+    <sbol:elements>ATGGTGAGCAAGGGCGAGGAGCTGTTCACCGGGGTGGTGCCCATCCTGGTCGAGCTGGACGGCGACGTAAACGGCCACAAGTTCAGCGTGTCCGGCGAGGGCGAGGGCGATGCCACCTACGGCAAGCTGACCCTGAAGTTCATCTGCACCACAGGCAAGCTGCCCGTGCCCTGGCCCACCCTCGTGACCACCTTCGGCTACGGCCTGCAATGCTTCGCCCGCTACCCCGACCACATGAAGCTGCACGACTTCTTCAAGTCCGCCATGCCCGAAGGCTACGTCCAGGAGCGCACCATCTTCTTCAAGGACGACGGCAACTACAAGACCCGCGCCGAGGTGAAGTTCGAGGGCGACACCCTGGTGAACCGCATCGAGCTGAAGGGCATCGACTTCAAGGAGGACGGCAACATCCTGGGGCACAAGCTGGAGTACAACTACAACAGCCACAACGTCTATATCATGGCCGACAAGCAGAAGAACGGCATCAAGGTGAACTTCAAGATCCGCCACAACATCGAGGACGGCAGCGTGCAGCTCGCCGACCACTACCAGCAGAACACCCCAATCGGCGACGGCCCCGTGCTGCTGCCCGACAACCACTACCTTAGCTACCAGTCCGCCCTGAGCAAAGACCCCAACGAGAAGCGCGATCACATGGTCCTGCTGGAGTTCGTGACCGCCGCCGGGATCACTCTCGGCATGGACGAGCTGTACAAGTAA</sbol:elements>
+    <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/YFP_protein_sequence/1"/>
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+    <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/YFP_protein_sequence"/>
+    <sbol:version>1</sbol:version>
+    <sbol:displayId>YFP_protein_sequence</sbol:displayId>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/pBAD_sequence/1">
+    <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/pBAD_sequence/1"/>
+    <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/pBAD_sequence"/>
+    <sbol:elements>ACTTTTCATACTCCCGCCATTCAGAGAAGAAACCAATTGTCCATATTGCATCAGACATTGCCGTCACTGCGTCTTTTACTGGCTCTTCTCGCTAACCAAACCGGTAACCCCGCTTATTAAAAGCATTCTGTAACAAAGCGGGACCAAAGCCATGACAAAAACGCGTAACAAAAGTGTCTATAATCACGGCAGAAAAGTCCACATTGATTATTTGCACGGCGTCACACTTTGCTATGCCATAGCATTTTTATCCATAAGATTAGCGGATCCTACCTGACGCTTTTTATCGCAACTCTCTACTGTTTCTCCATACCCGTTTTTTTGGGCTAGC</sbol:elements>
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+    <sbol:version>1</sbol:version>
+    <sbol:displayId>pBAD_sequence</sbol:displayId>
+    <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/ECK120019600_sequence/1">
+    <sbol:displayId>ECK120019600_sequence</sbol:displayId>
+    <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/ECK120019600_sequence"/>
+    <sbol:version>1</sbol:version>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/CelloUCF2sbol_Activity/1"/>
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+    <dcterms:title>ECK120019600_sequence</dcterms:title>
+    <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/ECK120019600_sequence/1"/>
+    <dcterms:created>2018-05-09T19:41:51.056Z</dcterms:created>
+    <sbol:elements>TTCAGCCAAAAAACTTAAGACCGCCGGTCTTGTCCACTACCTTGCAGTAATGCGGTGGACAGGATCGGCGGTTTTCTTTTCTCTTCTCAA</sbol:elements>
+    <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/pSrpR_sequence/1">
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+    <dcterms:title>pSrpR_sequence</dcterms:title>
+    <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/pSrpR_sequence"/>
+    <dcterms:created>2018-05-09T19:41:51.056Z</dcterms:created>
+    <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+    <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/pSrpR_sequence/1"/>
+    <sbol:elements>TCTATGATTGGTCCAGATTCGTTACCAATTGACAGCTAGCTCAGTCCTAGGTATATACATACATGCTTGTTTGTTTGTAAAC</sbol:elements>
+    <sbol:displayId>pSrpR_sequence</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/CelloUCF2sbol_Activity/1"/>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/RiboJ_sequence/1">
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+    <sbol:displayId>RiboJ_sequence</sbol:displayId>
+    <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+    <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/RiboJ_sequence"/>
+    <sbol:elements>AGCTGTCACCGGATGTGCTTTCCGGTCTGATGAGTCCGTGAGGACGAAACAGCCTCTACAAATAATTTTGTTTAA</sbol:elements>
+    <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/RiboJ_sequence/1"/>
+    <sbol:version>1</sbol:version>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/pTet_sequence/1">
+    <sbol:displayId>pTet_sequence</sbol:displayId>
+    <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+    <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/pTet_sequence"/>
+    <sbol:version>1</sbol:version>
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+    <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/pTet_sequence/1"/>
+    <sbol:elements>TACTCCACCGTTGGCTTTTTTCCCTATCAGTGATAGAGATTGACATCCCTATCAGTGATAGAGATAATGAGCAC</sbol:elements>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/pTac_sequence/1">
+    <sbol:displayId>pTac_sequence</sbol:displayId>
+    <sbol:version>1</sbol:version>
+    <sbol:elements>AACGATCGTTGGCTGTGTTGACAATTAATCATCGGCTCGTATAATGTGTGGAATTGTGAGCGCTCACAATT</sbol:elements>
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+    <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/pTac_sequence/1"/>
+    <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/pTac_sequence"/>
+    <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+  </sbol:Sequence>
+  <sbol:Sequence rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/pAmtR_sequence/1">
+    <sbol:encoding rdf:resource="http://www.chem.qmul.ac.uk/iubmb/misc/naseq.html"/>
+    <sbol:elements>CTTGTCCAACCAAATGATTCGTTACCAATTGACAGTTTCTATCGATCTATAGATAATGCTAGC</sbol:elements>
+    <dcterms:created>2018-05-09T19:41:51.056Z</dcterms:created>
+    <sbol:displayId>pAmtR_sequence</sbol:displayId>
+    <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/pAmtR_sequence/1"/>
+    <dcterms:title>pAmtR_sequence</dcterms:title>
+    <sbol:version>1</sbol:version>
+    <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+    <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/pAmtR_sequence"/>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/CelloUCF2sbol_Activity/1"/>
+  </sbol:Sequence>
+  <sbol:ComponentDefinition rdf:about="http://examples.org/_0xEA_comp/1">
+    <sbol:component>
+      <sbol:Component rdf:about="http://examples.org/_0xEA_comp/S3_SrpR_comp_1/1">
+        <sbol:displayId>S3_SrpR_comp_1</sbol:displayId>
+        <sbol:version>1</sbol:version>
+        <sbol:access rdf:resource="http://sbols.org/v2#public"/>
+        <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/S3_SrpR_comp_1"/>
+        <dcterms:title>S3_SrpR</dcterms:title>
+        <sbol:definition rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR/1"/>
+      </sbol:Component>
+    </sbol:component>
+    <sbol:component>
+      <sbol:Component rdf:about="http://examples.org/_0xEA_comp/S1_SrpR_v1_comp/1">
+        <sbol:version>1</sbol:version>
+        <sbol:displayId>S1_SrpR_v1_comp</sbol:displayId>
+        <sbol:definition rdf:resource="http://examples.org/Cello_Parts/S1_SrpR_v1/1"/>
+        <sbol:access rdf:resource="http://sbols.org/v2#public"/>
+        <dcterms:title>S1_SrpR_1</dcterms:title>
+        <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/S1_SrpR_v1_comp"/>
+      </sbol:Component>
+    </sbol:component>
+    <sbol:sequenceAnnotation>
+      <sbol:SequenceAnnotation rdf:about="http://examples.org/_0xEA_comp/ECK120029600_anno_1/1">
+        <sbol:displayId>ECK120029600_anno_1</sbol:displayId>
+        <sbol:component rdf:resource="http://examples.org/_0xEA_comp/ECK120029600_comp_1/1"/>
+        <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/ECK120029600_anno_1"/>
+        <dcterms:title>ECK120029600</dcterms:title>
+        <sbol:location>
+          <sbol:Range rdf:about="http://examples.org/_0xEA_comp/ECK120029600_anno_1/ECK120029600_anno_1_loc/1">
+            <sbol:orientation rdf:resource="http://sbols.org/v2#inline"/>
+            <sbol:displayId>ECK120029600_anno_1_loc</sbol:displayId>
+            <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/ECK120029600_anno_1/ECK120029600_anno_1_loc"/>
+            <sbol:start>1169</sbol:start>
+            <sbol:end>1258</sbol:end>
+            <sbol:version>1</sbol:version>
+          </sbol:Range>
+        </sbol:location>
+        <sbol:version>1</sbol:version>
+      </sbol:SequenceAnnotation>
+    </sbol:sequenceAnnotation>
+    <sbol:component>
+      <sbol:Component rdf:about="http://examples.org/_0xEA_comp/pBAD_comp_1/1">
+        <sbol:definition rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/pBAD/1"/>
+        <dcterms:title>pBAD</dcterms:title>
+        <sbol:version>1</sbol:version>
+        <sbol:displayId>pBAD_comp_1</sbol:displayId>
+        <sbol:access rdf:resource="http://sbols.org/v2#public"/>
+        <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/pBAD_comp_1"/>
+      </sbol:Component>
+    </sbol:component>
+    <sbol:component>
+      <sbol:Component rdf:about="http://examples.org/_0xEA_comp/pSrpR_comp_1/1">
+        <dcterms:title>pSrpR</dcterms:title>
+        <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/pSrpR_comp_1"/>
+        <sbol:version>1</sbol:version>
+        <sbol:definition rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/pSrpR/1"/>
+        <sbol:access rdf:resource="http://sbols.org/v2#public"/>
+        <sbol:displayId>pSrpR_comp_1</sbol:displayId>
+      </sbol:Component>
+    </sbol:component>
+    <sbol:component>
+      <sbol:Component rdf:about="http://examples.org/_0xEA_comp/AmtR_comp_1/1">
+        <sbol:definition rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/AmtR/1"/>
+        <sbol:version>1</sbol:version>
+        <sbol:displayId>AmtR_comp_1</sbol:displayId>
+        <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/AmtR_comp_1"/>
+        <dcterms:title>AmtR</dcterms:title>
+        <sbol:access rdf:resource="http://sbols.org/v2#public"/>
+      </sbol:Component>
+    </sbol:component>
+    <sbol:sequenceAnnotation>
+      <sbol:SequenceAnnotation rdf:about="http://examples.org/_0xEA_comp/pSrpR_anno_1/1">
+        <dcterms:title>pSrpR</dcterms:title>
+        <sbol:displayId>pSrpR_anno_1</sbol:displayId>
+        <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/pSrpR_anno_1"/>
+        <sbol:component rdf:resource="http://examples.org/_0xEA_comp/pSrpR_comp_1/1"/>
+        <sbol:version>1</sbol:version>
+        <sbol:location>
+          <sbol:Range rdf:about="http://examples.org/_0xEA_comp/pSrpR_anno_1/pSrpR_anno_1_loc/1">
+            <sbol:start>2182</sbol:start>
+            <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/pSrpR_anno_1/pSrpR_anno_1_loc"/>
+            <sbol:version>1</sbol:version>
+            <sbol:end>2263</sbol:end>
+            <sbol:orientation rdf:resource="http://sbols.org/v2#inline"/>
+            <sbol:displayId>pSrpR_anno_1_loc</sbol:displayId>
+          </sbol:Range>
+        </sbol:location>
+      </sbol:SequenceAnnotation>
+    </sbol:sequenceAnnotation>
+    <sbol:sequenceAnnotation>
+      <sbol:SequenceAnnotation rdf:about="http://examples.org/_0xEA_comp/pTet_anno_1/1">
+        <dcterms:title>pTet</dcterms:title>
+        <sbol:location>
+          <sbol:Range rdf:about="http://examples.org/_0xEA_comp/pTet_anno_1/pTet_anno_1_loc/1">
+            <sbol:start>336</sbol:start>
+            <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/pTet_anno_1/pTet_anno_1_loc"/>
+            <sbol:version>1</sbol:version>
+            <sbol:orientation rdf:resource="http://sbols.org/v2#inline"/>
+            <sbol:end>409</sbol:end>
+            <sbol:displayId>pTet_anno_1_loc</sbol:displayId>
+          </sbol:Range>
+        </sbol:location>
+        <sbol:version>1</sbol:version>
+        <sbol:component rdf:resource="http://examples.org/_0xEA_comp/pTet_comp_1/1"/>
+        <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/pTet_anno_1"/>
+        <sbol:displayId>pTet_anno_1</sbol:displayId>
+      </sbol:SequenceAnnotation>
+    </sbol:sequenceAnnotation>
+    <sbol:component>
+      <sbol:Component rdf:about="http://examples.org/_0xEA_comp/A1_AmtR_comp_1/1">
+        <sbol:displayId>A1_AmtR_comp_1</sbol:displayId>
+        <sbol:version>1</sbol:version>
+        <dcterms:title>A1_AmtR</dcterms:title>
+        <sbol:access rdf:resource="http://sbols.org/v2#public"/>
+        <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/A1_AmtR_comp_1"/>
+        <sbol:definition rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR/1"/>
+      </sbol:Component>
+    </sbol:component>
+    <sbol:sequenceAnnotation>
+      <sbol:SequenceAnnotation rdf:about="http://examples.org/_0xEA_comp/S2_SrpR_v1_anno_1/1">
+        <sbol:component rdf:resource="http://examples.org/_0xEA_comp/S2_SrpR_v1_comp/1"/>
+        <dcterms:title>S2_SrpR_variant_1</dcterms:title>
+        <sbol:location>
+          <sbol:Range rdf:about="http://examples.org/_0xEA_comp/S2_SrpR_v1_anno_1/S2_SrpR_v1_anno_1_loc/1">
+            <sbol:start>410</sbol:start>
+            <sbol:end>1258</sbol:end>
+            <sbol:version>1</sbol:version>
+            <sbol:displayId>S2_SrpR_v1_anno_1_loc</sbol:displayId>
+            <sbol:orientation rdf:resource="http://sbols.org/v2#inline"/>
+            <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/S2_SrpR_v1_anno_1/S2_SrpR_v1_anno_1_loc"/>
+          </sbol:Range>
+        </sbol:location>
+        <sbol:displayId>S2_SrpR_v1_anno_1</sbol:displayId>
+        <sbol:version>1</sbol:version>
+        <dcterms:description>Variant of part.</dcterms:description>
+        <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/S2_SrpR_v1_anno_1"/>
+      </sbol:SequenceAnnotation>
+    </sbol:sequenceAnnotation>
+    <sbol:component>
+      <sbol:Component rdf:about="http://examples.org/_0xEA_comp/pAmtR_comp_1/1">
+        <dcterms:title>pAmtR</dcterms:title>
+        <sbol:version>1</sbol:version>
+        <sbol:access rdf:resource="http://sbols.org/v2#public"/>
+        <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/pAmtR_comp_1"/>
+        <sbol:displayId>pAmtR_comp_1</sbol:displayId>
+        <sbol:definition rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/pAmtR/1"/>
+      </sbol:Component>
+    </sbol:component>
+    <sbol:sequenceAnnotation>
+      <sbol:SequenceAnnotation rdf:about="http://examples.org/_0xEA_comp/S3_SrpR_anno_1/1">
+        <sbol:location>
+          <sbol:Range rdf:about="http://examples.org/_0xEA_comp/S3_SrpR_anno_1/S3_SrpR_anno_1_loc/1">
+            <sbol:version>1</sbol:version>
+            <sbol:end>1258</sbol:end>
+            <sbol:start>410</sbol:start>
+            <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/S3_SrpR_anno_1/S3_SrpR_anno_1_loc"/>
+            <sbol:displayId>S3_SrpR_anno_1_loc</sbol:displayId>
+            <sbol:orientation rdf:resource="http://sbols.org/v2#inline"/>
+          </sbol:Range>
+        </sbol:location>
+        <sbol:component rdf:resource="http://examples.org/_0xEA_comp/S3_SrpR_comp_1/1"/>
+        <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/S3_SrpR_anno_1"/>
+        <sbol:version>1</sbol:version>
+        <dcterms:title>S3_SrpR</dcterms:title>
+        <sbol:displayId>S3_SrpR_anno_1</sbol:displayId>
+      </sbol:SequenceAnnotation>
+    </sbol:sequenceAnnotation>
+    <sbol:component>
+      <sbol:Component rdf:about="http://examples.org/_0xEA_comp/pTet_comp_1/1">
+        <dcterms:title>pTet</dcterms:title>
+        <sbol:version>1</sbol:version>
+        <sbol:definition rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/pTet/1"/>
+        <sbol:displayId>pTet_comp_1</sbol:displayId>
+        <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/pTet_comp_1"/>
+        <sbol:access rdf:resource="http://sbols.org/v2#public"/>
+      </sbol:Component>
+    </sbol:component>
+    <sbol:sequenceAnnotation>
+      <sbol:SequenceAnnotation rdf:about="http://examples.org/_0xEA_comp/RiboJ_anno_1/1">
+        <sbol:displayId>RiboJ_anno_1</sbol:displayId>
+        <sbol:component rdf:resource="http://examples.org/_0xEA_comp/RiboJ_comp_1/1"/>
+        <sbol:location>
+          <sbol:Range rdf:about="http://examples.org/_0xEA_comp/RiboJ_anno_1/RiboJ_anno_1_loc/1">
+            <sbol:start>2331</sbol:start>
+            <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/RiboJ_anno_1/RiboJ_anno_1_loc"/>
+            <sbol:end>2405</sbol:end>
+            <sbol:version>1</sbol:version>
+            <sbol:displayId>RiboJ_anno_1_loc</sbol:displayId>
+            <sbol:orientation rdf:resource="http://sbols.org/v2#inline"/>
+          </sbol:Range>
+        </sbol:location>
+        <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/RiboJ_anno_1"/>
+        <sbol:version>1</sbol:version>
+      </sbol:SequenceAnnotation>
+    </sbol:sequenceAnnotation>
+    <sbol:sequenceAnnotation>
+      <sbol:SequenceAnnotation rdf:about="http://examples.org/_0xEA_comp/pAmtR_anno_1/1">
+        <sbol:component rdf:resource="http://examples.org/_0xEA_comp/pAmtR_comp_1/1"/>
+        <sbol:location>
+          <sbol:Range rdf:about="http://examples.org/_0xEA_comp/pAmtR_anno_1/pAmtR_anno_1_loc/1">
+            <sbol:version>1</sbol:version>
+            <sbol:orientation rdf:resource="http://sbols.org/v2#inline"/>
+            <sbol:start>2264</sbol:start>
+            <sbol:displayId>pAmtR_anno_1_loc</sbol:displayId>
+            <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/pAmtR_anno_1/pAmtR_anno_1_loc"/>
+            <sbol:end>2326</sbol:end>
+          </sbol:Range>
+        </sbol:location>
+        <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/pAmtR_anno_1"/>
+        <sbol:displayId>pAmtR_anno_1</sbol:displayId>
+        <dcterms:title>pAmtR</dcterms:title>
+        <sbol:version>1</sbol:version>
+      </sbol:SequenceAnnotation>
+    </sbol:sequenceAnnotation>
+    <sbol:sequenceAnnotation>
+      <sbol:SequenceAnnotation rdf:about="http://examples.org/_0xEA_comp/pBAD_anno_1/1">
+        <sbol:location>
+          <sbol:Range rdf:about="http://examples.org/_0xEA_comp/pBAD_anno_1/pBAD_anno_1_loc/1">
+            <sbol:version>1</sbol:version>
+            <sbol:orientation rdf:resource="http://sbols.org/v2#inline"/>
+            <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/pBAD_anno_1/pBAD_anno_1_loc"/>
+            <sbol:displayId>pBAD_anno_1_loc</sbol:displayId>
+            <sbol:end>335</sbol:end>
+            <sbol:start>5</sbol:start>
+          </sbol:Range>
+        </sbol:location>
+        <dcterms:title>pBAD</dcterms:title>
+        <sbol:component rdf:resource="http://examples.org/_0xEA_comp/pBAD_comp_1/1"/>
+        <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/pBAD_anno_1"/>
+        <sbol:displayId>pBAD_anno_1</sbol:displayId>
+        <sbol:version>1</sbol:version>
+      </sbol:SequenceAnnotation>
+    </sbol:sequenceAnnotation>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp"/>
+    <sbol:component>
+      <sbol:Component rdf:about="http://examples.org/_0xEA_comp/L3S2P55_comp_1/1">
+        <dcterms:title>L3S2P55</dcterms:title>
+        <sbol:displayId>L3S2P55_comp_1</sbol:displayId>
+        <sbol:version>1</sbol:version>
+        <sbol:access rdf:resource="http://sbols.org/v2#public"/>
+        <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/L3S2P55_comp_1"/>
+        <sbol:definition rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/L3S2P55/1"/>
+      </sbol:Component>
+    </sbol:component>
+    <sbol:version>1</sbol:version>
+    <sbol:sequence rdf:resource="http://examples.org/_0xEA/1"/>
+    <sbol:component>
+      <sbol:Component rdf:about="http://examples.org/_0xEA_comp/RiboJ_comp_1/1">
+        <sbol:definition rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/RiboJ/1"/>
+        <sbol:displayId>RiboJ_comp_1</sbol:displayId>
+        <sbol:version>1</sbol:version>
+        <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/RiboJ_comp_1"/>
+        <sbol:access rdf:resource="http://sbols.org/v2#public"/>
+      </sbol:Component>
+    </sbol:component>
+    <sbol:sequenceAnnotation>
+      <sbol:SequenceAnnotation rdf:about="http://examples.org/_0xEA_comp/RiboJ10_anno_1/1">
+        <dcterms:title>RiboJ10</dcterms:title>
+        <sbol:location>
+          <sbol:Range rdf:about="http://examples.org/_0xEA_comp/RiboJ10_anno_1/RiboJ10_anno_1_loc/1">
+            <sbol:displayId>RiboJ10_anno_1_loc</sbol:displayId>
+            <sbol:end>488</sbol:end>
+            <sbol:version>1</sbol:version>
+            <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/RiboJ10_anno_1/RiboJ10_anno_1_loc"/>
+            <sbol:orientation rdf:resource="http://sbols.org/v2#inline"/>
+            <sbol:start>410</sbol:start>
+          </sbol:Range>
+        </sbol:location>
+        <sbol:displayId>RiboJ10_anno_1</sbol:displayId>
+        <sbol:component rdf:resource="http://examples.org/_0xEA_comp/RiboJ10_comp_1/1"/>
+        <sbol:version>1</sbol:version>
+        <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/RiboJ10_anno_1"/>
+      </sbol:SequenceAnnotation>
+    </sbol:sequenceAnnotation>
+    <sbol:component>
+      <sbol:Component rdf:about="http://examples.org/_0xEA_comp/pTac_comp_1/1">
+        <dcterms:title>pTac</dcterms:title>
+        <sbol:displayId>pTac_comp_1</sbol:displayId>
+        <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/pTac_comp_1"/>
+        <sbol:version>1</sbol:version>
+        <sbol:access rdf:resource="http://sbols.org/v2#public"/>
+        <sbol:definition rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/pTac/1"/>
+      </sbol:Component>
+    </sbol:component>
+    <sbol:sequenceAnnotation>
+      <sbol:SequenceAnnotation rdf:about="http://examples.org/_0xEA_comp/BydvJ_anno_1/1">
+        <sbol:component rdf:resource="http://examples.org/_0xEA_comp/BydvJ_comp_1/1"/>
+        <sbol:location>
+          <sbol:Range rdf:about="http://examples.org/_0xEA_comp/BydvJ_anno_1/BydvJ_anno_1_loc/1">
+            <sbol:start>1334</sbol:start>
+            <sbol:version>1</sbol:version>
+            <sbol:displayId>BydvJ_anno_1_loc</sbol:displayId>
+            <sbol:orientation rdf:resource="http://sbols.org/v2#inline"/>
+            <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/BydvJ_anno_1/BydvJ_anno_1_loc"/>
+            <sbol:end>1413</sbol:end>
+          </sbol:Range>
+        </sbol:location>
+        <sbol:displayId>BydvJ_anno_1</sbol:displayId>
+        <sbol:version>1</sbol:version>
+        <dcterms:title>BydvJ</dcterms:title>
+        <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/BydvJ_anno_1"/>
+      </sbol:SequenceAnnotation>
+    </sbol:sequenceAnnotation>
+    <sbol:displayId>_0xEA_comp</sbol:displayId>
+    <sbol:component>
+      <sbol:Component rdf:about="http://examples.org/_0xEA_comp/ECK120019600_comp_1/1">
+        <sbol:definition rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/ECK120019600/1"/>
+        <dcterms:title>ECK120019600</dcterms:title>
+        <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/ECK120019600_comp_1"/>
+        <sbol:access rdf:resource="http://sbols.org/v2#public"/>
+        <sbol:displayId>ECK120019600_comp_1</sbol:displayId>
+        <sbol:version>1</sbol:version>
+      </sbol:Component>
+    </sbol:component>
+    <sbol:sequenceAnnotation>
+      <sbol:SequenceAnnotation rdf:about="http://examples.org/_0xEA_comp/L3S2P55_anno_1/1">
+        <sbol:displayId>L3S2P55_anno_1</sbol:displayId>
+        <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/L3S2P55_anno_1"/>
+        <dcterms:title>L3S2P55</dcterms:title>
+        <sbol:location>
+          <sbol:Range rdf:about="http://examples.org/_0xEA_comp/L3S2P55_anno_1/L3S2P55_anno_1_loc/1">
+            <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/L3S2P55_anno_1/L3S2P55_anno_1_loc"/>
+            <sbol:version>1</sbol:version>
+            <sbol:orientation rdf:resource="http://sbols.org/v2#inline"/>
+            <sbol:start>2117</sbol:start>
+            <sbol:end>2173</sbol:end>
+            <sbol:displayId>L3S2P55_anno_1_loc</sbol:displayId>
+          </sbol:Range>
+        </sbol:location>
+        <sbol:version>1</sbol:version>
+        <sbol:component rdf:resource="http://examples.org/_0xEA_comp/L3S2P55_comp_1/1"/>
+      </sbol:SequenceAnnotation>
+    </sbol:sequenceAnnotation>
+    <sbol:sequenceAnnotation>
+      <sbol:SequenceAnnotation rdf:about="http://examples.org/_0xEA_comp/pTac_anno_1/1">
+        <sbol:location>
+          <sbol:Range rdf:about="http://examples.org/_0xEA_comp/pTac_anno_1/pTac_anno_1_loc/1">
+            <sbol:version>1</sbol:version>
+            <sbol:end>1333</sbol:end>
+            <sbol:displayId>pTac_anno_1_loc</sbol:displayId>
+            <sbol:orientation rdf:resource="http://sbols.org/v2#inline"/>
+            <sbol:start>1263</sbol:start>
+            <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/pTac_anno_1/pTac_anno_1_loc"/>
+          </sbol:Range>
+        </sbol:location>
+        <dcterms:title>pTac</dcterms:title>
+        <sbol:displayId>pTac_anno_1</sbol:displayId>
+        <sbol:version>1</sbol:version>
+        <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/pTac_anno_1"/>
+        <sbol:component rdf:resource="http://examples.org/_0xEA_comp/pTac_comp_1/1"/>
+      </sbol:SequenceAnnotation>
+    </sbol:sequenceAnnotation>
+    <sbol:component>
+      <sbol:Component rdf:about="http://examples.org/_0xEA_comp/YFP_comp_1/1">
+        <sbol:access rdf:resource="http://sbols.org/v2#public"/>
+        <dcterms:title>YFP</dcterms:title>
+        <sbol:displayId>YFP_comp_1</sbol:displayId>
+        <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/YFP_comp_1"/>
+        <sbol:definition rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/YFP/1"/>
+        <sbol:version>1</sbol:version>
+      </sbol:Component>
+    </sbol:component>
+    <sbol:sequenceAnnotation>
+      <sbol:SequenceAnnotation rdf:about="http://examples.org/_0xEA_comp/S1_SrpR_v1_anno_1/1">
+        <dcterms:title>S1_SrpR_variant_1</dcterms:title>
+        <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/S1_SrpR_v1_anno_1"/>
+        <sbol:displayId>S1_SrpR_v1_anno_1</sbol:displayId>
+        <dcterms:description>Variant of part.</dcterms:description>
+        <sbol:component rdf:resource="http://examples.org/_0xEA_comp/S1_SrpR_v1_comp/1"/>
+        <sbol:version>1</sbol:version>
+        <sbol:location>
+          <sbol:Range rdf:about="http://examples.org/_0xEA_comp/S1_SrpR_v1_anno_1/S1_SrpR_v1_anno_1_loc/1">
+            <sbol:start>410</sbol:start>
+            <sbol:orientation rdf:resource="http://sbols.org/v2#inline"/>
+            <sbol:end>1258</sbol:end>
+            <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/S1_SrpR_v1_anno_1/S1_SrpR_v1_anno_1_loc"/>
+            <sbol:version>1</sbol:version>
+            <sbol:displayId>S1_SrpR_v1_anno_1_loc</sbol:displayId>
+          </sbol:Range>
+        </sbol:location>
+      </sbol:SequenceAnnotation>
+    </sbol:sequenceAnnotation>
+    <sbol:sequenceAnnotation>
+      <sbol:SequenceAnnotation rdf:about="http://examples.org/_0xEA_comp/A1_AmtR_anno_1/1">
+        <sbol:component rdf:resource="http://examples.org/_0xEA_comp/A1_AmtR_comp_1/1"/>
+        <dcterms:title>A1_AmtR</dcterms:title>
+        <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/A1_AmtR_anno_1"/>
+        <sbol:location>
+          <sbol:Range rdf:about="http://examples.org/_0xEA_comp/A1_AmtR_anno_1/A1_AmtR_anno_1_loc/1">
+            <sbol:displayId>A1_AmtR_anno_1_loc</sbol:displayId>
+            <sbol:start>1334</sbol:start>
+            <sbol:version>1</sbol:version>
+            <sbol:orientation rdf:resource="http://sbols.org/v2#inline"/>
+            <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/A1_AmtR_anno_1/A1_AmtR_anno_1_loc"/>
+            <sbol:end>2173</sbol:end>
+          </sbol:Range>
+        </sbol:location>
+        <sbol:displayId>A1_AmtR_anno_1</sbol:displayId>
+        <sbol:version>1</sbol:version>
+      </sbol:SequenceAnnotation>
+    </sbol:sequenceAnnotation>
+    <sbol:sequenceAnnotation>
+      <sbol:SequenceAnnotation rdf:about="http://examples.org/_0xEA_comp/YFP_anno_1/1">
+        <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/YFP_anno_1"/>
+        <sbol:displayId>YFP_anno_1</sbol:displayId>
+        <sbol:location>
+          <sbol:Range rdf:about="http://examples.org/_0xEA_comp/YFP_anno_1/YFP_anno_1_loc/1">
+            <sbol:orientation rdf:resource="http://sbols.org/v2#inline"/>
+            <sbol:displayId>YFP_anno_1_loc</sbol:displayId>
+            <sbol:end>3151</sbol:end>
+            <sbol:start>2432</sbol:start>
+            <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/YFP_anno_1/YFP_anno_1_loc"/>
+            <sbol:version>1</sbol:version>
+          </sbol:Range>
+        </sbol:location>
+        <dcterms:title>YFP</dcterms:title>
+        <sbol:version>1</sbol:version>
+        <sbol:component rdf:resource="http://examples.org/_0xEA_comp/YFP_comp_1/1"/>
+      </sbol:SequenceAnnotation>
+    </sbol:sequenceAnnotation>
+    <sbol:component>
+      <sbol:Component rdf:about="http://examples.org/_0xEA_comp/ECK120029600_comp_1/1">
+        <sbol:access rdf:resource="http://sbols.org/v2#public"/>
+        <sbol:definition rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/ECK120029600/1"/>
+        <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/ECK120029600_comp_1"/>
+        <sbol:version>1</sbol:version>
+        <sbol:displayId>ECK120029600_comp_1</sbol:displayId>
+        <dcterms:title>ECK120029600</dcterms:title>
+      </sbol:Component>
+    </sbol:component>
+    <sbol:component>
+      <sbol:Component rdf:about="http://examples.org/_0xEA_comp/SrpR_comp_1/1">
+        <sbol:version>1</sbol:version>
+        <sbol:access rdf:resource="http://sbols.org/v2#public"/>
+        <sbol:displayId>SrpR_comp_1</sbol:displayId>
+        <dcterms:title>SrpR</dcterms:title>
+        <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/SrpR_comp_1"/>
+        <sbol:definition rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/SrpR/1"/>
+      </sbol:Component>
+    </sbol:component>
+    <sbol:sequenceAnnotation>
+      <sbol:SequenceAnnotation rdf:about="http://examples.org/_0xEA_comp/AmtR_anno_1/1">
+        <dcterms:title>AmtR</dcterms:title>
+        <sbol:location>
+          <sbol:Range rdf:about="http://examples.org/_0xEA_comp/AmtR_anno_1/AmtR_anno_1_loc/1">
+            <sbol:orientation rdf:resource="http://sbols.org/v2#inline"/>
+            <sbol:version>1</sbol:version>
+            <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/AmtR_anno_1/AmtR_anno_1_loc"/>
+            <sbol:end>2116</sbol:end>
+            <sbol:start>1448</sbol:start>
+            <sbol:displayId>AmtR_anno_1_loc</sbol:displayId>
+          </sbol:Range>
+        </sbol:location>
+        <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/AmtR_anno_1"/>
+        <sbol:displayId>AmtR_anno_1</sbol:displayId>
+        <sbol:component rdf:resource="http://examples.org/_0xEA_comp/AmtR_comp_1/1"/>
+        <sbol:version>1</sbol:version>
+      </sbol:SequenceAnnotation>
+    </sbol:sequenceAnnotation>
+    <sbol:component>
+      <sbol:Component rdf:about="http://examples.org/_0xEA_comp/S4_SrpR_v1_comp/1">
+        <dcterms:title>S4_SrpR_1</dcterms:title>
+        <sbol:version>1</sbol:version>
+        <sbol:access rdf:resource="http://sbols.org/v2#public"/>
+        <sbol:definition rdf:resource="http://examples.org/Cello_Parts/S4_SrpR_v1/1"/>
+        <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/S4_SrpR_v1_comp"/>
+        <sbol:displayId>S4_SrpR_v1_comp</sbol:displayId>
+      </sbol:Component>
+    </sbol:component>
+    <sbol:component>
+      <sbol:Component rdf:about="http://examples.org/_0xEA_comp/S2_SrpR_v1_comp/1">
+        <sbol:displayId>S2_SrpR_v1_comp</sbol:displayId>
+        <sbol:version>1</sbol:version>
+        <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/S2_SrpR_v1_comp"/>
+        <sbol:access rdf:resource="http://sbols.org/v2#public"/>
+        <sbol:definition rdf:resource="http://examples.org/Cello_Parts/S2_SrpR_v1/1"/>
+        <dcterms:title>S2_SrpR_1</dcterms:title>
+      </sbol:Component>
+    </sbol:component>
+    <sbol:sequenceAnnotation>
+      <sbol:SequenceAnnotation rdf:about="http://examples.org/_0xEA_comp/ECK120019600_anno_1/1">
+        <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/ECK120019600_anno_1"/>
+        <sbol:displayId>ECK120019600_anno_1</sbol:displayId>
+        <sbol:version>1</sbol:version>
+        <sbol:location>
+          <sbol:Range rdf:about="http://examples.org/_0xEA_comp/ECK120019600_anno_1/ECK120019600_anno_1_loc/1">
+            <sbol:start>1169</sbol:start>
+            <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/ECK120019600_anno_1/ECK120019600_anno_1_loc"/>
+            <sbol:version>1</sbol:version>
+            <sbol:displayId>ECK120019600_anno_1_loc</sbol:displayId>
+            <sbol:orientation rdf:resource="http://sbols.org/v2#inline"/>
+            <sbol:end>1258</sbol:end>
+          </sbol:Range>
+        </sbol:location>
+        <dcterms:title>ECK120019600</dcterms:title>
+        <sbol:component rdf:resource="http://examples.org/_0xEA_comp/ECK120019600_comp_1/1"/>
+      </sbol:SequenceAnnotation>
+    </sbol:sequenceAnnotation>
+    <sbol:component>
+      <sbol:Component rdf:about="http://examples.org/_0xEA_comp/RiboJ10_comp_1/1">
+        <dcterms:title>RiboJ10</dcterms:title>
+        <sbol:displayId>RiboJ10_comp_1</sbol:displayId>
+        <sbol:access rdf:resource="http://sbols.org/v2#public"/>
+        <sbol:definition rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/RiboJ10/1"/>
+        <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/RiboJ10_comp_1"/>
+        <sbol:version>1</sbol:version>
+      </sbol:Component>
+    </sbol:component>
+    <sbol:sequenceAnnotation>
+      <sbol:SequenceAnnotation rdf:about="http://examples.org/_0xEA_comp/SrpR_anno_1/1">
+        <sbol:version>1</sbol:version>
+        <dcterms:title>SrpR</dcterms:title>
+        <sbol:component rdf:resource="http://examples.org/_0xEA_comp/SrpR_comp_1/1"/>
+        <sbol:location>
+          <sbol:Range rdf:about="http://examples.org/_0xEA_comp/SrpR_anno_1/SrpR_anno_1_loc/1">
+            <sbol:orientation rdf:resource="http://sbols.org/v2#inline"/>
+            <sbol:end>1168</sbol:end>
+            <sbol:displayId>SrpR_anno_1_loc</sbol:displayId>
+            <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/SrpR_anno_1/SrpR_anno_1_loc"/>
+            <sbol:version>1</sbol:version>
+            <sbol:start>527</sbol:start>
+          </sbol:Range>
+        </sbol:location>
+        <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/SrpR_anno_1"/>
+        <sbol:displayId>SrpR_anno_1</sbol:displayId>
+      </sbol:SequenceAnnotation>
+    </sbol:sequenceAnnotation>
+    <sbol:sequenceAnnotation>
+      <sbol:SequenceAnnotation rdf:about="http://examples.org/_0xEA_comp/S4_SrpR_v1_anno_1/1">
+        <sbol:displayId>S4_SrpR_v1_anno_1</sbol:displayId>
+        <sbol:version>1</sbol:version>
+        <dcterms:description>Variant of part.</dcterms:description>
+        <sbol:location>
+          <sbol:Range rdf:about="http://examples.org/_0xEA_comp/S4_SrpR_v1_anno_1/S4_SrpR_v1_anno_1_loc/1">
+            <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/S4_SrpR_v1_anno_1/S4_SrpR_v1_anno_1_loc"/>
+            <sbol:orientation rdf:resource="http://sbols.org/v2#inline"/>
+            <sbol:end>1258</sbol:end>
+            <sbol:displayId>S4_SrpR_v1_anno_1_loc</sbol:displayId>
+            <sbol:start>410</sbol:start>
+            <sbol:version>1</sbol:version>
+          </sbol:Range>
+        </sbol:location>
+        <sbol:component rdf:resource="http://examples.org/_0xEA_comp/S4_SrpR_v1_comp/1"/>
+        <dcterms:title>S4_SrpR_variant_1</dcterms:title>
+        <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/S4_SrpR_v1_anno_1"/>
+      </sbol:SequenceAnnotation>
+    </sbol:sequenceAnnotation>
+    <sbol:component>
+      <sbol:Component rdf:about="http://examples.org/_0xEA_comp/BydvJ_comp_1/1">
+        <sbol:version>1</sbol:version>
+        <sbol:displayId>BydvJ_comp_1</sbol:displayId>
+        <sbol:persistentIdentity rdf:resource="http://examples.org/_0xEA_comp/BydvJ_comp_1"/>
+        <sbol:definition rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/BydvJ/1"/>
+        <sbol:access rdf:resource="http://sbols.org/v2#public"/>
+        <dcterms:title>BydvJ</dcterms:title>
+      </sbol:Component>
+    </sbol:component>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR/1">
+    <sbol:attachment rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/attachment_00009WRPSkKaNeRVf1GNnM/1"/>
+    <sbol:sequenceAnnotation>
+      <sbol:SequenceAnnotation rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR/annotation3/1">
+        <sbol:component rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR/ECK120029600/1"/>
+        <sbol:displayId>annotation3</sbol:displayId>
+        <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR/annotation3"/>
+        <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+        <sbol:location>
+          <sbol:Range rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR/annotation3/range/1">
+            <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+            <sbol:orientation rdf:resource="http://sbols.org/v2#inline"/>
+            <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR/1"/>
+            <sbol:version>1</sbol:version>
+            <sbol:displayId>range</sbol:displayId>
+            <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR/annotation3/range"/>
+            <sbol:start>760</sbol:start>
+            <sbol:end>849</sbol:end>
+          </sbol:Range>
+        </sbol:location>
+        <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR/1"/>
+        <sbol:version>1</sbol:version>
+      </sbol:SequenceAnnotation>
+    </sbol:sequenceAnnotation>
+    <sbol:sequence rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR_sequence/1"/>
+    <sbol:component>
+      <sbol:Component rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR/RiboJ10/1">
+        <sbol:displayId>RiboJ10</sbol:displayId>
+        <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR/RiboJ10"/>
+        <sbol:definition rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/RiboJ10/1"/>
+        <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR/1"/>
+        <sbol:version>1</sbol:version>
+        <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+        <sbol:access rdf:resource="http://sbols.org/v2#public"/>
+      </sbol:Component>
+    </sbol:component>
+    <sbol:displayId>S3_SrpR</sbol:displayId>
+    <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR/1"/>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR"/>
+    <sbol:version>1</sbol:version>
+    <cello:ymax>2.1</cello:ymax>
+    <cello:response_function>ymin+(ymax-ymin)/(1.0+(x/K)^n)</cello:response_function>
+    <cello:group_name>SrpR</cello:group_name>
+    <cello:n>2.8</cello:n>
+    <sbol:component>
+      <sbol:Component rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR/ECK120029600/1">
+        <sbol:displayId>ECK120029600</sbol:displayId>
+        <sbol:access rdf:resource="http://sbols.org/v2#public"/>
+        <sbol:definition rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/ECK120029600/1"/>
+        <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR/ECK120029600"/>
+        <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR/1"/>
+        <sbol:version>1</sbol:version>
+        <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+      </sbol:Component>
+    </sbol:component>
+    <cello:gate_type>NOR</cello:gate_type>
+    <sbol:sequenceAnnotation>
+      <sbol:SequenceAnnotation rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR/annotation0/1">
+        <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR/1"/>
+        <sbol:version>1</sbol:version>
+        <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR/annotation0"/>
+        <sbol:location>
+          <sbol:Range rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR/annotation0/range/1">
+            <sbol:displayId>range</sbol:displayId>
+            <sbol:start>1</sbol:start>
+            <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR/1"/>
+            <sbol:version>1</sbol:version>
+            <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR/annotation0/range"/>
+            <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+            <sbol:end>79</sbol:end>
+            <sbol:orientation rdf:resource="http://sbols.org/v2#inline"/>
+          </sbol:Range>
+        </sbol:location>
+        <sbol:component rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR/RiboJ10/1"/>
+        <sbol:displayId>annotation0</sbol:displayId>
+        <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+      </sbol:SequenceAnnotation>
+    </sbol:sequenceAnnotation>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000804"/>
+    <sbol:component>
+      <sbol:Component rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR/S3/1">
+        <sbol:access rdf:resource="http://sbols.org/v2#public"/>
+        <sbol:definition rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3/1"/>
+        <sbol:displayId>S3</sbol:displayId>
+        <sbol:version>1</sbol:version>
+        <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR/S3"/>
+        <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+        <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR/1"/>
+      </sbol:Component>
+    </sbol:component>
+    <dcterms:title>S3_SrpR</dcterms:title>
+    <sbol:sequenceAnnotation>
+      <sbol:SequenceAnnotation rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR/annotation2/1">
+        <sbol:displayId>annotation2</sbol:displayId>
+        <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR/1"/>
+        <sbol:version>1</sbol:version>
+        <sbol:location>
+          <sbol:Range rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR/annotation2/range/1">
+            <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR/1"/>
+            <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+            <sbol:start>118</sbol:start>
+            <sbol:version>1</sbol:version>
+            <sbol:orientation rdf:resource="http://sbols.org/v2#inline"/>
+            <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR/annotation2/range"/>
+            <sbol:displayId>range</sbol:displayId>
+            <sbol:end>759</sbol:end>
+          </sbol:Range>
+        </sbol:location>
+        <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR/annotation2"/>
+        <sbol:component rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR/SrpR/1"/>
+        <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+      </sbol:SequenceAnnotation>
+    </sbol:sequenceAnnotation>
+    <sbol:attachment rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/attachment_00009WRPU6BGd4triRY7vs/1"/>
+    <sbol:component>
+      <sbol:Component rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR/SrpR/1">
+        <sbol:displayId>SrpR</sbol:displayId>
+        <sbol:access rdf:resource="http://sbols.org/v2#public"/>
+        <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR/SrpR"/>
+        <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+        <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR/1"/>
+        <sbol:definition rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/SrpR/1"/>
+        <sbol:version>1</sbol:version>
+      </sbol:Component>
+    </sbol:component>
+    <cello:x_off_threshold>0.060081844</cello:x_off_threshold>
+    <cello:family>TetR</cello:family>
+    <sbol:sequenceAnnotation>
+      <sbol:SequenceAnnotation rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR/annotation1/1">
+        <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+        <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR/1"/>
+        <sbol:version>1</sbol:version>
+        <sbol:displayId>annotation1</sbol:displayId>
+        <sbol:component rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR/S3/1"/>
+        <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR/annotation1"/>
+        <sbol:location>
+          <sbol:Range rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR/annotation1/range/1">
+            <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+            <sbol:displayId>range</sbol:displayId>
+            <sbol:end>117</sbol:end>
+            <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR/1"/>
+            <sbol:version>1</sbol:version>
+            <sbol:orientation rdf:resource="http://sbols.org/v2#inline"/>
+            <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_SrpR/annotation1/range"/>
+            <sbol:start>80</sbol:start>
+          </sbol:Range>
+        </sbol:location>
+      </sbol:SequenceAnnotation>
+    </sbol:sequenceAnnotation>
+    <cello:color_hexcode>006838</cello:color_hexcode>
+    <dcterms:created>2018-05-09T19:41:51.056Z</dcterms:created>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/CelloUCF2sbol_Activity/1"/>
+    <cello:x_on_threshold>0.561105739</cello:x_on_threshold>
+    <cello:K>0.06</cello:K>
+    <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+    <cello:ymin>0.004</cello:ymin>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/SrpR/1">
+    <sbol:version>1</sbol:version>
+    <sbol:sequence rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/SrpR_sequence/1"/>
+    <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/SrpR"/>
+    <sbol:displayId>SrpR</sbol:displayId>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/CelloUCF2sbol_Activity/1"/>
+    <dcterms:title>SrpR</dcterms:title>
+    <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000316"/>
+    <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/SrpR/1"/>
+    <dcterms:created>2018-05-09T19:41:51.056Z</dcterms:created>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/ECK120029600/1">
+    <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/ECK120029600/1"/>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbol:version>1</sbol:version>
+    <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+    <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/ECK120029600"/>
+    <dcterms:created>2018-05-09T19:41:51.056Z</dcterms:created>
+    <sbol:sequence rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/ECK120029600_sequence/1"/>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/CelloUCF2sbol_Activity/1"/>
+    <sbol:displayId>ECK120029600</sbol:displayId>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000141"/>
+    <dcterms:title>ECK120029600</dcterms:title>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/RiboJ10/1">
+    <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000374"/>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbol:version>1</sbol:version>
+    <sbol:displayId>RiboJ10</sbol:displayId>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/CelloUCF2sbol_Activity/1"/>
+    <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/RiboJ10/1"/>
+    <sbol:sequence rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/RiboJ10_sequence/1"/>
+    <dcterms:title>RiboJ10</dcterms:title>
+    <dcterms:created>2018-05-09T19:41:51.056Z</dcterms:created>
+    <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/RiboJ10"/>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3/1">
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000139"/>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3/1"/>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/CelloUCF2sbol_Activity/1"/>
+    <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+    <dcterms:title>S3</dcterms:title>
+    <sbol:displayId>S3</sbol:displayId>
+    <dcterms:created>2018-05-09T19:41:51.056Z</dcterms:created>
+    <sbol:version>1</sbol:version>
+    <sbol:sequence rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3_sequence/1"/>
+    <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S3"/>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="http://examples.org/Cello_Parts/S1_SrpR_v1/1">
+    <sbol:attachment rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/attachment_00009WRPTyZ4wfC45yd1w8/1"/>
+    <cello:color_hexcode>006838</cello:color_hexcode>
+    <cello:ymax>1.3</cello:ymax>
+    <sbol:sequence rdf:resource="http://examples.org/S1_SrpR_v1/1"/>
+    <cello:family>TetR</cello:family>
+    <dcterms:title>S1_SrpR_variant_1</dcterms:title>
+    <cello:response_function>ymin+(ymax-ymin)/(1.0+(x/K)^n)</cello:response_function>
+    <dcterms:description>Variant of part.</dcterms:description>
+    <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+    <prov:wasDerivedFrom rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S1_SrpR/1"/>
+    <sbol:version>1</sbol:version>
+    <sbol:displayId>S1_SrpR_v1</sbol:displayId>
+    <cello:group_name>SrpR</cello:group_name>
+    <sbol:persistentIdentity rdf:resource="http://examples.org/Cello_Parts/S1_SrpR_v1"/>
+    <cello:x_off_threshold>0.010015965</cello:x_off_threshold>
+    <cello:x_on_threshold>0.08101328</cello:x_on_threshold>
+    <cello:n>2.9</cello:n>
+    <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S1_SrpR/1"/>
+    <cello:K>0.01</cello:K>
+    <cello:gate_type>NOR</cello:gate_type>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000804"/>
+    <cello:ymin>0.003</cello:ymin>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbol:attachment rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/attachment_00009WRPSgvJ3BRH5kPeTY/1"/>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR/1">
+    <dcterms:title>A1_AmtR</dcterms:title>
+    <sbol:sequenceAnnotation>
+      <sbol:SequenceAnnotation rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR/annotation0/1">
+        <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+        <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR/annotation0"/>
+        <sbol:component rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR/BydvJ/1"/>
+        <sbol:displayId>annotation0</sbol:displayId>
+        <sbol:version>1</sbol:version>
+        <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR/1"/>
+        <sbol:location>
+          <sbol:Range rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR/annotation0/range/1">
+            <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR/annotation0/range"/>
+            <sbol:start>1</sbol:start>
+            <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+            <sbol:end>80</sbol:end>
+            <sbol:version>1</sbol:version>
+            <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR/1"/>
+            <sbol:orientation rdf:resource="http://sbols.org/v2#inline"/>
+            <sbol:displayId>range</sbol:displayId>
+          </sbol:Range>
+        </sbol:location>
+      </sbol:SequenceAnnotation>
+    </sbol:sequenceAnnotation>
+    <sbol:sequenceAnnotation>
+      <sbol:SequenceAnnotation rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR/annotation2/1">
+        <sbol:displayId>annotation2</sbol:displayId>
+        <sbol:component rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR/AmtR/1"/>
+        <sbol:version>1</sbol:version>
+        <sbol:location>
+          <sbol:Range rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR/annotation2/range/1">
+            <sbol:version>1</sbol:version>
+            <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR/1"/>
+            <sbol:displayId>range</sbol:displayId>
+            <sbol:end>783</sbol:end>
+            <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR/annotation2/range"/>
+            <sbol:start>115</sbol:start>
+            <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+            <sbol:orientation rdf:resource="http://sbols.org/v2#inline"/>
+          </sbol:Range>
+        </sbol:location>
+        <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR/1"/>
+        <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+        <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR/annotation2"/>
+      </sbol:SequenceAnnotation>
+    </sbol:sequenceAnnotation>
+    <sbol:component>
+      <sbol:Component rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR/AmtR/1">
+        <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR/AmtR"/>
+        <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR/1"/>
+        <sbol:definition rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/AmtR/1"/>
+        <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+        <sbol:access rdf:resource="http://sbols.org/v2#public"/>
+        <sbol:displayId>AmtR</sbol:displayId>
+        <sbol:version>1</sbol:version>
+      </sbol:Component>
+    </sbol:component>
+    <cello:color_hexcode>3BA9E0</cello:color_hexcode>
+    <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+    <sbol:sequenceAnnotation>
+      <sbol:SequenceAnnotation rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR/annotation3/1">
+        <sbol:component rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR/L3S2P55/1"/>
+        <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+        <sbol:displayId>annotation3</sbol:displayId>
+        <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR/annotation3"/>
+        <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR/1"/>
+        <sbol:location>
+          <sbol:Range rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR/annotation3/range/1">
+            <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+            <sbol:displayId>range</sbol:displayId>
+            <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR/annotation3/range"/>
+            <sbol:version>1</sbol:version>
+            <sbol:end>840</sbol:end>
+            <sbol:orientation rdf:resource="http://sbols.org/v2#inline"/>
+            <sbol:start>784</sbol:start>
+            <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR/1"/>
+          </sbol:Range>
+        </sbol:location>
+        <sbol:version>1</sbol:version>
+      </sbol:SequenceAnnotation>
+    </sbol:sequenceAnnotation>
+    <sbol:component>
+      <sbol:Component rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR/L3S2P55/1">
+        <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+        <sbol:displayId>L3S2P55</sbol:displayId>
+        <sbol:definition rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/L3S2P55/1"/>
+        <sbol:version>1</sbol:version>
+        <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR/L3S2P55"/>
+        <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR/1"/>
+        <sbol:access rdf:resource="http://sbols.org/v2#public"/>
+      </sbol:Component>
+    </sbol:component>
+    <cello:x_off_threshold>0.071418036</cello:x_off_threshold>
+    <sbol:displayId>A1_AmtR</sbol:displayId>
+    <sbol:component>
+      <sbol:Component rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR/A1/1">
+        <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR/1"/>
+        <sbol:access rdf:resource="http://sbols.org/v2#public"/>
+        <sbol:definition rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1/1"/>
+        <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR/A1"/>
+        <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+        <sbol:version>1</sbol:version>
+        <sbol:displayId>A1</sbol:displayId>
+      </sbol:Component>
+    </sbol:component>
+    <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR"/>
+    <sbol:sequenceAnnotation>
+      <sbol:SequenceAnnotation rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR/annotation1/1">
+        <sbol:component rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR/A1/1"/>
+        <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR/annotation1"/>
+        <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+        <sbol:version>1</sbol:version>
+        <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR/1"/>
+        <sbol:location>
+          <sbol:Range rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR/annotation1/range/1">
+            <sbol:version>1</sbol:version>
+            <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR/1"/>
+            <sbol:displayId>range</sbol:displayId>
+            <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+            <sbol:end>114</sbol:end>
+            <sbol:start>81</sbol:start>
+            <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR/annotation1/range"/>
+            <sbol:orientation rdf:resource="http://sbols.org/v2#inline"/>
+          </sbol:Range>
+        </sbol:location>
+        <sbol:displayId>annotation1</sbol:displayId>
+      </sbol:SequenceAnnotation>
+    </sbol:sequenceAnnotation>
+    <cello:ymin>0.06</cello:ymin>
+    <cello:n>1.6</cello:n>
+    <cello:gate_type>NOR</cello:gate_type>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000804"/>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <cello:group_name>AmtR</cello:group_name>
+    <sbol:version>1</sbol:version>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/CelloUCF2sbol_Activity/1"/>
+    <cello:response_function>ymin+(ymax-ymin)/(1.0+(x/K)^n)</cello:response_function>
+    <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR/1"/>
+    <sbol:attachment rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/attachment_00009WRPStfTfLVAcQ6h6m/1"/>
+    <sbol:sequence rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR_sequence/1"/>
+    <cello:x_on_threshold>0.917082477</cello:x_on_threshold>
+    <cello:K>0.07</cello:K>
+    <sbol:attachment rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/attachment_00009WRPS9Y78OHNaGJAFE/1"/>
+    <sbol:component>
+      <sbol:Component rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR/BydvJ/1">
+        <sbol:access rdf:resource="http://sbols.org/v2#public"/>
+        <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR/BydvJ"/>
+        <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+        <sbol:displayId>BydvJ</sbol:displayId>
+        <sbol:version>1</sbol:version>
+        <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_AmtR/1"/>
+        <sbol:definition rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/BydvJ/1"/>
+      </sbol:Component>
+    </sbol:component>
+    <cello:family>TetR</cello:family>
+    <cello:ymax>3.8</cello:ymax>
+    <dcterms:created>2018-05-09T19:41:51.056Z</dcterms:created>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1/1">
+    <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1/1"/>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbol:version>1</sbol:version>
+    <sbol:displayId>A1</sbol:displayId>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000139"/>
+    <dcterms:created>2018-05-09T19:41:51.056Z</dcterms:created>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/CelloUCF2sbol_Activity/1"/>
+    <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1"/>
+    <dcterms:title>A1</dcterms:title>
+    <sbol:sequence rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/A1_sequence/1"/>
+    <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/L3S2P55/1">
+    <dcterms:title>L3S2P55</dcterms:title>
+    <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+    <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/L3S2P55"/>
+    <sbol:sequence rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/L3S2P55_sequence/1"/>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbol:version>1</sbol:version>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000141"/>
+    <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/L3S2P55/1"/>
+    <sbol:displayId>L3S2P55</sbol:displayId>
+    <dcterms:created>2018-05-09T19:41:51.056Z</dcterms:created>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/CelloUCF2sbol_Activity/1"/>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/AmtR/1">
+    <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+    <sbol:sequence rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/AmtR_sequence/1"/>
+    <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/AmtR"/>
+    <dcterms:title>AmtR</dcterms:title>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000316"/>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbol:version>1</sbol:version>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/CelloUCF2sbol_Activity/1"/>
+    <sbol:displayId>AmtR</sbol:displayId>
+    <dcterms:created>2018-05-09T19:41:51.056Z</dcterms:created>
+    <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/AmtR/1"/>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/BydvJ/1">
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbol:version>1</sbol:version>
+    <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/BydvJ/1"/>
+    <sbol:displayId>BydvJ</sbol:displayId>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/CelloUCF2sbol_Activity/1"/>
+    <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+    <sbol:sequence rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/BydvJ_sequence/1"/>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000374"/>
+    <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/BydvJ"/>
+    <dcterms:title>BydvJ</dcterms:title>
+    <dcterms:created>2018-05-09T19:41:51.056Z</dcterms:created>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="http://examples.org/Cello_Parts/S2_SrpR_v1/1">
+    <dcterms:title>S2_SrpR_variant_1</dcterms:title>
+    <cello:gate_type>NOR</cello:gate_type>
+    <cello:ymin>0.003</cello:ymin>
+    <cello:x_on_threshold>0.49642145</cello:x_on_threshold>
+    <sbol:attachment rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/attachment_00009WRPSiaSrdxKFgg2Ge/1"/>
+    <sbol:displayId>S2_SrpR_v1</sbol:displayId>
+    <cello:K>0.04</cello:K>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbol:version>1</sbol:version>
+    <cello:ymax>2.1</cello:ymax>
+    <cello:response_function>ymin+(ymax-ymin)/(1.0+(x/K)^n)</cello:response_function>
+    <cello:group_name>SrpR</cello:group_name>
+    <dcterms:description>Variant of part.</dcterms:description>
+    <sbol:attachment rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/attachment_00009WRPU2Iv2gdzh16BIu/1"/>
+    <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+    <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S2_SrpR/1"/>
+    <cello:x_off_threshold>0.040044043</cello:x_off_threshold>
+    <sbol:sequence rdf:resource="http://examples.org/S2_SrpR_v1/1"/>
+    <cello:family>TetR</cello:family>
+    <prov:wasDerivedFrom rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S2_SrpR/1"/>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000804"/>
+    <cello:color_hexcode>006838</cello:color_hexcode>
+    <sbol:persistentIdentity rdf:resource="http://examples.org/Cello_Parts/S2_SrpR_v1"/>
+    <cello:n>2.6</cello:n>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="http://examples.org/Cello_Parts/S4_SrpR_v1/1">
+    <cello:gate_type>NOR</cello:gate_type>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000804"/>
+    <cello:x_on_threshold>0.764977507</cello:x_on_threshold>
+    <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S4_SrpR/1"/>
+    <cello:response_function>ymin+(ymax-ymin)/(1.0+(x/K)^n)</cello:response_function>
+    <cello:family>TetR</cello:family>
+    <sbol:attachment rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/attachment_00009WRPU9nfAmOawOXKhE/1"/>
+    <cello:n>2.8</cello:n>
+    <cello:color_hexcode>006838</cello:color_hexcode>
+    <prov:wasDerivedFrom rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/S4_SrpR/1"/>
+    <sbol:attachment rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/attachment_00009WRPSm06AnF8q3h38i/1"/>
+    <cello:K>0.1</cello:K>
+    <cello:ymin>0.007</cello:ymin>
+    <sbol:sequence rdf:resource="http://examples.org/S4_SrpR_v1/1"/>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <dcterms:title>S4_SrpR_variant_1</dcterms:title>
+    <sbol:version>1</sbol:version>
+    <cello:ymax>2.1</cello:ymax>
+    <cello:group_name>SrpR</cello:group_name>
+    <sbol:displayId>S4_SrpR_v1</sbol:displayId>
+    <dcterms:description>Variant of part.</dcterms:description>
+    <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+    <sbol:persistentIdentity rdf:resource="http://examples.org/Cello_Parts/S4_SrpR_v1"/>
+    <cello:x_off_threshold>0.100239178</cello:x_off_threshold>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/YFP/1">
+    <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/YFP/1"/>
+    <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/YFP"/>
+    <dcterms:created>2018-05-09T19:41:51.056Z</dcterms:created>
+    <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000316"/>
+    <sbol:displayId>YFP</sbol:displayId>
+    <sbol:sequence rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/YFP_protein_sequence/1"/>
+    <dcterms:title>YFP</dcterms:title>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbol:version>1</sbol:version>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/CelloUCF2sbol_Activity/1"/>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/pBAD/1">
+    <sbol:sequence rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/pBAD_sequence/1"/>
+    <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/pBAD"/>
+    <dcterms:created>2018-05-09T19:41:51.056Z</dcterms:created>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/CelloUCF2sbol_Activity/1"/>
+    <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+    <sbol:displayId>pBAD</sbol:displayId>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000167"/>
+    <dcterms:title>pBAD</dcterms:title>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbol:version>1</sbol:version>
+    <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/pBAD/1"/>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/ECK120019600/1">
+    <sbol:sequence rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/ECK120019600_sequence/1"/>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/CelloUCF2sbol_Activity/1"/>
+    <dcterms:title>ECK120019600</dcterms:title>
+    <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/ECK120019600/1"/>
+    <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+    <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/ECK120019600"/>
+    <sbol:version>1</sbol:version>
+    <dcterms:created>2018-05-09T19:41:51.056Z</dcterms:created>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbol:displayId>ECK120019600</sbol:displayId>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000141"/>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/pSrpR/1">
+    <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+    <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/pSrpR"/>
+    <sbol:displayId>pSrpR</sbol:displayId>
+    <dcterms:created>2018-05-09T19:41:51.056Z</dcterms:created>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/CelloUCF2sbol_Activity/1"/>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbol:version>1</sbol:version>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000167"/>
+    <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/pSrpR/1"/>
+    <sbol:sequence rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/pSrpR_sequence/1"/>
+    <dcterms:title>pSrpR</dcterms:title>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/RiboJ/1">
+    <sbol:version>1</sbol:version>
+    <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000374"/>
+    <sbol:displayId>RiboJ</sbol:displayId>
+    <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/RiboJ"/>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/RiboJ/1"/>
+    <sbol:sequence rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/RiboJ_sequence/1"/>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/pTet/1">
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/CelloUCF2sbol_Activity/1"/>
+    <dcterms:title>pTet</dcterms:title>
+    <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/pTet"/>
+    <dcterms:created>2018-05-09T19:41:51.056Z</dcterms:created>
+    <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/pTet/1"/>
+    <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+    <sbol:sequence rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/pTet_sequence/1"/>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000167"/>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbol:displayId>pTet</sbol:displayId>
+    <sbol:version>1</sbol:version>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/pTac/1">
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbol:version>1</sbol:version>
+    <dcterms:title>pTac</dcterms:title>
+    <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+    <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/pTac/1"/>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000167"/>
+    <dcterms:created>2018-05-09T19:41:51.056Z</dcterms:created>
+    <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/pTac"/>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/CelloUCF2sbol_Activity/1"/>
+    <sbol:displayId>pTac</sbol:displayId>
+    <sbol:sequence rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/pTac_sequence/1"/>
+  </sbol:ComponentDefinition>
+  <sbol:ComponentDefinition rdf:about="https://synbiohub.programmingbiology.org/public/Cello_Parts/pAmtR/1">
+    <sbol:sequence rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/pAmtR_sequence/1"/>
+    <dcterms:title>pAmtR</dcterms:title>
+    <sbol:type rdf:resource="http://www.biopax.org/release/biopax-level3.owl#DnaRegion"/>
+    <sbol:version>1</sbol:version>
+    <sbh:topLevel rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/pAmtR/1"/>
+    <sbol:persistentIdentity rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/pAmtR"/>
+    <sbol:displayId>pAmtR</sbol:displayId>
+    <dcterms:created>2018-05-09T19:41:51.056Z</dcterms:created>
+    <prov:wasGeneratedBy rdf:resource="https://synbiohub.programmingbiology.org/public/Cello_Parts/CelloUCF2sbol_Activity/1"/>
+    <sbh:ownedBy rdf:resource="https://synbiohub.programmingbiology.org/user/myers"/>
+    <sbol:role rdf:resource="http://identifiers.org/so/SO:0000167"/>
+  </sbol:ComponentDefinition>
+</rdf:RDF>
