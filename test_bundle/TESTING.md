@@ -84,10 +84,23 @@ Three independent checks per circuit:
 
 - **netlist** — gate types, CDS, input promoters, output promoter and wire count match
   `<dataset>/expected/netlists/`. Gate *ids* (`g1`, `g2`, …) are positional and not compared.
-- **topology** — no broken edges: every input promoter is produced by another gate or is a
-  primary input; every produced promoter is consumed; no isolated logic gate; the reporter has
-  a driver. (An isolated *output* gate is allowed — an MD5 quorum-sensing output gene driven
-  straight off a sensor promoter legitimately has no edges.)
+- **topology** — no broken edges. Four rules:
+  - *input produced by nobody* — a gate's input promoter is neither produced by another gate
+    nor a primary input, so the edge feeding it is missing;
+  - *produced but unconsumed* — a gate makes an output promoter that no gate takes as input,
+    so the edge leaving it is missing;
+  - *isolated gate* — a gate that appears in no wire at all (the same defect seen from the
+    node side). **OUTPUT/reporter gates are exempt**: an MD5 quorum-sensing output gene driven
+    straight off a sensor promoter legitimately has no edges, as does the unused branch of a
+    multi-output Cello circuit such as `demultiplexer`;
+  - *gate output is not a promoter* — a logic gate whose repressor could not be resolved to a
+    repressed promoter, so it degenerates to its own CDS name.
+
+  For the **md5** dataset the middle two are switched off, plus the "no wires at all" rule:
+  its plasmids are partitions of one circuit spread across cells, so an unwired fragment is
+  the expected shape. Note there is no separate "the reporter is driven" rule — a reporter
+  with a dangling input is caught by the first rule, but a reporter wired straight to a sensor
+  promoter is accepted.
 - **truth table** — for the `0x..` circuits only: the hex recomputed from the Yosys table must
   equal the circuit name, which is the same string as `OUTPUT_OR` in
   `cello/reference/cello_logic/<C>_A000_*.txt`. Circuits whose name is not a truth table are

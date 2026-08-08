@@ -4,9 +4,14 @@
 Checks per circuit:
 
   1. netlist  -- gates / wires / inputs / outputs vs <dataset>/expected/netlists/
-  2. topology -- no broken edges: every input promoter is produced by some gate or is a
-                 primary input, every produced promoter is consumed, no isolated gate,
-                 the reporter is driven. The MD5 dataset relaxes the last three: its
+  2. topology -- no broken edges. A finding is reported when a gate's input promoter is
+                 neither produced by another gate nor a primary input; when a gate produces
+                 a promoter no gate consumes; when a gate appears in no wire at all; or when
+                 a logic gate's output could not be resolved to a promoter. OUTPUT/reporter
+                 gates are exempt from the isolated-gate rule (an MD5 quorum-sensing output
+                 gene, or an unused branch of a multi-output Cello circuit, legitimately has
+                 no edges), and there is no separate "reporter is driven" rule. The MD5
+                 dataset also switches off the unconsumed-promoter and no-wires rules: its
                  plasmids are PARTITIONS of one circuit spread across cells and wired by
                  quorum-sensing signals, so an unwired fragment is the expected shape.
   3. truth table (Cello hex circuits only) -- the hex recomputed from the Yosys table
