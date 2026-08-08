@@ -1,0 +1,27 @@
+# Python build artefacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# BLAST / BWA / Minimap2 indexes written to the working directory by
+# `sequences_to_features -bi` (the index prefix is hardcoded as ./test)
+/test.fasta
+/test.amb
+/test.ann
+/test.bwt
+/test.pac
+/test.sa
+/test.mmi
+/test.n*
+/test_protein.fasta
+
+# alignment scratch files written next to the run
+aligned.sam
+aligned.sam.log
+aligned.txt
+aligned.txt.log
+
+# test_bundle run output
+test_bundle/out/
