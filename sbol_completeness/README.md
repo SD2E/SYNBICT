@@ -15,21 +15,32 @@ those paths.
 All files here annotate `test_bundle/cello/sequences/0xEA.fasta` against
 `test_bundle/cello/library/cello_library.xml` with `-m 1000 -M 40 -np -ni`.
 
-| File | Produced by | ComponentDefinitions | Dangling |
-|---|---|---|---|
-| `0xEA_annotated_blastn_BEFORE_fix.xml` | old code, `-blastn` | 4 | **16** |
-| `0xEA_annotated_blastn_fixed.xml` | fixed code, `-blastn` | 22 | 0 |
-| `0xEA_annotated_bwa_fixed.xml` | fixed code, `-bwa` | 22 | 0 |
-| `0xEA_annotated_minimap2_fixed.xml` | fixed code, `-minimap2` | 22 | 0 |
-| `0xEA_annotated_flashtext.xml` | `-flashText` (unaffected either way) | 19 | 0 |
-| `0xEA_annotated_blastn_inplace.xml` | fixed code, `-blastn -p` | 4 | 16 |
+| File | Produced by | CDs | Annotations | Dangling |
+|---|---|---|---|---|
+| `0xEA_annotated_blastn_BEFORE_fix.xml` | old code, `-blastn` | 4 | 19 | **16** |
+| `0xEA_annotated_blastn_fixed.xml` | fixed code, `-blastn` | 22 | 19 | 0 |
+| `0xEA_annotated_blastn_exact.xml` | fixed code, `-blastn -exact` | 19 | 16 | 0 |
+| `0xEA_annotated_bwa_fixed.xml` | fixed code, `-bwa` | 22 | 19 | 0 |
+| `0xEA_annotated_minimap2_fixed.xml` | fixed code, `-minimap2` | 22 | 19 | 0 |
+| `0xEA_annotated_flashtext.xml` | `-flashText` (unaffected either way) | 19 | 9 | 0 |
+| `0xEA_annotated_blastn_inplace.xml` | fixed code, `-blastn -p` | 4 | 19 | 16 |
 
 The last row is not a bug: `-p/--in_place` asks for annotation in place, and honouring it is
 the point of the fix. It is kept here so the difference is visible.
 
-The aligner files carry 3 more definitions than FlashText: `S1_SrpR_v1`, `S2_SrpR_v1` and
-`S4_SrpR_v1`, the variant definitions similarity matching creates for parts that are not
-identical to a library entry.
+The three extra definitions in the similar-match aligner files are `S1_SrpR_v1`,
+`S2_SrpR_v1` and `S4_SrpR_v1` -- variant definitions that similarity matching creates for
+parts not identical to a library entry. All three sit on 410-1258, the same span as the
+exactly-matched `S3_SrpR`: they are the other RBS variants of the same SrpR gate cassette.
+`-exact` drops them, which is the whole difference between the `_fixed` and `_exact` files
+(22 CDs / 19 annotations vs 19 / 16).
+
+Comparing `_exact` with `_flashtext` is more interesting, since **both are exact matching**
+and they disagree: 16 annotations against 9. FlashText misses `RiboJ10`, `SrpR`,
+`ECK120019600`, `ECK120029600`, `BydvJ`, `AmtR` and `L3S2P55` -- every one of them a part
+nested inside a composite cassette (`S3_SrpR` at 410-1258, `A1_AmtR` at 1334-2173). It
+annotates the outer cassette but not the sub-parts within it; the aligner annotates both
+levels. That is a separate limitation from exact-vs-similar matching.
 
 ## Re-checking
 
