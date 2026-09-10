@@ -9,10 +9,16 @@ PROKKA_BIN = shutil.which("prokka") or "./prokka-1.14.6/bin/prokka"
 
 
 class ProkkaAligner():
-    def __init__(self, query_sbol):
+    # output_dir and database_path default to the historical fixed paths in the
+    # working directory. A caller that runs Prokka concurrently (e.g. a
+    # multi-threaded server) must pass a distinct output_dir per call, and the
+    # protein database for that call, or the runs overwrite each other.
+    def __init__(self, query_sbol, output_dir="PROKKA_SYNBICT",
+                 database_path=DATABASE_PROTEIN_PATH):
         self.query_sbol = query_sbol
-        self.output_sam_path = "PROKKA_SYNBICT"
+        self.output_sam_path = output_dir
         self.prefix = "PROKKA_SYNBICT"
+        self.database_path = database_path
 
     # query_sbol: SBOLDocument, same as BwaAligner
     # output_sam_path: str, prokka output path
@@ -34,7 +40,7 @@ class ProkkaAligner():
             '--quiet',
             '--rfam', 
             '--proteins', 
-            DATABASE_PROTEIN_PATH,
+            self.database_path,
             '--outdir', output_path, 
             '--prefix', prefix,
             '--locustag', 'LOCUS',
